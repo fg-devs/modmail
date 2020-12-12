@@ -3,3 +3,4 @@ node_modules
 yarn.lock
 config.yml
 .idea/
+yarn-error.log
