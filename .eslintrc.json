@@ -18,10 +18,11 @@
         "@typescript-eslint"
     ],
     "rules": {
-//        "@typescript-eslint/rule-name": "error"
         "import/no-unresolved": "off",
         "import/extensions": "off",
         "import/prefer-default-export": "off",
-        "no-console": "off"
+        "no-console": "off",
+        "class-methods-use-this": "off",
+        "no-continue": "off"
     }
 }

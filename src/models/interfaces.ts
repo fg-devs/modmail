@@ -1,9 +1,13 @@
 import { Snowflake } from 'discord.js';
-import { DiscordID, MessageID } from './identifiers';
-import { Edit, Message } from './types';
+import {
+  CategoryID, DiscordID, MessageID, ThreadID,
+} from './identifiers';
+import {
+  Category, Edit, Message, Thread,
+} from './types';
 
 export interface IEditsManager {
-    add(edit: Edit): Promise<void>;
+    add(edit: Edit): Promise<number>;
 }
 
 export interface IMessageManager {
@@ -13,7 +17,10 @@ export interface IMessageManager {
 
 export interface IThreadManager {
     close(channelID: DiscordID): Promise<void>;
-    open(author: DiscordID, channelID: DiscordID): Promise<void>;
+    open(author: DiscordID, channelID: DiscordID, categoryID: CategoryID): Promise<void>;
+    countThreads(user: DiscordID): Promise<number>;
+    getCurrentThread(user: DiscordID): Promise<Thread | undefined>;
+    getThreadByChannel(channelID: DiscordID): Promise<Thread | undefined>;
 }
 
 export interface IUserManager {
@@ -22,6 +29,15 @@ export interface IUserManager {
 
 export interface IIDManager {
     create(): Snowflake;
+}
+
+export interface ICategoryManger {
+    create(guildID: DiscordID, name: string, emote: string, channelID: DiscordID): Promise<void>
+    delete(threadID: ThreadID): Promise<void>
+    setName(threadID: ThreadID, name: string): Promise<void>
+    setEmoji(threadID: ThreadID, emote: string): Promise<void>
+    getActiveCategories(): Promise<Category[]>;
+    getCategoryByEmote(emote: string): Promise<Category | undefined>;
 }
 
 /**

@@ -43,10 +43,12 @@ export type Attachment = {
  * (basically if it's needed or not).
  */
 export type Category = {
+    name: string;
     emojiID: string;
     guildID: DiscordID;
     id: CategoryID;
     isActive: boolean;
+    channelID: DiscordID;
 }
 
 /**
@@ -80,6 +82,7 @@ export type Message = {
     isDeleted: boolean;
     modmailID: MessageID;
     sender: DiscordID;
+    threadID: ThreadID;
 }
 
 /**

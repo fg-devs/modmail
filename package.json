@@ -9,6 +9,7 @@
   "devDependencies": {
     "@types/js-yaml": "^3.12.5",
     "@types/node": "^14.14.12",
+    "@types/pg": "^7.14.7",
     "@typescript-eslint/eslint-plugin": "^4.9.1",
     "@typescript-eslint/parser": "^4.9.1",
     "eslint": "^7.15.0",
@@ -18,7 +19,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node dist/."
+    "start": "tsc && node dist/app.js"
   },
   "dependencies": {
     "discord.js": "^12.5.1",
