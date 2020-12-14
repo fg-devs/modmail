@@ -1,6 +1,8 @@
-create type file_type as enum ('image', 'file');
+create schema modmail;
 
-alter type file_type owner to current_user;
+create type modmail.file_type as enum ('image', 'file');
+
+alter type modmail.file_type owner to current_user;
 
 create table modmail.users
 (
@@ -36,12 +38,12 @@ create table modmail.threads
             primary key,
     author    bigint               not null
         constraint threads_users_id_fk
-            references users,
+            references modmail.users,
     channel   bigint               not null,
     is_active boolean default true not null,
     category  bigint               not null
         constraint threads_categories_id_fk
-            references categories
+            references modmail.categories
 );
 
 alter table modmail.threads
@@ -60,13 +62,13 @@ create table modmail.messages
 (
     sender     bigint                not null
         constraint messages_users_id_fk
-            references users,
+            references modmail.users,
     client_id  bigint                not null,
     modmail_id bigint                not null,
     content    text                  not null,
     thread_id  bigint                not null
         constraint messages_threads_id_fk
-            references threads,
+            references modmail.threads,
     is_deleted boolean default false not null
 );
 
@@ -86,12 +88,12 @@ create table modmail.attachments
             primary key,
     message_id bigint                                              not null
         constraint attachments_messages_modmail_id_fk
-            references messages (modmail_id),
+            references modmail.messages (modmail_id),
     name       text                                                not null,
     source     text                                                not null,
     sender     bigint                                              not null
         constraint attachments_users_id_fk
-            references users,
+            references modmail.users,
     type       modmail.file_type default 'file'::modmail.file_type not null
 );
 
@@ -115,7 +117,7 @@ create table modmail.edits
     content text              not null,
     message bigint            not null
         constraint edits_messages_modmail_id_fk
-            references messages (modmail_id),
+            references modmail.messages (modmail_id),
     version integer default 1 not null
 );
 
