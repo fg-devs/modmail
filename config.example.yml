@@ -1,2 +1,9 @@
 token:
 prefix:
+database:
+  username: 'postgres'
+  host: 'localhost'
+  port: 5432
+  username: 'modmail'
+  password: '1234'
+  database: 'postgres'

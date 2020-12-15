@@ -9,7 +9,6 @@ export default class DBConfig extends Conf {
 
   public readonly password: string;
 
-  public readonly schema: string;
 
   public readonly database: string;
 
@@ -19,7 +18,6 @@ export default class DBConfig extends Conf {
     this.port = 5432;
     this.username = 'modmail';
     this.password = '1234';
-    this.schema = 'modmail';
     this.database = 'postgres';
   }
 }
