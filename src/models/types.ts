@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+/* eslint-disable no-shadow */
 import {
   AttachmentID,
   CategoryID,
@@ -26,11 +28,11 @@ export enum FileType {
  * @property {FileType} type
  */
 export type Attachment = {
-    id: AttachmentID;
-    name: string;
+    id: AttachmentID,
+    name: string,
     sender: DiscordID
-    source: string;
-    type: FileType;
+    source: string,
+    type: FileType,
 }
 
 /**
@@ -43,12 +45,57 @@ export type Attachment = {
  * (basically if it's needed or not).
  */
 export type Category = {
-    name: string;
-    emojiID: string;
-    guildID: DiscordID;
-    id: CategoryID;
-    isActive: boolean;
-    channelID: DiscordID;
+    name: string,
+    emojiID: string,
+    guildID: DiscordID,
+    id: CategoryID,
+    isActive: boolean,
+    channelID: DiscordID,
+}
+
+/**
+ * DBCategory represents how the database stores a Category
+ * @type DBCategory
+ * @property {string} channel_id
+ * @property {string} emote
+ * @property {string} guild_id
+ * @property {string} id
+ * @property {string} name
+ */
+export type DBCategory = {
+    channel_id: string,
+    emote: string,
+    guild_id: string,
+    id: string,
+    name: string,
+}
+
+/**
+ * CreateCategoryOpt is used by ICategoryManager.create()
+ * @type CreateCategoryOpt
+ * @property {string} name New category name
+ * @property {string} guildID Category guild
+ * @property {string} emote A unique emote assigned to the category
+ * @property {string} channelID Channel category ID to utilize
+ */
+export type CreateCategoryOpt = {
+    name: string,
+    guildID: string,
+    emote: string,
+    channelID: string,
+}
+
+/**
+ * Fetch a category by any of the following
+ * @enum CategoryResolvable
+ */
+export enum CategoryResolvable {
+    activity,
+    name,
+    guild,
+    emote,
+    channel,
+    id,
 }
 
 /**
@@ -59,9 +106,9 @@ export type Category = {
  * will sit in an array and the biggest integer version is the latest edit.
  */
 export type Edit = {
-    content: string;
-    message: MessageID;
-    version: number;
+    content: string,
+    message: MessageID,
+    version: number,
 }
 
 /**
@@ -75,14 +122,35 @@ export type Edit = {
  * @property {DiscordID} sender
  */
 export type Message = {
-    content: string;
-    clientID: MessageID;
-    edits: Edit[];
-    files: Attachment[];
-    isDeleted: boolean;
-    modmailID: MessageID;
-    sender: DiscordID;
-    threadID: ThreadID;
+    content: string,
+    clientID: MessageID | null,
+    edits: Edit[],
+    files: Attachment[],
+    isDeleted: boolean,
+    modmailID: MessageID,
+    sender: DiscordID,
+    threadID: ThreadID,
+    internal: boolean
+}
+
+/**
+ * DBMessage is how the database stores a Message
+ * @type DBMessage
+ * @property {string} content
+ * @property {string} client_id
+ * @property {string} is_deleted
+ * @property {string} modmail_id
+ * @property {string} sender
+ * @property {string} thread_id
+ */
+export type DBMessage = {
+    content: string,
+    client_id: MessageID,
+    is_deleted: boolean,
+    modmail_id: MessageID,
+    sender: DiscordID,
+    thread_id: ThreadID,
+    internal: boolean
 }
 
 /**
@@ -91,7 +159,7 @@ export type Message = {
  * @property {Thread[]} threads The threads the user participated in.
  */
 export type ModmailUser = {
-    id: DiscordID;
+    id: DiscordID,
 }
 
 /**
@@ -104,10 +172,50 @@ export type ModmailUser = {
  * @property {CategoryID} The thread category
  */
 export type Thread = {
-    author: ModmailUser;
-    channel: DiscordID;
-    id: ThreadID;
-    isActive: boolean;
-    messages: Message[];
-    category: CategoryID;
+    author: ModmailUser,
+    channel: DiscordID,
+    id: ThreadID,
+    isActive: boolean,
+    messages: Message[],
+    category: CategoryID,
+}
+
+/**
+ * DBThread represents how the database stores a Thread
+ * @type DBThread
+ */
+export type DBThread = {
+    author: string,
+    channel: string,
+    id: string,
+    is_active: boolean,
+    category: string,
+}
+
+/**
+ * @type MuteStatus
+ * @property {DiscordID} user
+ * @property {number} till Unix Epoch in seconds
+ * @property {CategoryID} category
+ * @property {string} reason
+ */
+export type MuteStatus = {
+    user: DiscordID,
+    till: number,
+    category: CategoryID,
+    reason: string,
+}
+
+/**
+ * @type DBMuteStatus
+ * @property {DiscordID} user_id
+ * @property {number} till Unix Epoch in seconds
+ * @property {CategoryID} category_id
+ * @property {string} reason
+ */
+export type DBMuteStatus = {
+    user_id: DiscordID,
+    till: number,
+    category_id: CategoryID,
+    reason: string,
 }

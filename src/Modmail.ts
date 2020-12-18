@@ -2,7 +2,6 @@ import { CommandoClient } from 'discord.js-commando';
 import path from 'path';
 import { CONFIG } from './globals';
 import { IDatabaseManager } from './models/interfaces';
-// import * as cmd from './commands';
 import database from './database/database';
 import EventHandler from './events/EventHandler';
 
@@ -11,11 +10,12 @@ export default class Modmail {
 
   private readonly client: CommandoClient;
 
-  private events: EventHandler;
+  private readonly events: EventHandler;
 
   constructor() {
     this.client = new CommandoClient({
       commandPrefix: CONFIG.prefix,
+      owner: CONFIG.owners,
     });
 
     this.events = new EventHandler(this.client);
@@ -26,6 +26,9 @@ export default class Modmail {
       .registerDefaultCommands({ unknownCommand: false })
       .registerGroups([
         ['threads'],
+        ['messages'],
+        ['category'],
+        ['muting'],
       ])
       .registerCommandsIn(path.join(__dirname, 'commands'));
 
@@ -60,6 +63,12 @@ export default class Modmail {
 
   private registerEvents() {
     this.client.on('message', this.events.onMessage.bind(this.events));
+    this.client.on('messageDelete', this.events.onMessageDelete.bind(this.events));
+    this.client.on('messageUpdate', this.events.onMessageEdit.bind(this.events));
+
+    this.client.on('guildMemberAdd', this.events.onMemberJoin.bind(this.events));
+    this.client.on('guildMemberRemove', this.events.onMemberLeave.bind(this.events));
+
     this.client.once('ready', this.events.onReady.bind(this.events));
   }
 }

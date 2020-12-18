@@ -4,10 +4,20 @@ import { Conf } from './conf';
 import DBConfig from './dbconfig';
 import validate from './validate';
 
+/**
+ * This represents the config.yml
+ * @class Config
+ * @property {string} token
+ * @property {string} prefix
+ * @property {string[]} owners
+ * @property {DBConfig} database
+ */
 export default class Config extends Conf {
     public readonly token: string;
 
     public readonly prefix: string;
+
+    public readonly owners: string[];
 
     public readonly database: DBConfig;
 
@@ -15,6 +25,7 @@ export default class Config extends Conf {
       super('config');
       this.token = '';
       this.prefix = '';
+      this.owners = [''];
       this.database = new DBConfig();
     }
 

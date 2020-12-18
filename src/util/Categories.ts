@@ -2,9 +2,17 @@ import {
   CategoryChannel, DMChannel, Guild, TextChannel, User,
 } from 'discord.js';
 import { CommandoClient } from 'discord.js-commando';
-import { Category } from '../models/types';
-import DatabaseManager from '../database/database';
+import { Category, CategoryResolvable } from '../models/types';
 import Embeds from './Embeds';
+import { ICategoryManger } from '../models/interfaces';
+import { PROMPT_TIME } from '../globals';
+
+export type CatSelector = {
+  category: CategoryChannel,
+  guild: Guild,
+  id: string,
+  name: string,
+}
 
 export default class Categories {
   /**
@@ -28,55 +36,77 @@ export default class Categories {
    * @param {TextChannel | DMChannel} channel
    * @param {User} user
    * @param {CommandoClient} client
-   * @return {{category: CategoryChannel, guild: Guild} | undefined} returns undefined if the user
-   * fails to react or does it wrong
-   * */
+   * @return {Promise<CatSelector>}
+   * @throws {Error} If user did the following:
+   *  * Provided an invalid emoji
+   *  * The user didn't answer.
+   *  * The category selected couldn't be found (unlikey).
+   *  * There are no active categories.
+   */
   public static async categorySelector(
-    pool: DatabaseManager,
+    pool: ICategoryManger,
     channel: TextChannel | DMChannel,
     user: User,
     client: CommandoClient,
-  ): Promise<{category: CategoryChannel, guild: Guild, id: string} | undefined> {
-    const categories = await pool.categories.getActiveCategories();
+  ): Promise<CatSelector> {
+    const categories = await pool.fetchAll(CategoryResolvable.activity, 'true');
+
+    if (categories.length === 0) {
+      throw new Error('There are no active categories at the moment.');
+    }
+
     const embed = Embeds.categorySelect(categories);
     const msg = await channel.send(embed);
-    const emotes = categories.map((category) => category.emojiID);
+    const emotes = categories.map((cat: Category) => cat.emojiID);
 
-    emotes.forEach((emote) => {
-      msg.react(emote)
+    emotes.forEach((emojiStr: string) => {
+      msg.react(emojiStr)
         .then((_) => _)
         .catch(console.warn);
     });
 
     const collection = await msg.awaitReactions(
-      (reaction, reactionUser) => reactionUser.id === user.id,
-      { max: 1, time: 30000 },
+      (_, rUser: User) => rUser.id === user.id,
+      { max: 1, time: PROMPT_TIME },
     );
 
     const emote = collection.first();
+
+    // The user didn't answer in time
     if (emote === undefined) {
-      await channel.send("You didn't answer in time, please restart the process by sending your message again.");
-      return undefined;
+      throw new Error(
+        "You didn't answer in time, please restart the process by sending "
+        + 'your message again.',
+      );
     }
 
+    // The user provided an emoji that isn't even part of the prompt.
     if (!emotes.includes(emote.emoji.toString())) {
-      await channel.send('What the heck, you should be using category emotes not new ones. >:(');
-      return undefined;
+      throw new Error(
+        'What the heck, you should be using category emotes not new ones. >:(',
+      );
     }
 
-    const category = await pool.categories.getCategoryByEmote(emote.emoji.toString());
-    if (category === undefined) {
-      return undefined;
-    }
-
-    const categoryChannel = await client.channels.cache.get(category.channelID) as CategoryChannel;
-
-    const categoryGuild = await client.guilds.cache.get(category.guildID) as Guild;
+    const category = await pool.fetch(
+      CategoryResolvable.emote,
+      emote.emoji.toString(),
+    );
+    const categoryChannel = await client.channels.fetch(
+      category.channelID,
+      true,
+      true,
+    ) as CategoryChannel;
+    const categoryGuild = await client.guilds.fetch(
+      category.guildID,
+      true,
+      true,
+    );
 
     return {
       category: categoryChannel,
       guild: categoryGuild,
       id: category.id,
+      name: category.name,
     };
   }
 }

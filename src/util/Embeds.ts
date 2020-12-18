@@ -4,7 +4,7 @@ import {
 import { IThreadManager } from '../models/interfaces';
 import Members from './Members';
 import { Category } from '../models/types';
-import Categories from './Categories';
+import { CLOSE_THREAD_DELAY } from '../globals';
 
 /**
  * @class Embeds
@@ -18,9 +18,9 @@ export default class Embeds {
    * @param {GuildMember} target The user being mailed.
    * @returns {MessageEmbed}
    */
-  public static newThreadFor(creator: GuildMember, target: GuildMember): MessageEmbed {
+  public static newThreadFor(creator: User, target: User): MessageEmbed {
     const res = Embeds.newThread(creator);
-    res.description = `${creator.user} created a new thread for ${target.user}.`;
+    res.description = `${creator} created a new thread for ${target}.`;
 
     return res;
   }
@@ -30,11 +30,11 @@ export default class Embeds {
    * @param {GuildMember} creator The user that started the thread.
    * @returns {MessageEmbed}
    */
-  public static newThread(creator: GuildMember): MessageEmbed {
+  public static newThread(creator: User): MessageEmbed {
     return Embeds.getGeneric({
       color: 0xB00B69,
       title: 'New Thread',
-      description: `${creator.user} created a new thread.`,
+      description: `${creator} created a new thread.`,
     });
   }
 
@@ -52,7 +52,7 @@ export default class Embeds {
     return Embeds.getGeneric({
       author: {
         name: member.user.tag,
-        icon_url: member.user.avatarURL() || '',
+        icon_url: member.user.avatarURL() || member.user.defaultAvatarURL,
       },
       description: `${member.user} has ${numOfThreads} past threads.`,
       color: 0x7289da,
@@ -71,17 +71,30 @@ export default class Embeds {
    * @returns {MessageEmbed}
    */
   public static categorySelect(categories: Category[]): MessageEmbed {
-    return Embeds.getGeneric({
-      title: 'Category Selector',
-      description: 'Please react with the corresponding emote for your desired category',
-      fields: [
-        {
-          name: 'Available categories:',
-          value: Categories.listCategories(categories),
-        },
-      ],
+    const res = Embeds.listCategories(categories);
+
+    res.title = 'Select The Category You Want to Talk In';
+
+    return res;
+  }
+
+  public static listCategories(categories: Category[]): MessageEmbed {
+    const res = Embeds.getGeneric({
+      title: 'Available Categories',
+      fields: [],
       color: 0xB00B69,
     });
+
+    for (let i = 0; i < categories.length; i += 1) {
+      const cat = categories[i];
+      res.fields.push({
+        name: `${cat.emojiID} - ${cat.name}`,
+        value: `${cat.id}`,
+        inline: false,
+      });
+    }
+
+    return res;
   }
 
   /**
@@ -93,7 +106,7 @@ export default class Embeds {
   public static messageSend(content: string, author: User): MessageEmbed {
     return Embeds.getGeneric({
       author: {
-        name: `${author.username}#${author.discriminator}`,
+        name: author.tag,
         icon_url: author.avatarURL() || author.defaultAvatarURL,
       },
       description: content,
@@ -110,11 +123,148 @@ export default class Embeds {
   public static messageReceived(content: string, author: User): MessageEmbed {
     return Embeds.getGeneric({
       author: {
-        name: `${author.username}#${author.discriminator}`,
+        name: author.tag,
         icon_url: author.avatarURL() || author.defaultAvatarURL,
       },
       description: content,
       color: 0xE8D90C,
+    });
+  }
+
+  /**
+   * All embeds share the attributes returned here.
+   * @param {string} content
+   * @param {User} author
+   * @returns {MessageEmbed}
+   */
+  public static messageSendAnon(content: string, author: User): MessageEmbed {
+    return Embeds.getGeneric({
+      author: {
+        name: author.tag,
+        icon_url: author.avatarURL() || author.defaultAvatarURL,
+      },
+      description: content,
+      color: 0x7CFC00,
+      footer: {
+        text: 'Anonymous',
+      },
+    });
+  }
+
+  /**
+   * All embeds share the attributes returned here.
+   * @param {string} content
+   * @param {User} author
+   * @returns {MessageEmbed}
+   */
+  public static messageReceivedAnon(content: string): MessageEmbed {
+    return Embeds.getGeneric({
+      author: {
+        name: 'Moderator',
+      },
+      description: content,
+      color: 0xE8D90C,
+    });
+  }
+
+  /**
+   * All embeds share the attributes returned here.
+   * @returns {MessageEmbed}
+   */
+  public static closeThread(): MessageEmbed {
+    return Embeds.getGeneric({
+      title: 'Conversation closed',
+      description: 'This channel will get deleted in'
+      + ` ${CLOSE_THREAD_DELAY / 1000} seconds...`,
+    });
+  }
+
+  /**
+   * All embeds share the attributes returned here.
+   * @returns {MessageEmbed}
+   */
+  public static closeThreadClient(): MessageEmbed {
+    return Embeds.getGeneric({
+      title: 'Thread closed',
+      description: 'This thread has been closed.',
+      footer: {
+        text: 'Sending another message will open a new thread.',
+      },
+    });
+  }
+
+  /**
+   * All embeds share the attributes returned here.
+   * @returns {MessageEmbed}
+   */
+  public static memberJoined(member: GuildMember): MessageEmbed {
+    return Embeds.getGeneric({
+      title: 'User joined the server',
+      description: `${member} joined the server`,
+      author: {
+        icon_url: member.user.avatarURL() || member.user.defaultAvatarURL,
+        name: member.user.tag,
+      },
+    });
+  }
+
+  /**
+   * All embeds share the attributes returned here.
+   * @returns {MessageEmbed}
+   */
+  public static memberLeft(member: GuildMember): MessageEmbed {
+    return Embeds.getGeneric({
+      title: 'User left the server',
+      description: `${member} left the server`,
+      author: {
+        icon_url: member.user.avatarURL() || member.user.defaultAvatarURL,
+        name: member.user.tag,
+      },
+    });
+  }
+
+  /**
+   * All embeds share the attributes returned here.
+   * @returns {MessageEmbed}
+   */
+  public static internalMessage(content: string, author: User): MessageEmbed {
+    return Embeds.getGeneric({
+      author: {
+        name: author.tag,
+        icon_url: author.avatarURL() || author.defaultAvatarURL,
+      },
+      description: content,
+      color: 0xADD8E6,
+      footer: {
+        text: 'Internal message',
+      },
+    });
+  }
+
+  /**
+   * All embeds share the attributes returned here.
+   * @returns {MessageEmbed}
+   */
+  public static successfulForward(): MessageEmbed {
+    return Embeds.getGeneric({
+      title: 'Conversation Forwarded',
+      description: 'Successfully forwarded the thread, this channel will get deleted in '
+        + `${CLOSE_THREAD_DELAY / 1000} seconds...`,
+    });
+  }
+
+  /**
+   * All embeds share the attributes returned here.
+   * @returns {MessageEmbed}
+   */
+  public static forwardedBy(author: User, category: string): MessageEmbed {
+    return Embeds.getGeneric({
+      title: 'Conversation Forwarded',
+      description: `This conversation was forwarded by ${author} from ${category}`,
+      author: {
+        name: author.tag,
+        icon_url: author.avatarURL() || author.defaultAvatarURL,
+      },
     });
   }
 

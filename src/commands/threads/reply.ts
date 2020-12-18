@@ -11,6 +11,7 @@ export default class Reply extends Command {
       description: 'Reply to a user in modmail',
       group: 'threads',
       memberName: 'reply',
+      guildOnly: true,
       args: [
         {
           key: 'content',
@@ -29,7 +30,7 @@ export default class Reply extends Command {
     const pool = await Modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
 
-    if (thread === undefined) {
+    if (thread === null) {
       return msg.say('Not currently in a modmail thread');
     }
 
@@ -49,12 +50,14 @@ export default class Reply extends Command {
     const threadMessage = await msg.channel.send(threadEmbed);
     const dmMessage = await dmChannel.send(dmEmbed);
 
+    await pool.users.create(msg.author.id);
     await pool.messages.add({
       clientID: dmMessage.id,
       content: text,
       edits: [],
       files: [],
       isDeleted: false,
+      internal: false,
       modmailID: threadMessage.id,
       sender: msg.author.id,
       threadID: thread.id,

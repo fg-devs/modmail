@@ -1,10 +1,11 @@
 import { Pool, PoolClient } from 'pg';
 import {
   ICategoryManger,
-  IDatabaseManager, IEditsManager, IMessageManager, IThreadManager, IUserManager,
+  IDatabaseManager, IEditsManager, IMessageManager, IMuteManager, IThreadManager, IUserManager,
 } from '../models/interfaces';
 import EditManager from './edits';
 import MessageManager from './messages';
+import MuteManager from './mutes';
 import ThreadManager from './threads';
 import UsersManager from './users';
 import CategoryManager from './categories';
@@ -15,6 +16,8 @@ export default class DatabaseManager implements IDatabaseManager {
 
     public readonly messages: IMessageManager;
 
+    public readonly mutes: IMuteManager;
+
     public readonly threads: IThreadManager;
 
     public readonly users: IUserManager;
@@ -24,6 +27,7 @@ export default class DatabaseManager implements IDatabaseManager {
     constructor(pool: PoolClient) {
       this.edits = new EditManager(pool);
       this.messages = new MessageManager(pool);
+      this.mutes = new MuteManager(pool);
       this.threads = new ThreadManager(pool);
       this.users = new UsersManager(pool);
       this.categories = new CategoryManager(pool);

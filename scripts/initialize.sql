@@ -63,13 +63,14 @@ create table modmail.messages
     sender     bigint                not null
         constraint messages_users_id_fk
             references modmail.users,
-    client_id  bigint                not null,
+    client_id  bigint                ,
     modmail_id bigint                not null,
     content    text                  not null,
     thread_id  bigint                not null
         constraint messages_threads_id_fk
             references modmail.threads,
-    is_deleted boolean default false not null
+    is_deleted boolean default false not null,
+    internal boolean default false not null
 );
 
 alter table modmail.messages
@@ -80,6 +81,14 @@ create unique index messages_client_id_uindex
 
 create unique index messages_modmail_id_uindex
     on modmail.messages (modmail_id);
+
+create table modmail.mutes
+(
+    user_id modmail.users not null,
+    till bigint not null,
+    category_id bigint not null,
+    reason text not null
+);
 
 create table modmail.attachments
 (
@@ -123,4 +132,3 @@ create table modmail.edits
 
 alter table modmail.edits
     owner to current_user;
-

@@ -1,8 +1,16 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Conf } from './conf';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * This validates the config.yml recursively
+ * @function validate
+ * @param {T extends Conf} ref Reference.
+ * @param {any} obj Target, if obj is missing something ref has then an error
+ * will be thrown
+ * @throws {Error} See obj param description
+ */
 export default function validate<T extends Conf>(ref: T, obj: any): void {
   const reference = Object.keys(ref);
   const objKeys = Object.keys(obj);
