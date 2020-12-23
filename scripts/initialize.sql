@@ -21,13 +21,14 @@ create unique index users_id_uindex
 
 create table modmail.categories
 (
-    id        bigint               not null
+    id         bigint               not null
         constraint categories_pk
             primary key,
-    name      text                 not null,
-    is_active boolean default true not null,
-    guild_id  bigint               not null,
-    emote     text                 not null
+    channel_id bigint unique        not null,
+    name       text                 not null,
+    is_active  boolean default true not null,
+    guild_id   bigint               not null,
+    emote      text                 not null
 );
 
 alter table modmail.categories
