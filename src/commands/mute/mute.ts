@@ -1,7 +1,10 @@
 import { Message } from 'discord.js';
 import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
-import { CategoryResolvable, MuteStatus } from '../../models/types';
+import IssueHandler from '../../events/IssueHandler';
+import { MuteStatus, RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
+import Categories from '../../util/Categories';
+import { Requires } from '../../util/Perms';
 import Time from '../../util/Time';
 
 type Args = {
@@ -41,38 +44,23 @@ export default class Mute extends Command {
     });
   }
 
-  public async run(msg: CommandoMessage, _args: Args): Promise<Message | Message[] | null> {
+  @Requires(RoleLevel.Mod)
+  public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
     const pool = await Modmail.getDB();
+    const category = await Categories.getCategory(msg);
 
-    try {
-      const mute = await Mute.parseArgs(msg, _args);
-      await pool.mutes.add(mute);
-      return msg.say('Muted.');
-    } catch (e) {
-      console.error(e);
-      return msg.say(e.message);
+    if (category === null) {
+      const res = 'Please run this command in a guild with an active category.';
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
     }
-  }
-
-  private static async parseArgs(msg: CommandoMessage, args: Args): Promise<MuteStatus> {
-    const pool = await Modmail.getDB();
-    const res: MuteStatus = {
+    const mute: MuteStatus = {
       category: '',
       reason: args.reason.join(' '),
       till: Time.parse(args.time),
       user: args.userID,
     };
-    // get the category
-    try {
-      const cat = await pool.categories.fetch(
-        CategoryResolvable.guild,
-        msg.guild.id,
-      );
-      res.category = cat.id;
-
-      return res;
-    } catch (e) {
-      throw new Error('Please use this command in a guild that has a category.');
-    }
+    await pool.mutes.add(mute);
+    return msg.say('Muted.');
   }
 }

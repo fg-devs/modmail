@@ -1,7 +1,10 @@
-import { TextChannel, Message } from 'discord.js';
+import { Message } from 'discord.js';
 import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
-import { CategoryResolvable } from '../../models/types';
+import IssueHandler from '../../events/IssueHandler';
+import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
+import Categories from '../../util/Categories';
+import { Requires } from '../../util/Perms';
 
 export default class ActivateCategory extends Command {
   constructor(client: CommandoClient) {
@@ -9,31 +12,24 @@ export default class ActivateCategory extends Command {
       name: 'activate',
       aliases: [],
       description: 'Reactivate a category',
-      // TODO(dylan): Add a proper permission system.
-      ownerOnly: true,
       group: 'category',
       memberName: 'activate',
       args: [],
     });
   }
 
+  @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const { parent } = msg.channel as TextChannel;
-
-    if (!parent) {
-      return msg.say("This channel isn't part of a category.");
-    }
     const pool = await Modmail.getDB();
+    const category = await Categories.getCategory(msg, false);
 
-    try {
-      const category = await pool.categories.fetch(
-        CategoryResolvable.channel,
-        parent.id,
-      );
-      await pool.categories.setActive(category.id, true);
-      return msg.say('Reactivated.');
-    } catch (e) {
-      return msg.say(e.message);
+    if (category === null) {
+      const res = "Couldn't find a category for this guild.";
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
     }
+
+    await pool.categories.setActive(category.id, true);
+    return msg.say('Reactivated.');
   }
 }

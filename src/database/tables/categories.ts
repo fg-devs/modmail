@@ -1,19 +1,20 @@
 import { SnowflakeUtil } from 'discord.js';
-import Table from './table';
-import { ICategoryManger } from '../models/interfaces';
-import { CategoryID } from '../models/identifiers';
-import { CONFIG } from '../globals';
+import Table from '../table';
+import { ICategoryManger } from '../../models/interfaces';
+import { CategoryID } from '../../models/identifiers';
+import { CONFIG } from '../../globals';
 import {
   Category,
   CategoryResolvable,
   CreateCategoryOpt,
   DBCategory,
-} from '../models/types';
+} from '../../models/types';
 
 const TABLE = `${CONFIG.database.schema}.categories`;
 
 export default class CategoryManager extends Table implements ICategoryManger {
   /**
+   * Handles added attachments and sends them.
    * @method create
    * @param {CreateCategoryOpt} opt Required options for a new category
    * @returns {Promise<Category>}
@@ -127,11 +128,11 @@ export default class CategoryManager extends Table implements ICategoryManger {
    * @param {string} id
    * @throws {Error} If nothing is resolved
    */
-  public async fetch(by: CategoryResolvable, id: string): Promise<Category> {
+  public async fetch(by: CategoryResolvable, id: string): Promise<Category | null> {
     const res = await this.fetchAll(by, id);
 
     if (res.length === 0) {
-      throw new Error(`${id} didn't resolve anything`);
+      return null;
     }
 
     return res[0];

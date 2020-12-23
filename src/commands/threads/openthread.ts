@@ -2,8 +2,9 @@ import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
-import Categories from '../../util/Categories';
-import Members from '../../util/Members';
+import { Requires } from '../../util/Perms';
+import { CategoryResolvable, RoleLevel } from '../../models/types';
+import IssueHandler from '../../events/IssueHandler';
 
 export default class OpenThread extends Command {
   constructor(client: CommandoClient) {
@@ -24,49 +25,64 @@ export default class OpenThread extends Command {
     });
   }
 
+  @Requires(RoleLevel.Mod)
   public async run(
     msg: CommandoMessage,
     { userID }: {userID: string},
   ): Promise<Message | Message[] | null> {
     const pool = await Modmail.getDB();
-    let member;
-    let selectorRes;
+    const user = await msg.client.users.fetch(userID, true, true);
+    const category = await pool.categories.fetch(
+      CategoryResolvable.guild,
+      msg.guild.id,
+    );
 
-    try {
-      member = await Members.getMember(userID, msg.guild);
-
-      const hasThread = await pool.threads.getCurrentThread(member.id);
-      if (hasThread !== null) {
-        throw new Error('This user already has a thread open');
-      }
-
-      selectorRes = await Categories.categorySelector(
-        pool.categories,
-        msg.channel,
-        msg.author,
-        this.client,
-      );
-    } catch (e) {
-      console.error(e);
-      return msg.say(e);
+    if (category === null) {
+      const res = "This guild isn't part of a category.";
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
     }
 
-    const channel = await selectorRes.guild.channels.create(
-      `${member.user.username}-${member.user.discriminator}`,
+    if (user === null) {
+      const res = 'Failed to get that member, is it the correct ID?';
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
+    }
+
+    const hasThread = await pool.threads.getCurrentThread(user.id);
+
+    if (hasThread !== null) {
+      const res = 'This user already has a thread open';
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
+    }
+
+    const channel = await msg.guild.channels.create(
+      `${user.username}-${user.discriminator}`,
       {
         type: 'text',
       },
     );
 
-    if (member.user.dmChannel === undefined) {
-      await member.createDM(true);
+    if (user.dmChannel === undefined) {
+      try {
+        await user.createDM();
+      } catch (e) {
+        const res = 'Failed to create DM with this user.';
+        IssueHandler.onCommandWarn(msg, res);
+        return msg.say(res);
+      }
     }
 
-    await channel.setParent(selectorRes.category);
-    await channel.send(await Embeds.memberDetails(pool.threads, member));
-    await channel.send(Embeds.newThreadFor(msg.author, member.user));
-    await pool.users.create(member.user.id);
-    await pool.threads.open(member.user.id, channel.id, selectorRes.id);
+    await channel.setParent(category.channelID);
+    await channel.send(await Embeds.memberDetails(pool.threads, user));
+    await channel.send(Embeds.newThreadFor(msg.author, user));
+    await pool.users.create(user.id);
+    await pool.threads.open(user.id, channel.id, category.id);
+
+    await msg.react('✅');
+    await new Promise((r) => setTimeout(r, 5000));
+    await msg.delete();
 
     return null;
   }

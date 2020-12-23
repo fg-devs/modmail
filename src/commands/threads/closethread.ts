@@ -3,6 +3,7 @@ import { Message } from 'discord.js';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
 import { CLOSE_THREAD_DELAY } from '../../globals';
+import IssueHandler from '../../events/IssueHandler';
 
 export default class CloseThread extends Command {
   constructor(client: CommandoClient) {
@@ -21,7 +22,9 @@ export default class CloseThread extends Command {
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
 
     if (thread === null) {
-      return msg.say('Not currently in a thread');
+      const res = 'Not currently in a thread';
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
     }
 
     const user = await this.client.users.fetch(thread.author.id, true, true);

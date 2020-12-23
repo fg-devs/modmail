@@ -2,6 +2,8 @@ create schema modmail;
 
 create type modmail.file_type as enum ('image', 'file');
 
+create type modmail.role_level as enum ('admin', 'mod');
+
 alter type modmail.file_type owner to current_user;
 
 create table modmail.users
@@ -132,3 +134,32 @@ create table modmail.edits
 
 alter table modmail.edits
     owner to current_user;
+
+create table modmail.standard_replies
+(
+    id    bigint not null
+        constraint standard_replies_pk
+            primary key,
+    name  text   not null,
+    reply text   not null
+);
+
+alter table modmail.standard_replies
+    owner to current_user;
+
+create unique index standard_replies_id_uindex
+    on modmail.standard_replies (id);
+
+create unique index standard_replies_name_uindex
+    on modmail.standard_replies (name);
+
+create table modmail.permissions
+(
+    category_id bigint not null
+        references modmail.categories,
+    role_id text unique not null,
+    level modmail.role_level default 'mod'::modmail.role_level not null
+);
+
+create unique index permissions_role_id_uindex
+    on modmail.permissions (role_id);

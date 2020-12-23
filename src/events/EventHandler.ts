@@ -1,5 +1,5 @@
 import {
-  DMChannel, Guild, GuildMember, Message, TextChannel,
+  DMChannel, GuildMember, Message, TextChannel,
 } from 'discord.js';
 import { CommandoClient } from 'discord.js-commando';
 import ThreadHandler from './ThreadHandling';
@@ -56,7 +56,8 @@ export default class EventHandler {
    * Called on ready
    */
   public async onReady(): Promise<void> {
-    console.log('Bot is ready');
+    const log = Modmail.getLogger();
+    log.info('Bot is ready.');
     this.client.user?.setPresence({
       activity: {
         type: 'PLAYING',
@@ -71,7 +72,7 @@ export default class EventHandler {
    */
   public async onMessageDelete(msg: Message): Promise<void> {
     const pool = await Modmail.getDB();
-    if (!msg.author.bot) {
+    if (!msg.author.bot && !msg.content.startsWith(CONFIG.prefix)) {
       const thread = await pool.threads.getCurrentThread(msg.author.id);
       if (thread === null) {
         return;

@@ -1,7 +1,10 @@
 import { Message } from 'discord.js';
 import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
-import { CategoryResolvable } from '../../models/types';
+import IssueHandler from '../../events/IssueHandler';
+import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
+import Categories from '../../util/Categories';
+import { Requires } from '../../util/Perms';
 
 type Args = {
   userID: string,
@@ -26,22 +29,18 @@ export default class Unmute extends Command {
     });
   }
 
+  @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
     const pool = await Modmail.getDB();
+    const category = await Categories.getCategory(msg);
 
-    try {
-      const cat = await pool.categories.fetch(
-        CategoryResolvable.guild,
-        msg.guild.id,
-      );
-
-      await pool.mutes.delete(args.userID, cat.id);
-      return msg.say('Unmuted.');
-    } catch (e) {
-      if (e.message.includes('resolve')) {
-        return msg.say('Please use this command in a guild that uses modmail.');
-      }
-      return msg.say(e.message);
+    if (category === null) {
+      const res = 'Please use this command in a guild with an active category.';
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
     }
+
+    await pool.mutes.delete(args.userID, category.id);
+    return msg.say('Unmuted.');
   }
 }

@@ -6,6 +6,8 @@ import Categories, { CatSelector } from '../util/Categories';
 import Embeds from '../util/Embeds';
 import { Thread } from '../models/types';
 import { IDatabaseManager } from '../models/interfaces';
+import AttachmentHandling from './AttachmentHandling';
+import Modmail from '../Modmail';
 
 export default class ThreadHandler {
   /**
@@ -52,7 +54,7 @@ export default class ThreadHandler {
     }
 
     await channel.setParent(selectorRes.category);
-    await channel.send(await Embeds.memberDetails(pool.threads, member));
+    await channel.send(await Embeds.memberDetails(pool.threads, member.user));
     await channel.send(Embeds.newThread(member.user));
     await pool.users.create(msg.author.id);
 
@@ -62,7 +64,9 @@ export default class ThreadHandler {
       if (thread !== null) {
         await ThreadHandler.clientSendMessage(client, msg, thread, pool);
       }
-    } catch (_) {
+    } catch (e) {
+      const log = Modmail.getLogger();
+      log.error(e);
       await channel.delete('Dupe thread');
     }
   }
@@ -86,9 +90,13 @@ export default class ThreadHandler {
       true,
       true,
     ) as TextChannel;
-    const modmailMessage = await channel.send(Embeds.messageReceived(msg.content, msg.author));
+    const modmailMessage = await channel.send(
+      Embeds.messageReceived(
+        msg.content,
+        msg.author,
+      ),
+    );
 
-    await msg.react('✅');
     await pool.messages.add({
       clientID: msg.id,
       content: msg.content,
@@ -100,6 +108,9 @@ export default class ThreadHandler {
       sender: msg.author.id,
       threadID: thread.id,
     });
+
+    await AttachmentHandling.handle(msg, channel, modmailMessage.id);
+    await msg.react('✅');
   }
 
   public static async messageDeleted(
@@ -153,7 +164,11 @@ export default class ThreadHandler {
 
     const embed = modmailMessage.embeds[0];
     embed.description = newMsg.content;
-    embed.addField(`Version ${embed.fields.length + 1}: `, oldMsg.content, false);
+    embed.addField(
+      `Version ${embed.fields.length + 1}: `,
+      oldMsg.content,
+      false,
+    );
 
     await modmailMessage.edit(embed);
     await clientMessage.react('✏️');

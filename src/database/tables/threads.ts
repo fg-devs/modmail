@@ -1,9 +1,9 @@
 import { SnowflakeUtil } from 'discord.js';
-import { IThreadManager } from '../models/interfaces';
-import Table from './table';
-import { CategoryID, DiscordID, ThreadID } from '../models/identifiers';
-import { DBThread, Message, Thread } from '../models/types';
-import { CONFIG } from '../globals';
+import { IThreadManager } from '../../models/interfaces';
+import Table from '../table';
+import { CategoryID, DiscordID, ThreadID } from '../../models/identifiers';
+import { DBThread, Thread } from '../../models/types';
+import { CONFIG } from '../../globals';
 
 const TABLE = `${CONFIG.database.schema}.threads`;
 
@@ -55,7 +55,7 @@ export default class ThreadManager extends Table implements IThreadManager {
    */
   public async countThreads(user: string): Promise<number> {
     const res = await this.pool.query(
-      'SELECT COUNT(*) FROM modmail.threads WHERE author = $1 AND is_active = false',
+      `SELECT COUNT(*) FROM ${TABLE} WHERE author = $1 AND is_active = false`,
       [user],
     );
 

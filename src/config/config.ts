@@ -11,21 +11,25 @@ import validate from './validate';
  * @property {string} prefix
  * @property {string[]} owners
  * @property {DBConfig} database
+ * @property {string} logLevel Options: debug, warn, info, error
  */
 export default class Config extends Conf {
     public readonly token: string;
 
     public readonly prefix: string;
 
-    public readonly owners: string[];
-
     public readonly database: DBConfig;
+
+    public readonly owners: string[]
+
+    public readonly logLevel: string;
 
     constructor() {
       super('config');
       this.token = '';
       this.prefix = '';
-      this.owners = [''];
+      this.owners = [];
+      this.logLevel = 'debug';
       this.database = new DBConfig();
     }
 

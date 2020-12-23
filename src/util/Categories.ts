@@ -1,11 +1,12 @@
 import {
   CategoryChannel, DMChannel, Guild, TextChannel, User,
 } from 'discord.js';
-import { CommandoClient } from 'discord.js-commando';
+import { CommandoClient, CommandoMessage } from 'discord.js-commando';
 import { Category, CategoryResolvable } from '../models/types';
 import Embeds from './Embeds';
 import { ICategoryManger } from '../models/interfaces';
 import { PROMPT_TIME } from '../globals';
+import Modmail from '../Modmail';
 
 export type CatSelector = {
   category: CategoryChannel,
@@ -15,6 +16,29 @@ export type CatSelector = {
 }
 
 export default class Categories {
+  /**
+   * Get category based on what guild the message is in
+   * @param {CommandoMessage} msg
+   * @param {boolean} isActive Whether or not the category must be active
+   */
+  public static async getCategory(msg: CommandoMessage, isActive = true): Promise<Category | null> {
+    if (!msg.guild) {
+      return null;
+    }
+
+    const pool = await Modmail.getDB();
+    const category = await pool.categories.fetch(
+      CategoryResolvable.guild,
+      msg.guild.id,
+    );
+
+    if (category === null || category.isActive !== isActive) {
+      return null;
+    }
+
+    return category;
+  }
+
   /**
    * List roles of a member in a mention list fashion (see returns).
    * @param {Category[]} categories
@@ -49,7 +73,10 @@ export default class Categories {
     user: User,
     client: CommandoClient,
   ): Promise<CatSelector> {
-    const categories = await pool.fetchAll(CategoryResolvable.activity, 'true');
+    const categories = await pool.fetchAll(
+      CategoryResolvable.activity,
+      'true',
+    );
 
     if (categories.length === 0) {
       throw new Error('There are no active categories at the moment.');
@@ -91,6 +118,11 @@ export default class Categories {
       CategoryResolvable.emote,
       emote.emoji.toString(),
     );
+
+    if (category === null) {
+      throw new Error("Couldn't get category based on emote.");
+    }
+
     const categoryChannel = await client.channels.fetch(
       category.channelID,
       true,

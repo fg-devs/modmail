@@ -1,8 +1,8 @@
-import { CONFIG } from '../globals';
-import { MessageID, ThreadID } from '../models/identifiers';
-import { IMessageManager } from '../models/interfaces';
-import { DBMessage, Message } from '../models/types';
-import Table from './table';
+import { CONFIG } from '../../globals';
+import { MessageID, ThreadID } from '../../models/identifiers';
+import { IMessageManager } from '../../models/interfaces';
+import { DBMessage, Message } from '../../models/types';
+import Table from '../table';
 
 const TABLE = `${CONFIG.database.schema}.messages`;
 
@@ -38,7 +38,6 @@ export default class MessageManager extends Table implements IMessageManager {
    * @throws {Error} If nothing was resolved
    */
   public async getLastMessage(id: ThreadID, author: string): Promise<Message> {
-    // TODO(dylan): Please make a constant for the schema and table name.
     const res = await this.pool.query(
       `SELECT * FROM ${TABLE}`
       + ' WHERE sender = $1'

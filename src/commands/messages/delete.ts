@@ -2,6 +2,7 @@ import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
 import { DMChannel, Message } from 'discord.js';
 import Modmail from '../../Modmail';
 import { Thread } from '../../models/types';
+import IssueHandler from '../../events/IssueHandler';
 
 type Args = {
   msgID?: string;
@@ -31,7 +32,9 @@ export default class Delete extends Command {
     const pool = await Modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
     if (thread === null) {
-      return msg.say('Not currently in a thread..');
+      const res = 'Not currently in a thread..';
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
     }
 
     const user = await this.client.users.fetch(thread.author.id, true, true);
@@ -68,7 +71,8 @@ export default class Delete extends Command {
         }
 
         return dm.messages.fetch(dbMessage.clientID, true, true);
-      } catch (_) {
+      } catch (e) {
+        IssueHandler.onCommandError(this, e, msg);
         await msg.say('Unable to locate user message');
         return null;
       }

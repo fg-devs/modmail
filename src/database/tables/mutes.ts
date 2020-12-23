@@ -1,9 +1,9 @@
-import { CONFIG } from '../globals';
-import { CategoryID, DiscordID } from '../models/identifiers';
-import { IMuteManager } from '../models/interfaces';
-import { DBMuteStatus, MuteStatus } from '../models/types';
-import Time from '../util/Time';
-import Table from './table';
+import { CONFIG } from '../../globals';
+import { CategoryID, DiscordID } from '../../models/identifiers';
+import { IMuteManager } from '../../models/interfaces';
+import { DBMuteStatus, MuteStatus } from '../../models/types';
+import Time from '../../util/Time';
+import Table from '../table';
 
 const TABLE = `${CONFIG.database.schema}.mutes`;
 

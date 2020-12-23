@@ -1,34 +1,39 @@
 import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
-import Embeds from '../../util/Embeds';
 import Modmail from '../../Modmail';
+import Embeds from '../../util/Embeds';
 import IssueHandler from '../../events/IssueHandler';
 
-export default class Reply extends Command {
+type Args = {
+  name: string
+}
+
+export default class StandardReplyAnon extends Command {
   constructor(client: CommandoClient) {
     super(client, {
-      name: 'reply',
-      aliases: ['r'],
-      description: 'Reply to a user in modmail',
-      group: 'threads',
-      memberName: 'reply',
-      guildOnly: true,
+      description: 'Reply with a standard reply anonymously',
+      group: 'standard_replies',
+      memberName: 'sra',
+      name: 'sra',
       args: [
         {
-          key: 'content',
-          prompt: 'The message you want to send',
+          key: 'name',
           type: 'string',
-          infinite: true,
+          prompt: 'The name of the standard reply',
         },
       ],
     });
   }
 
-  public async run(
-    msg: CommandoMessage,
-    { content }: {content: string[]},
-  ): Promise<Message | Message[] | null> {
+  public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] |null> {
     const pool = await Modmail.getDB();
+    const standardReply = await pool.standardReplies.get(args.name);
+    if (standardReply === null) {
+      const res = 'Unable to locate that standard reply...';
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
+    }
+
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
 
     if (thread === null) {
@@ -39,24 +44,15 @@ export default class Reply extends Command {
 
     const user = await this.client.users.fetch(thread.author.id, true, true);
     const dmChannel = user.dmChannel || await user.createDM();
-    const member = await msg.guild.members.fetch(msg.author.id);
-    const footer = {
-      text: member.roles.highest.name,
-    };
-    const text = content.join(' ');
-    const threadEmbed = Embeds.messageSend(text, msg.author);
-    const dmEmbed = Embeds.messageReceived(text, msg.author);
-
-    threadEmbed.footer = footer;
-    dmEmbed.footer = footer;
-
+    const threadEmbed = Embeds.messageSendAnon(standardReply.reply, msg.author);
+    const dmEmbed = Embeds.messageReceivedAnon(standardReply.reply);
     const threadMessage = await msg.channel.send(threadEmbed);
     const dmMessage = await dmChannel.send(dmEmbed);
 
     await pool.users.create(msg.author.id);
     await pool.messages.add({
       clientID: dmMessage.id,
-      content: text,
+      content: standardReply.reply,
       edits: [],
       files: [],
       isDeleted: false,

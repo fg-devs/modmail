@@ -1,7 +1,7 @@
-import { CategoryChannel, Message, TextChannel } from 'discord.js';
+import { Message, TextChannel } from 'discord.js';
 import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
+import IssueHandler from '../../events/IssueHandler';
 import Modmail from '../../Modmail';
-import { CategoryConstraint as CatConst } from '../../util/Explain';
 
 type CatArgs = {
   name: string;
@@ -14,7 +14,6 @@ export default class AddCategory extends Command {
       name: 'addcat',
       aliases: ['addcat', 'ac'],
       description: 'Add a category',
-      // TODO(dylan): Add a proper permission system.
       ownerOnly: true,
       group: 'category',
       memberName: 'addcat',
@@ -43,47 +42,18 @@ export default class AddCategory extends Command {
 
     const { parent } = msg.channel;
     if (!parent) {
-      await msg.say("This channel isn't in a category.");
-      return null;
+      const res = "This channel isn't in a category.";
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
     }
 
-    try {
-      await pool.categories.create({
-        guildID: msg.channel.guild.id,
-        name,
-        emote: emoji,
-        channelID: parent.id,
-      });
+    await pool.categories.create({
+      guildID: msg.channel.guild.id,
+      name,
+      emote: emoji,
+      channelID: parent.id,
+    });
 
-      return msg.say('Category added.');
-    } catch (e) {
-      console.error(`Failed adding "${name}" because\n`, e);
-      return AddCategory.explain(msg, args, e);
-    }
-  }
-
-  private static async explain(
-    msg: CommandoMessage,
-    args: CatArgs,
-    err: Error,
-  ): Promise<Message | Message[]> {
-    const { emoji, name } = args;
-    let res;
-    if (err.message.includes('emote')) {
-      res = CatConst.emote(emoji);
-    } else if (err.message.includes('channel_id')) {
-      res = CatConst.channelID(
-        (msg.channel as TextChannel).parent as CategoryChannel,
-      );
-    } else if (err.message.includes('name')) {
-      res = CatConst.catName(name);
-    } else if (err.message.includes('categories_id')) {
-      res = CatConst.id();
-    } else {
-      console.error(err);
-      res = 'Something went wrong.';
-    }
-
-    return msg.say(res);
+    return msg.say('Category added.');
   }
 }

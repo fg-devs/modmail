@@ -1,9 +1,12 @@
 import {
-  GuildMember, MessageEmbed, MessageEmbedOptions, User,
+  GuildMember,
+  MessageAttachment,
+  MessageEmbed,
+  MessageEmbedOptions,
+  User,
 } from 'discord.js';
 import { IThreadManager } from '../models/interfaces';
-import Members from './Members';
-import { Category } from '../models/types';
+import { Category, Role, RoleLevel } from '../models/types';
 import { CLOSE_THREAD_DELAY } from '../globals';
 
 /**
@@ -41,27 +44,24 @@ export default class Embeds {
   /**
    * Details about a member in a message embed. Usually used for a new thread.
    * @param {DatabaseManager} db To count how many past threads a user had.
-   * @param {GuildMember} member
+   * @param {User} user
    * @returns {Promise<MessageEmbed>}
    */
   public static async memberDetails(
     db: IThreadManager,
-    member: GuildMember,
+    user: User,
   ): Promise<MessageEmbed> {
-    const numOfThreads = await db.countThreads(member.id);
+    const numOfThreads = await db.countThreads(user.id);
+    const createdDays = this.getDays(user.createdAt);
     return Embeds.getGeneric({
       author: {
-        name: member.user.tag,
-        icon_url: member.user.avatarURL() || member.user.defaultAvatarURL,
+        name: user.tag,
+        icon_url: user.avatarURL() || user.defaultAvatarURL,
       },
-      description: `${member.user} has ${numOfThreads} past threads.`,
+      description: `${user} was created ${createdDays} days ago, `
+        + `with **${numOfThreads}** past threads`,
       color: 0x7289da,
-      fields: [
-        {
-          name: 'Roles',
-          value: Members.listRoles(member),
-        },
-      ],
+      fields: [],
     });
   }
 
@@ -270,6 +270,76 @@ export default class Embeds {
 
   /**
    * All embeds share the attributes returned here.
+   * @param {MessageAttachment} attachment
+   * @param {User} author
+   * @returns {MessageEmbed}
+   */
+  public static messageAttachmentImage(
+    attachment: MessageAttachment,
+    author: User,
+  ): MessageEmbed {
+    return Embeds.getGeneric({
+      title: 'Message Attachment',
+      image: {
+        url: attachment.url,
+        proxy_url: attachment.proxyURL,
+      },
+      author: {
+        name: author.tag,
+        icon_url: author.avatarURL() || author.defaultAvatarURL,
+      },
+      color: 0xE8D90C,
+    });
+  }
+
+  /**
+   * All embeds share the attributes returned here.
+   * @param {MessageAttachment} attachment
+   * @param {User} author
+   * @returns {MessageEmbed}
+   */
+  public static messageAttachment(
+    attachment: MessageAttachment,
+    author: User,
+  ): MessageEmbed {
+    return Embeds.getGeneric({
+      title: 'Message Attachment',
+      description: `[${attachment.name}](${attachment.url})`,
+      author: {
+        name: author.tag,
+        icon_url: author.avatarURL() || author.defaultAvatarURL,
+      },
+      color: 0xE8D90C,
+    });
+  }
+
+  /**
+   * Build an embed that lists all the roles of a category
+   * @param {Category} cat
+   * @param {Role[]} roles
+   * @returns {MessageEmbed}
+   */
+  public static listRoles(cat: Category, roles: Role[]): MessageEmbed {
+    const res = Embeds.getGeneric({
+      title: `Roles of ${cat.name} - ${cat.emojiID}`,
+      description: '',
+      color: 'BLURPLE',
+    });
+
+    for (let i = 0; i < roles.length; i += 1) {
+      const role = roles[i];
+      const level = role.level === RoleLevel.Admin
+        ? '**[admin]**'
+        : '**[mod]**';
+
+      res.description += `${level} <@&${role.roleID}> (\`${role.roleID}\`)\n`;
+    }
+
+    return res;
+  }
+
+  /**
+   * All embeds share the attributes returned here.
    * @param {MessageEmbedOptions} data Additional or overwriting attributes
    * options.
    * @returns {MessageEmbed}
@@ -279,5 +349,14 @@ export default class Embeds {
       timestamp: new Date(),
       ...data,
     });
+  }
+
+  private static getDays(timestamp: Date | null): number {
+    if (timestamp === null) {
+      return 0;
+    }
+    return Math.ceil(
+      (Math.abs(Date.now() - timestamp.getTime()) / (1000 * 60 * 60 * 24)),
+    );
   }
 }

@@ -1,7 +1,7 @@
-import { CONFIG } from '../globals';
-import { DiscordID } from '../models/identifiers';
-import { IUserManager } from '../models/interfaces';
-import Table from './table';
+import { CONFIG } from '../../globals';
+import { DiscordID } from '../../models/identifiers';
+import { IUserManager } from '../../models/interfaces';
+import Table from '../table';
 
 const TABLE = `${CONFIG.database.schema}.users`;
 

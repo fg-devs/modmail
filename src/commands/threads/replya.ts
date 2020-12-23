@@ -2,6 +2,7 @@ import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
+import IssueHandler from '../../events/IssueHandler';
 
 export default class ReplyA extends Command {
   constructor(client: CommandoClient) {
@@ -31,7 +32,9 @@ export default class ReplyA extends Command {
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
 
     if (thread === null) {
-      return msg.say('Not currently in a modmail thread');
+      const res = 'Not currently in a modmail thread';
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
     }
 
     const user = await this.client.users.fetch(thread.author.id, true, true);

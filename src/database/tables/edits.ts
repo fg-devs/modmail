@@ -1,7 +1,7 @@
-import { CONFIG } from '../globals';
-import { IEditsManager } from '../models/interfaces';
-import { Edit } from '../models/types';
-import Table from './table';
+import { CONFIG } from '../../globals';
+import { IEditsManager } from '../../models/interfaces';
+import { Edit } from '../../models/types';
+import Table from '../table';
 
 const TABLE = `${CONFIG.database.schema}.edits`;
 

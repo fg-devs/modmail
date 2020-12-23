@@ -6,10 +6,13 @@ import {
 import {
   Category,
   CategoryResolvable,
+  CreateAttachmentOpt,
   CreateCategoryOpt,
+  CreateStandardReplyOpt,
+  Role,
   Edit,
   Message,
-  MuteStatus,
+  MuteStatus, StandardReply,
   Thread,
 } from './types';
 
@@ -52,13 +55,30 @@ export interface IIDManager {
     create(): Snowflake
 }
 
+export interface IAttachmentManager {
+    create(opt: CreateAttachmentOpt): Promise<void>
+}
+
 export interface ICategoryManger {
     create(opt: CreateCategoryOpt): Promise<Category>
     setActive(id: CategoryID, active: boolean): Promise<void>
     setName(id: CategoryID, name: string): Promise<void>
     setEmote(id: CategoryID, emote: string): Promise<void>
-    fetch(by: CategoryResolvable, id: string): Promise<Category>
+    fetch(by: CategoryResolvable, id: string): Promise<Category | null>
     fetchAll(by: CategoryResolvable, id: string): Promise<Category[]>
+}
+
+export interface IPermissionsManager {
+    add(role: Role): Promise<boolean>
+    remove(id: DiscordID): Promise<boolean>
+    fetchAll(category: CategoryID): Promise<Role[]>
+}
+
+export interface IStandardReplyManager {
+    create(opt: CreateStandardReplyOpt): Promise<void>
+    remove(name: string): Promise<void>
+    update(opt: CreateStandardReplyOpt, id: string): Promise<void>
+    get(name: string): Promise<StandardReply | null>
 }
 
 /**
@@ -75,4 +95,7 @@ export interface IDatabaseManager {
     threads: IThreadManager,
     users: IUserManager,
     categories: ICategoryManger,
+    attachments: IAttachmentManager,
+    standardReplies: IStandardReplyManager,
+    permissions: IPermissionsManager,
 }

@@ -1,6 +1,7 @@
 dist
 node_modules
 yarn.lock
+package-lock.json
 config.yml
 .idea/
 yarn-error.log

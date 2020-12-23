@@ -1,6 +1,9 @@
 import { Message } from 'discord.js';
 import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
+import IssueHandler from '../../events/IssueHandler';
+import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
+import { Requires } from '../../util/Perms';
 
 type Args = {
   id: string,
@@ -13,8 +16,6 @@ export default class SetEmote extends Command {
       name: 'setemote',
       aliases: ['se'],
       description: 'Set emote for a category',
-      // TODO(dylan): Add a proper permission system.
-      ownerOnly: true,
       group: 'category',
       memberName: 'setemote',
       args: [
@@ -32,15 +33,17 @@ export default class SetEmote extends Command {
     });
   }
 
+  @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
     const pool = await Modmail.getDB();
 
     try {
       await pool.categories.setEmote(args.id, args.emoji);
       return msg.say('Updated.');
-    } catch (e) {
-      console.error(e);
-      return msg.say(e.message);
+    } catch (_) {
+      const res = "That category doesn't exist.";
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Guild, GuildMember } from 'discord.js';
+import { GuildMember } from 'discord.js';
 
 export default class Members {
   /**
@@ -22,20 +22,6 @@ export default class Members {
       }
     }
 
-    return res;
-  }
-
-  public static async getMember(uid: string, guild: Guild): Promise<GuildMember> {
-    let uidParsed = uid;
-    if (uid.startsWith('<@') && uid.endsWith('>')) {
-      const re = new RegExp('[<@!>]', 'g');
-      uidParsed = uid.replace(re, '');
-    }
-
-    const res = await guild.members.fetch(uidParsed);
-    if (res === undefined) {
-      throw new Error('User not found, please check your arguments and try again');
-    }
     return res;
   }
 }

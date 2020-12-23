@@ -5,6 +5,7 @@ import Modmail from '../../Modmail';
 import Categories from '../../util/Categories';
 import Embeds from '../../util/Embeds';
 import { CLOSE_THREAD_DELAY } from '../../globals';
+import IssueHandler from '../../events/IssueHandler';
 
 export default class Forward extends Command {
   constructor(client: CommandoClient) {
@@ -28,7 +29,9 @@ export default class Forward extends Command {
 
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
     if (thread === null) {
-      return msg.reply('not in a thread');
+      const res = 'Currently not in a thread';
+      IssueHandler.onCommandWarn(msg, res);
+      return msg.say(res);
     }
 
     const user = await this.client.users.fetch(thread.author.id, true, true);

@@ -1,9 +1,11 @@
-token:
-prefix:
+token: 'TOKEN'
+prefix: '!'
+owners: ['164837347156951040', '357918459058978816']
+logLevel: 'debug'
 database:
-  username: 'postgres'
-  host: 'localhost'
+  host: '127.0.0.1'
   port: 5432
   username: 'modmail'
   password: '1234'
   database: 'postgres'
+  schema: 'modmail'

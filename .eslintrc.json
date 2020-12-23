@@ -23,6 +23,7 @@
         "import/prefer-default-export": "off",
         "no-console": "off",
         "class-methods-use-this": "off",
-        "no-continue": "off"
+        "no-continue": "off",
+        "linebreak-style": "off"
     }
 }

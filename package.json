@@ -8,7 +8,7 @@
   "license": "gpl-3.0",
   "devDependencies": {
     "@types/js-yaml": "^3.12.5",
-    "@types/node": "^14.14.12",
+    "@types/node": "^14.14.14",
     "@types/pg": "^7.14.7",
     "@typescript-eslint/eslint-plugin": "^4.9.1",
     "@typescript-eslint/parser": "^4.9.1",
@@ -22,9 +22,11 @@
     "start": "tsc && node dist/app.js"
   },
   "dependencies": {
+    "@types/log4js": "^2.3.5",
     "discord.js": "^12.5.1",
     "discord.js-commando": "github:discordjs/Commando",
     "js-yaml": "^3.14.1",
+    "log4js": "^6.3.0",
     "pg": "^8.5.1"
   }
 }

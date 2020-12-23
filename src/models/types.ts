@@ -86,6 +86,34 @@ export type CreateCategoryOpt = {
 }
 
 /**
+ * CreateAttachmentOpt is used by IAttachmentManger.create()
+ * @type CreateAttachmentOpt
+ * @property {string} messageID
+ * @property {string} name
+ * @property {string} source
+ * @property {string} sender
+ * @property {string} type
+ */
+export type CreateAttachmentOpt = {
+    messageID: DiscordID,
+    name: string,
+    source: string,
+    sender: string,
+    type: FileType,
+}
+
+/**
+ * CreateStandardReplyOpt is ued my IStandardRepliesManager.create()
+ * @type CreateStandardReplyOpt
+ * @property {string} name
+ * @property {string} reply
+ */
+export type CreateStandardReplyOpt = {
+    name: string,
+    reply: string
+}
+
+/**
  * Fetch a category by any of the following
  * @enum CategoryResolvable
  */
@@ -218,4 +246,33 @@ export type DBMuteStatus = {
     till: number,
     category_id: CategoryID,
     reason: string,
+}
+
+export type StandardReply = {
+    reply: string,
+    name: string,
+    id: string,
+}
+
+export type DBStandardReply = {
+    reply: string,
+    name: string,
+    id: bigint,
+}
+
+export enum RoleLevel {
+    Admin,
+    Mod,
+}
+
+export type Role = {
+    category: CategoryID,
+    roleID: DiscordID,
+    level: RoleLevel,
+}
+
+export type DBRole = {
+    category: CategoryID,
+    role_id: DiscordID,
+    level: string,
 }
