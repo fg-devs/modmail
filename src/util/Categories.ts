@@ -7,6 +7,7 @@ import Embeds from './Embeds';
 import { ICategoryManger } from '../models/interfaces';
 import { PROMPT_TIME } from '../globals';
 import Modmail from '../Modmail';
+import { DiscordID } from '../models/identifiers';
 
 export type CatSelector = {
   category: CategoryChannel,
@@ -16,6 +17,8 @@ export type CatSelector = {
 }
 
 export default class Categories {
+  private static activeSelectors: Set<DiscordID> = new Set();
+
   /**
    * Get category based on what guild the message is in
    * @param {CommandoMessage} msg
@@ -73,6 +76,9 @@ export default class Categories {
     user: User,
     client: CommandoClient,
   ): Promise<CatSelector> {
+    if (Categories.hasActiveSelector(user.id)) {
+      throw new Error('Please select a category.');
+    }
     const categories = await pool.fetchAll(
       CategoryResolvable.activity,
       'true',
@@ -84,6 +90,7 @@ export default class Categories {
 
     const embed = Embeds.categorySelect(categories);
     const msg = await channel.send(embed);
+    Categories.remember(user.id);
     const emotes = categories.map((cat: Category) => cat.emojiID);
 
     emotes.forEach((emojiStr: string) => {
@@ -96,6 +103,7 @@ export default class Categories {
       (_, rUser: User) => rUser.id === user.id,
       { max: 1, time: PROMPT_TIME },
     );
+    Categories.forget(user.id);
 
     const emote = collection.first();
 
@@ -140,5 +148,17 @@ export default class Categories {
       id: category.id,
       name: category.name,
     };
+  }
+
+  private static hasActiveSelector(user: DiscordID): boolean {
+    return Categories.activeSelectors.has(user);
+  }
+
+  private static remember(user: DiscordID): void {
+    Categories.activeSelectors.add(user);
+  }
+
+  private static forget(user: DiscordID): void {
+    Categories.activeSelectors.delete(user);
   }
 }
