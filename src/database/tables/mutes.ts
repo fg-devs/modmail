@@ -123,7 +123,7 @@ export default class MuteManager extends Table {
    */
   protected async init(): Promise<void> {
     await this.pool.query(
-      `IF NOT EXISTS CREATE TABLE ${this.name} (`
+      `CREATE TABLE IF NOT EXISTS ${this.name} (`
       + ' user_id modmail.users not null,'
       + ' till bigint not null,'
       + ' category_id bigint not null,'

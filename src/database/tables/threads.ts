@@ -104,7 +104,7 @@ export default class ThreadManager extends Table {
    */
   protected async init(): Promise<void> {
     await this.pool.query(
-      `IF NOT EXISTS CREATE TABLE ${this.name} (`
+      `CREATE TABLE IF NOT EXISTS ${this.name} (`
       + ' id bigint not null'
       + '   constraint threads_pk primary key,'
       + ' author bigint not null'
@@ -118,15 +118,15 @@ export default class ThreadManager extends Table {
     );
 
     await this.pool.query(
-      `create unique index threads_channel_uindex on ${this.name} (channel);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS threads_channel_uindex ON ${this.name} (channel);`,
     );
 
     await this.pool.query(
-      `create unique index threads_channel_uindex_2 on ${this.name} (channel);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS threads_channel_uindex_2 ON ${this.name} (channel);`,
     );
 
     await this.pool.query(
-      `create unique index threads_id_uindex on ${this.name} (id);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS threads_id_uindex ON ${this.name} (id);`,
     );
   }
 

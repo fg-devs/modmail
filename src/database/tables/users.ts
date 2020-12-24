@@ -25,12 +25,12 @@ export default class UsersManager extends Table {
    */
   protected async init(): Promise<void> {
     await this.pool.query(
-      `IF NOT EXISTS CREATE TABLE ${this.name} (`
+      `CREATE TABLE IF NOT EXISTS ${this.name} (`
       + ' id bigint not null constraint users_pk primary key)',
     );
 
     await this.pool.query(
-      `create unique index users_id_uindex on ${this.name} (id);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS users_id_uindex ON ${this.name} (id);`,
     );
   }
 }

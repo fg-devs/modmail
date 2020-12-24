@@ -67,7 +67,7 @@ export default class PermManager extends Table {
    */
   protected async init(): Promise<void> {
     await this.pool.query(
-      `IF NOT EXISTS CREATE TABLE ${this.name} (`
+      `CREATE TABLE IF NOT EXISTS ${this.name} (`
       + ' category_id bigint not null'
       + '   references modmail.categories,'
       + ' role_id text unique not null,'
@@ -75,7 +75,7 @@ export default class PermManager extends Table {
     );
 
     await this.pool.query(
-      `create unique index permissions_role_id_uindex on ${this.name} (role_id)`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS permissions_role_id_uindex on ${this.name} (role_id)`,
     );
   }
 

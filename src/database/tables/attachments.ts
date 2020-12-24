@@ -42,7 +42,7 @@ export default class Attachments extends Table {
     );
 
     await this.pool.query(
-      `create unique index attachments_id_uindex on ${this.name} (id);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS attachments_id_uindex ON ${this.name} (id);`,
     );
   }
 }

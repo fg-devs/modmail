@@ -30,6 +30,10 @@ export default class DatabaseManager {
 
     public readonly permissions: PermsManager;
 
+    private readonly pool: PoolClient;
+
+    private readonly modmail: Modmail;
+
     constructor(modmail: Modmail, pool: PoolClient) {
       this.edits = new EditManager(modmail, pool);
       this.messages = new MessageManager(modmail, pool);
@@ -40,6 +44,8 @@ export default class DatabaseManager {
       this.attachments = new AttachmentManager(modmail, pool);
       this.standardReplies = new StandardReplyManager(modmail, pool);
       this.permissions = new PermsManager(modmail, pool);
+      this.pool = pool;
+      this.modmail = modmail;
     }
 
     public static async getDB(modmail: Modmail): Promise<DatabaseManager> {
@@ -56,7 +62,7 @@ export default class DatabaseManager {
       const tasks: Promise<void>[] = [];
 
       // Initialize schema and enums
-      await DatabaseManager.init(poolClient);
+      await db.init();
       // Initialie users first
       await db.users.validate();
       // Initialize categories second
@@ -77,18 +83,20 @@ export default class DatabaseManager {
       return db;
     }
 
-    private static async init(pool: PoolClient): Promise<void> {
+    public async init(): Promise<void> {
       const { schema } = CONFIG.database;
-      await pool.query(
-        `CREATE SCHEMA ${schema}`,
-      );
+      const log = this.modmail.getLogger('dbmanager');
 
-      await pool.query(
-        `create type ${schema}.file_type as enum ('image', 'file');`,
-      );
+      await this.pool.query(
+        `CREATE SCHEMA IF NOT EXISTS ${schema}`,
+      ).catch((e: Error) => log.error(e.message));
 
-      await pool.query(
-        `create type ${schema}.role_level as enum ('admin', 'mod');`,
-      );
+      await this.pool.query(
+        `CREATE TYPE ${schema}.file_type AS ENUM ('image', 'file');`,
+      ).catch((e: Error) => log.error(e.message));
+
+      await this.pool.query(
+        `CREATE TYPE ${schema}.role_level AS ENUM ('admin', 'mod');`,
+      ).catch((e: Error) => log.error(e.message));
     }
 }

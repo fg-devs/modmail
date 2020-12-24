@@ -28,7 +28,7 @@ export default class EditManager extends Table {
    */
   protected async init(): Promise<void> {
     await this.pool.query(
-      `IF NOT EXISTS CREATE TABLE ${this.name} (`
+      `CREATE TABLE IF NOT EXISTS ${this.name} (`
       + ' content text not null,'
       + ' message bigint not null'
       + '   constraint edits_messages_modmail_id_fk'

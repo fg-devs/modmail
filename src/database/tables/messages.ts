@@ -119,7 +119,7 @@ export default class MessageManager extends Table {
    */
   protected async init(): Promise<void> {
     await this.pool.query(
-      `IF NOT EXISTS CREATE TABLE ${this.name} (`
+      `CREATE TABLE IF NOT EXISTS ${this.name} (`
       + ' sender bigint not null'
       + '   constraint messages_users_id_fk'
       + '   references modmail.users,'
@@ -134,11 +134,11 @@ export default class MessageManager extends Table {
     );
 
     await this.pool.query(
-      `create unique index messages_client_id_uindex on ${this.name} (client_id);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS messages_client_id_uindex on ${this.name} (client_id);`,
     );
 
     await this.pool.query(
-      `create unique index messages_modmail_id_uindex on ${this.name} (modmail_id);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS messages_modmail_id_uindex on ${this.name} (modmail_id);`,
     );
   }
 

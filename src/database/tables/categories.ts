@@ -155,15 +155,15 @@ export default class CategoryManager extends Table {
     );
 
     await this.pool.query(
-      `create unique index categories_emote_uindex on ${this.name} (emote);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS categories_emote_uindex ON ${this.name} (emote);`,
     );
 
     await this.pool.query(
-      `create unique index categories_id_uindex on ${this.name} (id);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS categories_id_uindex ON ${this.name} (id);`,
     );
 
     await this.pool.query(
-      `create unique index categories_name_uindex on ${this.name} (name);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS categories_name_uindex ON ${this.name} (name);`,
     );
   }
 

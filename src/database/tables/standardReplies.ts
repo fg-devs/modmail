@@ -65,7 +65,7 @@ export default class StandardReplyManager extends Table {
    */
   protected async init(): Promise<void> {
     await this.pool.query(
-      `IF NOT EXISTS CREATE TABLE ${this.name} (`
+      `CREATE TABLE IF NOT EXISTS ${this.name} (`
       + ' id bigint not null'
       + '   constraint standard_replies_pk primary key,'
       + ' name text not null,'
@@ -73,11 +73,11 @@ export default class StandardReplyManager extends Table {
     );
 
     await this.pool.query(
-      `create unique index standard_replies_id_uindex on ${this.name} (id);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS standard_replies_id_uindex ON ${this.name} (id);`,
     );
 
     await this.pool.query(
-      `create unique index standard_replies_name_uindex on ${this.name} (name);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS standard_replies_name_uindex ON ${this.name} (name);`,
     );
   }
 
