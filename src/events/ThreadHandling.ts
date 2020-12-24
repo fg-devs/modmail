@@ -48,14 +48,14 @@ export default class ThreadHandler {
       `${msg.author.username}-${msg.author.discriminator}`,
       { type: 'text' },
     );
-    const member = await selectorRes.guild.members.fetch(msg.author.id);
-    if (member === undefined) {
+    const user = await client.users.fetch(msg.author.id, true, true);
+    if (user === undefined) {
       return;
     }
 
     await channel.setParent(selectorRes.category);
-    await channel.send(await Embeds.memberDetails(pool.threads, member.user));
-    await channel.send(Embeds.newThread(member.user));
+    await channel.send(await Embeds.memberDetails(pool.threads, user));
+    await channel.send(Embeds.newThread(user));
     await pool.users.create(msg.author.id);
 
     try {
