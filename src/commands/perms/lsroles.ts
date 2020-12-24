@@ -26,7 +26,7 @@ export default class ListRoles extends Command {
       return msg.say(res);
     }
 
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     const roles = await pool.permissions.fetchAll(category.id);
     const res = Embeds.listRoles(category, roles);
 

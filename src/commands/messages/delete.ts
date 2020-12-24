@@ -32,7 +32,7 @@ export default class Delete extends Command {
     msg: CommandoMessage,
     { msgID }: Args,
   ): Promise<Message | Message[] | null> {
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
     if (thread === null) {
       const res = 'Not currently in a thread..';
@@ -64,7 +64,7 @@ export default class Delete extends Command {
     msg: CommandoMessage,
     msgID?: string,
   ): Promise<Message | null> {
-    const pool = await this.client.getDB();
+    const pool = await this.modmail.getDB();
     if (msgID) {
       try {
         const dbMessage = await pool.messages.fetch(msgID);
@@ -107,7 +107,7 @@ export default class Delete extends Command {
         return null;
       }
     }
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     let recentMessage;
 
     try {

@@ -52,7 +52,7 @@ export default class AddRole extends Command {
       this.logWarning(msg, res);
       return msg.say(res);
     }
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
 
     await pool.permissions.add({
       roleID,

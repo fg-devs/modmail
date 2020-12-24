@@ -35,7 +35,7 @@ export default class SetEmote extends Command {
 
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
 
     try {
       await pool.categories.setEmote(args.id, args.emoji);

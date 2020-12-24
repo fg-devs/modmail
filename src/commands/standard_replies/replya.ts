@@ -26,7 +26,7 @@ export default class StandardReplyAnon extends Command {
   }
 
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] |null> {
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     const standardReply = await pool.standardReplies.get(args.name);
     if (standardReply === null) {
       const res = 'Unable to locate that standard reply...';

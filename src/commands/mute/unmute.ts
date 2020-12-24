@@ -33,7 +33,7 @@ export default class Unmute extends Command {
     msg: CommandoMessage,
     args: Args,
   ): Promise<Message | Message[] | null> {
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     const category = await this.catUtil.getCategory(msg);
 
     if (category === null) {

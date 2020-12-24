@@ -5,14 +5,14 @@ import Categories from '../util/Categories';
 import LogUtil from '../util/Logging';
 
 export default class Command extends djs.Command {
-  public readonly client: Modmail;
+  public readonly modmail: Modmail;
 
   protected readonly catUtil: Categories;
 
-  constructor(client: Modmail, info: djs.CommandInfo) {
-    super(client, info);
-    this.client = client;
-    this.catUtil = client.catUtil;
+  constructor(modmail: Modmail, info: djs.CommandInfo) {
+    super(modmail, info);
+    this.modmail = modmail;
+    this.catUtil = modmail.catUtil;
   }
 
   /**
@@ -48,6 +48,6 @@ ${LogUtil.breakDownMsg(msg)}
    * @returns {Logger}
    */
   protected getLogger(): Logger {
-    return this.client.getLogger(`(command) ${this.name}`);
+    return this.modmail.getLogger(`(command) ${this.name}`);
   }
 }

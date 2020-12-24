@@ -39,7 +39,7 @@ export default class RemoveRole extends Command {
       return msg.say(res);
     }
 
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     const isRemoved = await pool.permissions.remove(roleID);
 
     if (isRemoved) {

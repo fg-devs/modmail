@@ -29,7 +29,7 @@ export default class StandardReplyDelete extends Command {
 
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     await pool.standardReplies.remove(args.name);
     await msg.react('✅');
     return null;

@@ -20,7 +20,7 @@ export default class ListCategories extends Command {
 
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     const cats = await pool.categories.fetchAll(
       CategoryResolvable.activity,
       'true',

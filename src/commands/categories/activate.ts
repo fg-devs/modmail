@@ -19,7 +19,7 @@ export default class ActivateCategory extends Command {
 
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     const category = await this.catUtil.getCategory(msg, false);
 
     if (category === null) {

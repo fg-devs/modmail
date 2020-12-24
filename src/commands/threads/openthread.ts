@@ -30,7 +30,7 @@ export default class OpenThread extends Command {
     msg: CommandoMessage,
     { userID }: {userID: string},
   ): Promise<Message | Message[] | null> {
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     const user = await msg.client.users.fetch(userID, true, true);
     const category = await pool.categories.fetch(
       CategoryResolvable.guild,

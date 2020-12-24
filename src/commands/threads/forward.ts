@@ -18,7 +18,7 @@ export default class Forward extends Command {
   }
 
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     const selectorRes = await this.catUtil.categorySelector(
       msg.channel,
       msg.author,

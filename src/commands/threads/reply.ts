@@ -28,7 +28,7 @@ export default class Reply extends Command {
     msg: CommandoMessage,
     { content }: {content: string[]},
   ): Promise<Message | Message[] | null> {
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
 
     if (thread === null) {

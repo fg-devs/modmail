@@ -29,7 +29,7 @@ export default class RemoveCategory extends Command {
 
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: CatArgs): Promise<Message | Message[] | null> {
-    const pool = await this.client.getDB();
+    const pool = await this.modmail.getDB();
     const { id } = args;
 
     try {

@@ -34,7 +34,7 @@ export default class AddCategory extends Command {
 
   public async run(msg: CommandoMessage, args: CatArgs): Promise<Message | Message[] | null> {
     const { name, emoji } = args;
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
 
     if (!(msg.channel instanceof TextChannel)) {
       return null;

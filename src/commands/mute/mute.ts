@@ -45,7 +45,7 @@ export default class Mute extends Command {
 
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
-    const pool = this.client.getDB();
+    const pool = this.modmail.getDB();
     const category = await this.catUtil.getCategory(msg);
 
     if (category === null) {

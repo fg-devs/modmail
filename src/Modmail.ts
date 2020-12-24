@@ -97,9 +97,9 @@ export default class Modmail extends CommandoClient {
    */
   private registerEvents() {
     const issues = new IssueHandler(this);
-    this.on('commandError', issues.onCommandError)
-      .on('commandRun', issues.onCommandRun)
-      .on('commandRegister', issues.onCommandRegister);
+    this.on('commandError', issues.onCommandError.bind(issues))
+      .on('commandRun', issues.onCommandRun.bind(issues))
+      .on('commandRegister', issues.onCommandRegister.bind(issues));
 
     this.on('message', this.events.onMessage.bind(this.events))
       .on('messageDelete', this.events.onMessageDelete.bind(this.events))
