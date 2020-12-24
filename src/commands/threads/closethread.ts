@@ -1,12 +1,12 @@
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
+import Command from '../../models/command';
 import { CLOSE_THREAD_DELAY } from '../../globals';
-import IssueHandler from '../../events/IssueHandler';
 
 export default class CloseThread extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'closethread',
       aliases: ['close', 'exit'],
@@ -18,12 +18,12 @@ export default class CloseThread extends Command {
   }
 
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const pool = await Modmail.getDB();
+    const pool = this.client.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
 
     if (thread === null) {
       const res = 'Not currently in a thread';
-      IssueHandler.onCommandWarn(msg, res);
+      this.logWarning(msg, res);
       return msg.say(res);
     }
 

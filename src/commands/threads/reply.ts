@@ -1,11 +1,11 @@
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
+import Command from '../../models/command';
 import Embeds from '../../util/Embeds';
 import Modmail from '../../Modmail';
-import IssueHandler from '../../events/IssueHandler';
 
 export default class Reply extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'reply',
       aliases: ['r'],
@@ -28,12 +28,12 @@ export default class Reply extends Command {
     msg: CommandoMessage,
     { content }: {content: string[]},
   ): Promise<Message | Message[] | null> {
-    const pool = await Modmail.getDB();
+    const pool = this.client.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
 
     if (thread === null) {
       const res = 'Not currently in a modmail thread';
-      IssueHandler.onCommandWarn(msg, res);
+      this.logWarning(msg, res);
       return msg.say(res);
     }
 

@@ -1,17 +1,5 @@
 import { Pool, PoolClient } from 'pg';
 import { CONFIG } from '../globals';
-import {
-  IAttachmentManager,
-  ICategoryManger,
-  IDatabaseManager,
-  IEditsManager,
-  IMessageManager,
-  IMuteManager,
-  IPermissionsManager,
-  IStandardReplyManager,
-  IThreadManager,
-  IUserManager,
-} from '../models/interfaces';
 import EditManager from './tables/edits';
 import MessageManager from './tables/messages';
 import MuteManager from './tables/mutes';
@@ -20,40 +8,41 @@ import UsersManager from './tables/users';
 import CategoryManager from './tables/categories';
 import AttachmentManager from './tables/attachments';
 import StandardReplyManager from './tables/standardReplies';
-import PermManager from './tables/permissions';
+import PermsManager from './tables/permissions';
+import Modmail from '../Modmail';
 
-export default class DatabaseManager implements IDatabaseManager {
-    public readonly edits: IEditsManager;
+export default class DatabaseManager {
+    public readonly edits: EditManager;
 
-    public readonly messages: IMessageManager;
+    public readonly messages: MessageManager;
 
-    public readonly mutes: IMuteManager;
+    public readonly mutes: MuteManager;
 
-    public readonly threads: IThreadManager;
+    public readonly threads: ThreadManager;
 
-    public readonly users: IUserManager;
+    public readonly users: UsersManager;
 
-    public readonly categories: ICategoryManger;
+    public readonly categories: CategoryManager;
 
-    public readonly attachments: IAttachmentManager;
+    public readonly attachments: AttachmentManager;
 
-    public readonly standardReplies: IStandardReplyManager;
+    public readonly standardReplies: StandardReplyManager;
 
-    public readonly permissions: IPermissionsManager;
+    public readonly permissions: PermsManager;
 
-    constructor(pool: PoolClient) {
-      this.edits = new EditManager(pool);
-      this.messages = new MessageManager(pool);
-      this.mutes = new MuteManager(pool);
-      this.threads = new ThreadManager(pool);
-      this.users = new UsersManager(pool);
-      this.categories = new CategoryManager(pool);
-      this.attachments = new AttachmentManager(pool);
-      this.standardReplies = new StandardReplyManager(pool);
-      this.permissions = new PermManager(pool);
+    constructor(modmail: Modmail, pool: PoolClient) {
+      this.edits = new EditManager(modmail, pool);
+      this.messages = new MessageManager(modmail, pool);
+      this.mutes = new MuteManager(modmail, pool);
+      this.threads = new ThreadManager(modmail, pool);
+      this.users = new UsersManager(modmail, pool);
+      this.categories = new CategoryManager(modmail, pool);
+      this.attachments = new AttachmentManager(modmail, pool);
+      this.standardReplies = new StandardReplyManager(modmail, pool);
+      this.permissions = new PermsManager(modmail, pool);
     }
 
-    public static async getDb(): Promise<DatabaseManager> {
+    public static async getDB(modmail: Modmail): Promise<DatabaseManager> {
       const pool = new Pool({
         host: CONFIG.database.host,
         port: CONFIG.database.port,
@@ -63,6 +52,43 @@ export default class DatabaseManager implements IDatabaseManager {
       });
 
       const poolClient = await pool.connect();
-      return new DatabaseManager(poolClient);
+      const db = new DatabaseManager(modmail, poolClient);
+      const tasks: Promise<void>[] = [];
+
+      // Initialize schema and enums
+      await DatabaseManager.init(poolClient);
+      // Initialie users first
+      await db.users.validate();
+      // Initialize categories second
+      await db.categories.validate();
+      // Intiialize threads third
+      await db.threads.validate();
+      // Initialize messages fourth
+      await db.messages.validate();
+
+      // Initialize everything else
+      tasks.push(db.attachments.validate());
+      tasks.push(db.edits.validate());
+      tasks.push(db.mutes.validate());
+      tasks.push(db.permissions.validate());
+      tasks.push(db.standardReplies.validate());
+
+      await Promise.all(tasks);
+      return db;
+    }
+
+    private static async init(pool: PoolClient): Promise<void> {
+      const { schema } = CONFIG.database;
+      await pool.query(
+        `CREATE SCHEMA ${schema}`,
+      );
+
+      await pool.query(
+        `create type ${schema}.file_type as enum ('image', 'file');`,
+      );
+
+      await pool.query(
+        `create type ${schema}.role_level as enum ('admin', 'mod');`,
+      );
     }
 }

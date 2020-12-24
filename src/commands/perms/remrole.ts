@@ -1,9 +1,8 @@
 import { Message } from 'discord.js';
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
-import IssueHandler from '../../events/IssueHandler';
+import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
-import Categories from '../../util/Categories';
+import Command from '../../models/command';
 import { Requires } from '../../util/Perms';
 
 type Args = {
@@ -11,7 +10,7 @@ type Args = {
 }
 
 export default class RemoveRole extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'remrole',
       aliases: ['revoke'],
@@ -32,15 +31,15 @@ export default class RemoveRole extends Command {
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[]> {
     const { roleID } = args;
-    const category = await Categories.getCategory(msg, true);
+    const category = await this.catUtil.getCategory(msg, true);
 
     if (category === null) {
       const res = "This guild doesn't have an active category.";
-      IssueHandler.onCommandWarn(msg, res);
+      this.logWarning(msg, res);
       return msg.say(res);
     }
 
-    const pool = await Modmail.getDB();
+    const pool = this.client.getDB();
     const isRemoved = await pool.permissions.remove(roleID);
 
     if (isRemoved) {

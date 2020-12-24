@@ -1,9 +1,10 @@
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 
 export default class Edit extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'edit',
       aliases: ['e', 'change'],
@@ -24,7 +25,7 @@ export default class Edit extends Command {
     msg: CommandoMessage,
     { content }: {content: string},
   ): Promise<Message| Message[] | null> {
-    const pool = await Modmail.getDB();
+    const pool = this.client.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
     if (thread === null) {
       return msg.say('Not currently in a thread..');

@@ -1,9 +1,8 @@
 import { Message } from 'discord.js';
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
-import IssueHandler from '../../events/IssueHandler';
+import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
-import Categories from '../../util/Categories';
+import Command from '../../models/command';
 import { Requires } from '../../util/Perms';
 
 type Args = {
@@ -11,7 +10,7 @@ type Args = {
 }
 
 export default class Unmute extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'unmute',
       aliases: [],
@@ -30,13 +29,16 @@ export default class Unmute extends Command {
   }
 
   @Requires(RoleLevel.Mod)
-  public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
-    const pool = await Modmail.getDB();
-    const category = await Categories.getCategory(msg);
+  public async run(
+    msg: CommandoMessage,
+    args: Args,
+  ): Promise<Message | Message[] | null> {
+    const pool = this.client.getDB();
+    const category = await this.catUtil.getCategory(msg);
 
     if (category === null) {
       const res = 'Please use this command in a guild with an active category.';
-      IssueHandler.onCommandWarn(msg, res);
+      this.logWarning(msg, res);
       return msg.say(res);
     }
 

@@ -1,12 +1,14 @@
-import { CONFIG } from '../../globals';
+import { PoolClient } from 'pg';
 import { MessageID, ThreadID } from '../../models/identifiers';
-import { IMessageManager } from '../../models/interfaces';
 import { DBMessage, Message } from '../../models/types';
-import Table from '../table';
+import Table from '../../models/table';
+import Modmail from '../../Modmail';
 
-const TABLE = `${CONFIG.database.schema}.messages`;
+export default class MessageManager extends Table {
+  constructor(modmail: Modmail, pool: PoolClient) {
+    super(modmail, pool, 'messages');
+  }
 
-export default class MessageManager extends Table implements IMessageManager {
   /**
    * Log a message
    * @method add
@@ -16,7 +18,7 @@ export default class MessageManager extends Table implements IMessageManager {
   public async add(message: Message): Promise<void> {
     // TODO(dylan): Please make a constant for the schema and table name.
     await this.pool.query(
-      `INSERT INTO ${TABLE}`
+      `INSERT INTO ${this.name}`
       + ' (sender, client_id, modmail_id, content, thread_id, internal)'
       + ' VALUES ($1, $2, $3, $4, $5, $6)',
       [
@@ -39,7 +41,7 @@ export default class MessageManager extends Table implements IMessageManager {
    */
   public async getLastMessage(id: ThreadID, author: string): Promise<Message> {
     const res = await this.pool.query(
-      `SELECT * FROM ${TABLE}`
+      `SELECT * FROM ${this.name}`
       + ' WHERE sender = $1'
       + ' AND thread_id = $2'
       + ' AND is_deleted = false'
@@ -74,7 +76,7 @@ export default class MessageManager extends Table implements IMessageManager {
    */
   public async setDeleted(id: MessageID): Promise<void> {
     const res = await this.pool.query(
-      `UPDATE ${TABLE} SET`
+      `UPDATE ${this.name} SET`
       + ' is_deleted = true'
       + ' WHERE modmail_id = $1'
       + ' OR client_id = $1',
@@ -89,17 +91,16 @@ export default class MessageManager extends Table implements IMessageManager {
   /**
    * @method fetch
    * @param {MessageID} id
-   * @returns {Promise<Message>}
-   * @throws {Error} If nothing is resolved
+   * @returns {Promise<Message | null>}
    */
-  public async fetch(id: MessageID): Promise<Message> {
+  public async fetch(id: MessageID): Promise<Message | null> {
     const res = await this.pool.query(
-      `SELECT * FROM ${TABLE} WHERE modmail_id = $1 OR client_id = $1`,
+      `SELECT * FROM ${this.name} WHERE modmail_id = $1 OR client_id = $1`,
       [id],
     );
 
     if (res.rowCount === 0) {
-      throw new Error(`"${id}" didn't resolve anything`);
+      return null;
     }
 
     return MessageManager.parse(res.rows[0]);
@@ -107,10 +108,38 @@ export default class MessageManager extends Table implements IMessageManager {
 
   public async getPastMessages(threadID: ThreadID): Promise<Message[]> {
     const res = await this.pool.query(
-      `SELECT * FROM ${TABLE} WHERE thread_id = $1 AND is_deleted = false`,
+      `SELECT * FROM ${this.name} WHERE thread_id = $1 AND is_deleted = false`,
       [threadID],
     );
     return res.rows.map((row: DBMessage) => MessageManager.parse(row));
+  }
+
+  /**
+   * Initialize the messages table
+   */
+  protected async init(): Promise<void> {
+    await this.pool.query(
+      `IF NOT EXISTS CREATE TABLE ${this.name} (`
+      + ' sender bigint not null'
+      + '   constraint messages_users_id_fk'
+      + '   references modmail.users,'
+      + ' client_id bigint,'
+      + ' modmail_id bigint not null,'
+      + ' content text not null,'
+      + ' thread_id bigint not null'
+      + '   constraint messages_threads_id_fk'
+      + '   references modmail.threads,'
+      + ' is_deleted boolean default false not null,'
+      + ' internal boolean default false not null)',
+    );
+
+    await this.pool.query(
+      `create unique index messages_client_id_uindex on ${this.name} (client_id);`,
+    );
+
+    await this.pool.query(
+      `create unique index messages_modmail_id_uindex on ${this.name} (modmail_id);`,
+    );
   }
 
   /**
@@ -134,7 +163,7 @@ export default class MessageManager extends Table implements IMessageManager {
 
   public async update(oldID: MessageID, newID: MessageID): Promise<void> {
     await this.pool.query(
-      `UPDATE ${TABLE} SET modmail_id = $1 WHERE modmail_id = $2`,
+      `UPDATE ${this.name} SET modmail_id = $1 WHERE modmail_id = $2`,
       [newID, oldID],
     );
   }

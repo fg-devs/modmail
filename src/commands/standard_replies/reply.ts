@@ -1,15 +1,15 @@
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
 import Modmail from '../../Modmail';
+import Command from '../../models/command';
 import Embeds from '../../util/Embeds';
-import IssueHandler from '../../events/IssueHandler';
 
 type Args = {
   name: string
 }
 
 export default class StandardReply extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       description: 'Reply with a standard reply',
       group: 'standard_replies',
@@ -26,11 +26,11 @@ export default class StandardReply extends Command {
   }
 
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] |null> {
-    const pool = await Modmail.getDB();
+    const pool = await this.client.getDB();
     const standardReply = await pool.standardReplies.get(args.name);
     if (standardReply === null) {
       const res = 'Unable to locate that standard reply...';
-      IssueHandler.onCommandWarn(msg, res);
+      this.logWarning(msg, res);
       return msg.say(res);
     }
 
@@ -38,7 +38,7 @@ export default class StandardReply extends Command {
 
     if (thread === null) {
       const res = 'Not currently in a modmail thread';
-      IssueHandler.onCommandWarn(msg, res);
+      this.logWarning(msg, res);
       return msg.say(res);
     }
 

@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
-import IssueHandler from '../../events/IssueHandler';
+import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
+import Command from '../../models/command';
 import { Requires } from '../../util/Perms';
 
 type CatArgs = {
@@ -10,7 +10,7 @@ type CatArgs = {
 }
 
 export default class RemoveCategory extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'remcat',
       aliases: ['remcat', 'rc', 'rm'],
@@ -29,14 +29,14 @@ export default class RemoveCategory extends Command {
 
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: CatArgs): Promise<Message | Message[] | null> {
-    const pool = await Modmail.getDB();
+    const pool = await this.client.getDB();
     const { id } = args;
 
     try {
       await pool.categories.setActive(id, false);
       return msg.say('Disabled category.');
-    } catch (e) {
-      IssueHandler.onCommandError(msg.command, e, msg);
+    } catch (err) {
+      this.logError(msg, err);
       return msg.say(`Couldn't find category "${id}"`);
     }
   }

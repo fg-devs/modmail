@@ -2,17 +2,17 @@ import { CommandoClient } from 'discord.js-commando';
 import path from 'path';
 import { Logger, getLogger } from 'log4js';
 import { CONFIG } from './globals';
-import { IDatabaseManager } from './models/interfaces';
-import database from './database/database';
 import EventHandler from './events/EventHandler';
 import IssueHandler from './events/IssueHandler';
+import DatabaseManager from './database/database';
+import MessageController from './controllers/messages';
+import ThreadController from './controllers/threads';
+import Categories from './util/Categories';
 
 export default class Modmail extends CommandoClient {
-  private static db: IDatabaseManager | null;
+  private static db: DatabaseManager | null;
 
-  private static logger: Logger | null;
-
-  private static client: CommandoClient | null;
+  public readonly catUtil: Categories;
 
   private readonly events: EventHandler;
 
@@ -22,9 +22,16 @@ export default class Modmail extends CommandoClient {
       owner: CONFIG.owners,
     });
 
-    this.events = new EventHandler(this);
+    const threadController = new ThreadController(this);
+    const msgController = new MessageController(
+      this,
+      threadController,
+    );
+
+    this.catUtil = new Categories(this);
+    Modmail.db = null;
+    this.events = new EventHandler(this, msgController);
     this.registerEvents();
-    Modmail.client = this;
     this.registry
       .registerDefaultTypes()
       .registerDefaultGroups()
@@ -47,51 +54,52 @@ export default class Modmail extends CommandoClient {
   }
 
   /**
+   * This method must be called before anything else
+   * @returns {Promise<void>}
+   */
+  public async start(): Promise<void> {
+    Modmail.db = await DatabaseManager.getDB(this);
+    await this.login(CONFIG.token);
+  }
+
+  /**
    * Get the database manager.
    * @method getDB
-   * @returns {Promise<IDatabaseManager>}
+   * @returns {DatabaseManager}
    */
-  public static async getDB(): Promise<IDatabaseManager> {
-    if (Modmail.db) {
+  public getDB(): DatabaseManager {
+    if (Modmail.db !== null) {
       return Modmail.db;
     }
-    Modmail.db = await database.getDb();
-    return Modmail.db;
+    throw new Error('getDB was called before starting Modmail.');
+  }
+
+  public static getDB(): DatabaseManager {
+    if (Modmail.db !== null) {
+      return Modmail.db;
+    }
+    throw new Error('getDB was called before starting Modmail.');
   }
 
   /**
    * Get/create active logger
+   * @param {string} section Where this logger is going to be used
    * @returns {Logger}
    */
-  public static getLogger(): Logger {
-    if (Modmail.logger) {
-      return Modmail.logger;
-    }
-    Modmail.logger = getLogger();
-    Modmail.logger.level = CONFIG.logLevel;
-    return Modmail.logger;
-  }
-
-  public static getClient(): CommandoClient {
-    if (!Modmail.client) {
-      throw new Error('Modmail.getClient was called before initializing');
-    }
-    return Modmail.client;
-  }
-
-  public async start(): Promise<void> {
-    Modmail.db = await database.getDb();
-    Modmail.logger = Modmail.getLogger();
-    await this.login(CONFIG.token);
+  public getLogger(section: string): Logger {
+    const logger = getLogger(section);
+    logger.level = CONFIG.logLevel;
+    return logger;
   }
 
   /**
    * Register all the possible events that the bot would want to listen for.
    */
   private registerEvents() {
-    this.on('commandError', IssueHandler.onCommandError)
-      .on('commandRun', IssueHandler.onCommandRun)
-      .on('commandRegister', IssueHandler.onCommandRegister);
+    const issues = new IssueHandler(this);
+    this.on('commandError', issues.onCommandError)
+      .on('commandRun', issues.onCommandRun)
+      .on('commandRegister', issues.onCommandRegister);
 
     this.on('message', this.events.onMessage.bind(this.events))
       .on('messageDelete', this.events.onMessageDelete.bind(this.events))

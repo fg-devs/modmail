@@ -1,12 +1,13 @@
 import { Message } from 'discord.js';
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
 import { CategoryResolvable, RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
+import Command from '../../models/command';
 import { Requires } from '../../util/Perms';
 
 export default class ListCategories extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'lscat',
       aliases: ['lscat', 'lc', 'ls'],
@@ -19,7 +20,7 @@ export default class ListCategories extends Command {
 
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const pool = await Modmail.getDB();
+    const pool = this.client.getDB();
     const cats = await pool.categories.fetchAll(
       CategoryResolvable.activity,
       'true',

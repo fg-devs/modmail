@@ -1,13 +1,15 @@
 import { SnowflakeUtil } from 'discord.js';
-import { IThreadManager } from '../../models/interfaces';
-import Table from '../table';
+import { PoolClient } from 'pg';
+import Table from '../../models/table';
 import { CategoryID, DiscordID, ThreadID } from '../../models/identifiers';
 import { DBThread, Thread } from '../../models/types';
-import { CONFIG } from '../../globals';
+import Modmail from '../../Modmail';
 
-const TABLE = `${CONFIG.database.schema}.threads`;
+export default class ThreadManager extends Table {
+  constructor(modmail: Modmail, pool: PoolClient) {
+    super(modmail, pool, 'threads');
+  }
 
-export default class ThreadManager extends Table implements IThreadManager {
   /**
    * Mark a thread a closed
    * @method close
@@ -17,7 +19,7 @@ export default class ThreadManager extends Table implements IThreadManager {
    */
   public async close(id: DiscordID): Promise<void> {
     const res = await this.pool.query(
-      `UPDATE ${TABLE} SET is_active = false WHERE channel = $1`,
+      `UPDATE ${this.name} SET is_active = false WHERE channel = $1`,
       [id],
     );
 
@@ -41,7 +43,7 @@ export default class ThreadManager extends Table implements IThreadManager {
   ): Promise<void> {
     const threadID = SnowflakeUtil.generate(Date.now());
     await this.pool.query(
-      `INSERT INTO ${TABLE} (id, author, channel, category)`
+      `INSERT INTO ${this.name} (id, author, channel, category)`
       + ' VALUES ($1, $2, $3, $4)',
       [threadID, author, channelID, categoryID],
     );
@@ -55,7 +57,7 @@ export default class ThreadManager extends Table implements IThreadManager {
    */
   public async countThreads(user: string): Promise<number> {
     const res = await this.pool.query(
-      `SELECT COUNT(*) FROM ${TABLE} WHERE author = $1 AND is_active = false`,
+      `SELECT COUNT(*) FROM ${this.name} WHERE author = $1 AND is_active = false`,
       [user],
     );
 
@@ -68,7 +70,7 @@ export default class ThreadManager extends Table implements IThreadManager {
    */
   public async getCurrentThread(user: DiscordID): Promise<Thread | null> {
     const res = await this.pool.query(
-      `SELECT * FROM ${TABLE} WHERE author = $1 AND is_active = true LIMIT 1`,
+      `SELECT * FROM ${this.name} WHERE author = $1 AND is_active = true LIMIT 1`,
       [user],
     );
     if (res.rowCount === 0) {
@@ -86,7 +88,7 @@ export default class ThreadManager extends Table implements IThreadManager {
    */
   public async getThreadByChannel(channelID: DiscordID): Promise<Thread | null> {
     const res = await this.pool.query(
-      `SELECT * FROM ${TABLE} WHERE channel = $1 AND is_active = true LIMIT 1`,
+      `SELECT * FROM ${this.name} WHERE channel = $1 AND is_active = true LIMIT 1`,
       [channelID],
     );
 
@@ -95,6 +97,37 @@ export default class ThreadManager extends Table implements IThreadManager {
     }
 
     return ThreadManager.parse(res.rows[0]);
+  }
+
+  /**
+   * Initialize threads table
+   */
+  protected async init(): Promise<void> {
+    await this.pool.query(
+      `IF NOT EXISTS CREATE TABLE ${this.name} (`
+      + ' id bigint not null'
+      + '   constraint threads_pk primary key,'
+      + ' author bigint not null'
+      + '   constraint threads_users_id_fk'
+      + '   references modmail.users,'
+      + ' channel bigint not null,'
+      + ' is_active boolean default true not null,'
+      + ' category bigint not null'
+      + '   constraint threads_categories_id_fk'
+      + '   references modmail.categories);',
+    );
+
+    await this.pool.query(
+      `create unique index threads_channel_uindex on ${this.name} (channel);`,
+    );
+
+    await this.pool.query(
+      `create unique index threads_channel_uindex_2 on ${this.name} (channel);`,
+    );
+
+    await this.pool.query(
+      `create unique index threads_id_uindex on ${this.name} (id);`,
+    );
   }
 
   private static parse(data: DBThread): Thread {

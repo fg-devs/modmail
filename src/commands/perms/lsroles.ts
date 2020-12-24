@@ -1,12 +1,11 @@
 import { Message } from 'discord.js';
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
-import IssueHandler from '../../events/IssueHandler';
+import { CommandoMessage } from 'discord.js-commando';
 import Modmail from '../../Modmail';
-import Categories from '../../util/Categories';
+import Command from '../../models/command';
 import Embeds from '../../util/Embeds';
 
 export default class ListRoles extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'listroles',
       aliases: ['lsroles'],
@@ -19,15 +18,15 @@ export default class ListRoles extends Command {
   }
 
   public async run(msg: CommandoMessage): Promise<Message | Message[]> {
-    const category = await Categories.getCategory(msg);
+    const category = await this.catUtil.getCategory(msg);
 
     if (!category) {
       const res = "This guild doesn't have a category.";
-      IssueHandler.onCommandWarn(msg, res);
+      this.logWarning(msg, res);
       return msg.say(res);
     }
 
-    const pool = await Modmail.getDB();
+    const pool = this.client.getDB();
     const roles = await pool.permissions.fetchAll(category.id);
     const res = Embeds.listRoles(category, roles);
 
