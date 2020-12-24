@@ -52,7 +52,7 @@ ${LogUtil.breakDownErr(err)}`;
     msg: CommandoMessage,
   ): void {
     const log = this.modmail.getLogger(`(command) ${c.name}`);
-    const message = `${msg.author.tag} executed this command`
+    const message = `${msg.author.tag} executed this command\n`
     + `${LogUtil.breakDownMsg(msg)}`;
 
     log.debug(message);
