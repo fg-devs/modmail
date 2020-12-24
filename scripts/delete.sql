@@ -1,4 +1,3 @@
-DROP SCHEMA modmail CASCADE;
 DROP TABLE modmail.users CASCADE;
 DROP TABLE modmail.categories CASCADE;
 DROP TABLE modmail.threads CASCADE;
@@ -8,3 +7,4 @@ DROP TABLE modmail.attachments CASCADE;
 DROP TABLE modmail.edits CASCADE;
 DROP TABLE modmail.standard_replies CASCADE;
 DROP TABLE modmail.permissions CASCADE;
+DROP SCHEMA modmail CASCADE;
