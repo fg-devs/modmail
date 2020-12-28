@@ -27,14 +27,15 @@ export default class CloseThread extends Command {
       return msg.say(res);
     }
 
+    const threadEmbed = Embeds.closeThread();
+    const dmEmbed = Embeds.closeThreadClient();
+
     try {
       const user = await this.client.users.fetch(thread.author.id);
       const dmChannel = user.dmChannel || await user.createDM();
-      const threadEmbed = Embeds.closeThread();
-      const dmEmbed = Embeds.closeThreadClient();
-      await msg.channel.send(threadEmbed);
       await dmChannel.send(dmEmbed);
     } finally {
+      await msg.channel.send(threadEmbed);
       await pool.threads.close(msg.channel.id);
       await new Promise((r) => setTimeout(r, CLOSE_THREAD_DELAY));
       await msg.channel.delete('Thread closed');
