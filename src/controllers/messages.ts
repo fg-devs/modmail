@@ -149,8 +149,6 @@ export default class MessageController extends Controller {
     );
     // edit the thread iteration of the message that was editted
     await thMessage.edit(embed);
-    // let them know their message has been edited
-    await newVersion.react('✏');
     // store the new edit to the edits table
     await pool.edits.add({
       content: newVersion.content,

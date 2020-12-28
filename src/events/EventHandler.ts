@@ -24,6 +24,7 @@ export default class EventHandler {
     if (!msg.author.bot && !msg.content.startsWith(CONFIG.prefix)) {
       if (msg.channel.type === 'dm') {
         await this.messages.handleDM(msg);
+        await msg.react('✅');
       } else {
         await this.messages.handle(msg);
       }
@@ -79,6 +80,7 @@ export default class EventHandler {
         return;
       }
       await this.messages.editMessage(oldMsg, newMsg, thread);
+      await newMsg.react('✏');
     }
   }
 
