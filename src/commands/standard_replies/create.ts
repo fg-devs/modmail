@@ -1,4 +1,4 @@
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
 import Modmail from '../../Modmail';
 import { CONFIG } from '../../globals';
@@ -11,7 +11,7 @@ type Args = {
 }
 
 export default class StandardReplyCreate extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       description: 'create a standard reply',
       group: 'standard_replies',
@@ -35,7 +35,7 @@ export default class StandardReplyCreate extends Command {
 
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
-    const pool = await Modmail.getDB();
+    const pool = Modmail.getDB();
     await pool.standardReplies.create(args);
     return msg.say(
       'Successfully created a new standard reply'

@@ -5,9 +5,9 @@ import {
   MessageEmbedOptions,
   User,
 } from 'discord.js';
-import { IThreadManager } from '../models/interfaces';
 import { Category, Role, RoleLevel } from '../models/types';
 import { CLOSE_THREAD_DELAY } from '../globals';
+import ThreadManager from '../database/tables/threads';
 
 /**
  * @class Embeds
@@ -48,7 +48,7 @@ export default class Embeds {
    * @returns {Promise<MessageEmbed>}
    */
   public static async memberDetails(
-    db: IThreadManager,
+    db: ThreadManager,
     user: User,
   ): Promise<MessageEmbed> {
     const numOfThreads = await db.countThreads(user.id);

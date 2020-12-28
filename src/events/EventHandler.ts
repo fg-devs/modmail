@@ -1,53 +1,32 @@
 import {
   DMChannel, GuildMember, Message, TextChannel,
 } from 'discord.js';
-import { CommandoClient } from 'discord.js-commando';
-import ThreadHandler from './ThreadHandling';
 import Modmail from '../Modmail';
 import Embeds from '../util/Embeds';
 import { CONFIG } from '../globals';
+import MessageController from '../controllers/messages';
 
 export default class EventHandler {
-  private readonly client: CommandoClient
+  private readonly modmail: Modmail;
 
-  constructor(client: CommandoClient) {
-    this.client = client;
+  private readonly messages: MessageController
+
+  constructor(modmail: Modmail, messages: MessageController) {
+    this.modmail = modmail;
+    this.messages = messages;
   }
 
   /**
-   * Called on message
+   * onMessage is called when a new message appears that the bot can see
    * @param {Message} msg
    */
   public async onMessage(msg: Message): Promise<void> {
-    const pool = await Modmail.getDB();
-
     if (!msg.author.bot && !msg.content.startsWith(CONFIG.prefix)) {
       if (msg.channel.type === 'dm') {
-        const thread = await pool.threads.getCurrentThread(msg.author.id);
-
-        if (thread !== null) {
-          await ThreadHandler.clientSendMessage(this.client, msg, thread, pool);
-        } else {
-          await ThreadHandler.createNewThread(pool, this.client, msg);
-        }
+        await this.messages.handleDM(msg);
+        await msg.react('✅');
       } else {
-        const thread = await pool.threads.getThreadByChannel(msg.channel.id);
-
-        if (thread === null) {
-          return;
-        }
-
-        await pool.messages.add({
-          clientID: null,
-          content: msg.content,
-          edits: [],
-          files: [],
-          internal: true,
-          isDeleted: false,
-          modmailID: msg.id,
-          sender: msg.author.id,
-          threadID: thread.id,
-        });
+        await this.messages.handle(msg);
       }
     }
   }
@@ -56,9 +35,9 @@ export default class EventHandler {
    * Called on ready
    */
   public async onReady(): Promise<void> {
-    const log = Modmail.getLogger();
+    const log = this.getLogger();
     log.info('Bot is ready.');
-    this.client.user?.setPresence({
+    this.modmail.user?.setPresence({
       activity: {
         type: 'PLAYING',
         name: 'DM me for Help!',
@@ -71,7 +50,8 @@ export default class EventHandler {
    * @param {Message} msg
    */
   public async onMessageDelete(msg: Message): Promise<void> {
-    const pool = await Modmail.getDB();
+    const pool = this.modmail.getDB();
+
     if (!msg.author.bot && !msg.content.startsWith(CONFIG.prefix)) {
       const thread = await pool.threads.getCurrentThread(msg.author.id);
       if (thread === null) {
@@ -79,7 +59,7 @@ export default class EventHandler {
       }
 
       if (msg.channel instanceof DMChannel) {
-        await ThreadHandler.messageDeleted(this.client, msg, pool, thread);
+        await this.messages.markAsDeleted(msg, thread);
       } else {
         await pool.messages.setDeleted(msg.id);
       }
@@ -92,10 +72,15 @@ export default class EventHandler {
    * @param {Message} newMsg
    */
   public async onMessageEdit(oldMsg: Message, newMsg: Message): Promise<void> {
-    const pool = await Modmail.getDB();
+    const pool = this.modmail.getDB();
 
     if (newMsg.channel instanceof DMChannel && !newMsg.author.bot) {
-      await ThreadHandler.messageEdit(this.client, oldMsg, newMsg, pool);
+      const thread = await pool.threads.getCurrentThread(newMsg.author.id);
+      if (thread === null) {
+        return;
+      }
+      await this.messages.editMessage(oldMsg, newMsg, thread);
+      await newMsg.react('✏');
     }
   }
 
@@ -104,15 +89,23 @@ export default class EventHandler {
    * @param {GuildMember} member
    */
   public async onMemberJoin(member: GuildMember): Promise<void> {
-    const pool = await Modmail.getDB();
+    const pool = this.modmail.getDB();
     const thread = await pool.threads.getCurrentThread(member.id);
+
     if (thread === null) {
       return;
     }
 
-    const channel = await this.client.channels.fetch(thread.channel, true, true) as TextChannel;
-    const embed = Embeds.memberJoined(member);
-    await channel.send(embed);
+    const channel = await this.modmail.channels.fetch(
+      thread.channel,
+      true,
+      true,
+    );
+
+    if (channel) {
+      const embed = Embeds.memberJoined(member);
+      await (channel as TextChannel).send(embed);
+    }
   }
 
   /**
@@ -120,14 +113,26 @@ export default class EventHandler {
    * @param {GuildMember} member
    */
   public async onMemberLeave(member: GuildMember): Promise<void> {
-    const pool = await Modmail.getDB();
+    const pool = this.modmail.getDB();
     const thread = await pool.threads.getCurrentThread(member.id);
+
     if (thread === null) {
       return;
     }
 
-    const channel = await this.client.channels.fetch(thread.channel, true, true) as TextChannel;
-    const embed = Embeds.memberLeft(member);
-    await channel.send(embed);
+    const channel = await this.modmail.channels.fetch(
+      thread.channel,
+      true,
+      true,
+    );
+
+    if (channel) {
+      const embed = Embeds.memberLeft(member);
+      await (channel as TextChannel).send(embed);
+    }
+  }
+
+  private getLogger() {
+    return Modmail.getLogger('events');
   }
 }

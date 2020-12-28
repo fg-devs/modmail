@@ -1,12 +1,14 @@
+import { PoolClient } from 'pg';
 import { SnowflakeUtil } from 'discord.js';
-import Table from '../table';
-import { IStandardReplyManager } from '../../models/interfaces';
+import Table from '../../models/table';
 import { CreateStandardReplyOpt, DBStandardReply, StandardReply } from '../../models/types';
-import { CONFIG } from '../../globals';
+import Modmail from '../../Modmail';
 
-const TABLE = `${CONFIG.database.schema}.standard_replies`;
+export default class StandardReplyManager extends Table {
+  constructor(modmail: Modmail, pool: PoolClient) {
+    super(modmail, pool, 'standard_replies');
+  }
 
-export default class StandardReplyManager extends Table implements IStandardReplyManager {
   /**
    * Create a new standard reply
    * @param {string} opt
@@ -14,7 +16,7 @@ export default class StandardReplyManager extends Table implements IStandardRepl
   public async create(opt: CreateStandardReplyOpt): Promise<void> {
     const id = SnowflakeUtil.generate(Date.now());
     await this.pool.query(
-      `INSERT INTO ${TABLE} (id, name, reply) VALUES ($1::bigint, $2, $3)`,
+      `INSERT INTO ${this.name} (id, name, reply) VALUES ($1::bigint, $2, $3)`,
       [id, opt.name, opt.reply],
     );
   }
@@ -25,7 +27,7 @@ export default class StandardReplyManager extends Table implements IStandardRepl
    */
   public async remove(name: string): Promise<void> {
     await this.pool.query(
-      `DELETE FROM ${TABLE} WHERE name = $1`,
+      `DELETE FROM ${this.name} WHERE name = $1`,
       [name],
     );
   }
@@ -37,7 +39,7 @@ export default class StandardReplyManager extends Table implements IStandardRepl
    */
   public async update(opt: CreateStandardReplyOpt, id: string): Promise<void> {
     await this.pool.query(
-      `UPDATE ${TABLE} SET reply = $1, name = $2 WHERE id = $3::bigint OR name = $3`,
+      `UPDATE ${this.name} SET reply = $1, name = $2 WHERE id = $3::bigint OR name = $3`,
       [opt.reply, opt.name, id],
     );
   }
@@ -49,13 +51,34 @@ export default class StandardReplyManager extends Table implements IStandardRepl
    */
   public async get(name: string): Promise<StandardReply | null> {
     const res = await this.pool.query(
-      `SELECT * FROM ${TABLE} WHERE name = $1`,
+      `SELECT * FROM ${this.name} WHERE name = $1`,
       [name.toLowerCase()],
     );
     if (res.rowCount === 0) {
       return null;
     }
     return StandardReplyManager.parse(res.rows[0]);
+  }
+
+  /**
+   * Initialize standard replies table
+   */
+  protected async init(): Promise<void> {
+    await this.pool.query(
+      `CREATE TABLE IF NOT EXISTS ${this.name} (`
+      + ' id bigint not null'
+      + '   constraint standard_replies_pk primary key,'
+      + ' name text not null,'
+      + ' reply text not null);',
+    );
+
+    await this.pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS standard_replies_id_uindex ON ${this.name} (id);`,
+    );
+
+    await this.pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS standard_replies_name_uindex ON ${this.name} (name);`,
+    );
   }
 
   /**

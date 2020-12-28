@@ -1,3 +1,6 @@
+/**
+ * These are ALL the types that exist in the Modmail ecosystem
+ */
 /* eslint-disable camelcase */
 /* eslint-disable no-shadow */
 import {

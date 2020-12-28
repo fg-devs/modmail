@@ -1,13 +1,17 @@
-import { CONFIG } from '../../globals';
+import { PoolClient } from 'pg';
 import { CategoryID, DiscordID } from '../../models/identifiers';
-import { IMuteManager } from '../../models/interfaces';
 import { DBMuteStatus, MuteStatus } from '../../models/types';
 import Time from '../../util/Time';
-import Table from '../table';
+import Table from '../../models/table';
+import Modmail from '../../Modmail';
+import LogUtil from '../../util/Logging';
+import { CONFIG } from '../../globals';
 
-const TABLE = `${CONFIG.database.schema}.mutes`;
+export default class MuteManager extends Table {
+  constructor(modmail: Modmail, pool: PoolClient) {
+    super(modmail, pool, 'mutes');
+  }
 
-export default class MuteManager extends Table implements IMuteManager {
   /**
    * Mute a user for a category
    * @param {DiscordID} userID
@@ -23,7 +27,7 @@ export default class MuteManager extends Table implements IMuteManager {
     }
 
     await this.pool.query(
-      `INSERT INTO ${TABLE} (user_id, category_id, till, reason)`
+      `INSERT INTO ${this.name} (user_id, category_id, till, reason)`
       + ' VALUES ($1, $2, $3, $4);',
       [mute.user, mute.category, mute.till, mute.reason],
     );
@@ -38,7 +42,7 @@ export default class MuteManager extends Table implements IMuteManager {
    */
   public async delete(user: DiscordID, cat: CategoryID): Promise<void> {
     const res = await this.pool.query(
-      `DELETE FROM ${TABLE}`
+      `DELETE FROM ${this.name}`
       + ' WHERE user_id=$1 AND category_id=$2 AND till > $3',
       [user, cat, Time.now()],
     );
@@ -54,12 +58,22 @@ export default class MuteManager extends Table implements IMuteManager {
    * @returns {Promise<MuteStatus>}
    */
   public async fetchAll(user: DiscordID): Promise<MuteStatus[]> {
-    const res = await this.pool.query(
-      `SELECT * FROM ${TABLE} WHERE user_id=$1`,
-      [user],
-    );
+    const log = this.getLogger();
+    console.debug(this.name);
 
-    return res.rows.map(MuteManager.parse);
+    try {
+      const res = await this.pool.query(
+        `SELECT * FROM ${this.name} WHERE user_id = $1`,
+        [user],
+      );
+
+      return res.rows.map(MuteManager.parse);
+    } catch (err) {
+      log.error(
+        `Failed to fetchAll for "${user}"\n${LogUtil.breakDownErr(err)}`,
+      );
+      return [];
+    }
   }
 
   /**
@@ -107,13 +121,26 @@ export default class MuteManager extends Table implements IMuteManager {
    */
   public async remove(user: DiscordID, category: CategoryID): Promise<void> {
     const res = await this.pool.query(
-      `DELETE FROM ${TABLE} WHERE user_id=$1 AND category_id=$2`,
+      `DELETE FROM ${this.name} WHERE user_id=$1 AND category_id=$2`,
       [user, category],
     );
 
     if (res.rowCount === 0) {
       throw new Error('Failed to remove user from mutes table.');
     }
+  }
+
+  /**
+   * Initialize the mutes table
+   */
+  protected async init(): Promise<void> {
+    await this.pool.query(
+      `CREATE TABLE IF NOT EXISTS ${this.name} (`
+      + ` user_id ${CONFIG.database.schema}.users not null,`
+      + ' till bigint not null,'
+      + ' category_id bigint not null,'
+      + ' reason text not null)',
+    );
   }
 
   /**
