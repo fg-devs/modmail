@@ -1,12 +1,16 @@
 import {
-  CategoryChannel, DMChannel, Guild, TextChannel, User,
+  CategoryChannel,
+  DMChannel,
+  Guild,
+  TextChannel,
+  User,
 } from 'discord.js';
-import { CommandoClient, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
 import { Category, CategoryResolvable } from '../models/types';
 import Embeds from './Embeds';
-import { ICategoryManger } from '../models/interfaces';
 import { PROMPT_TIME } from '../globals';
 import Modmail from '../Modmail';
+import { DiscordID } from '../models/identifiers';
 
 export type CatSelector = {
   category: CategoryChannel,
@@ -16,17 +20,28 @@ export type CatSelector = {
 }
 
 export default class Categories {
+  private activeSelectors: Set<DiscordID> = new Set();
+
+  private modmail: Modmail;
+
+  constructor(modmail: Modmail) {
+    this.modmail = modmail;
+  }
+
   /**
    * Get category based on what guild the message is in
    * @param {CommandoMessage} msg
    * @param {boolean} isActive Whether or not the category must be active
    */
-  public static async getCategory(msg: CommandoMessage, isActive = true): Promise<Category | null> {
+  public async getCategory(
+    msg: CommandoMessage,
+    isActive = true,
+  ): Promise<Category | null> {
     if (!msg.guild) {
       return null;
     }
 
-    const pool = await Modmail.getDB();
+    const pool = this.modmail.getDB();
     const category = await pool.categories.fetch(
       CategoryResolvable.guild,
       msg.guild.id,
@@ -56,7 +71,6 @@ export default class Categories {
 
   /**
    * Start the categorySelector
-   * @param {DatabaseManager} pool
    * @param {TextChannel | DMChannel} channel
    * @param {User} user
    * @param {CommandoClient} client
@@ -67,13 +81,15 @@ export default class Categories {
    *  * The category selected couldn't be found (unlikey).
    *  * There are no active categories.
    */
-  public static async categorySelector(
-    pool: ICategoryManger,
+  public async categorySelector(
     channel: TextChannel | DMChannel,
     user: User,
-    client: CommandoClient,
   ): Promise<CatSelector> {
-    const categories = await pool.fetchAll(
+    if (this.hasActiveSelector(user.id)) {
+      throw new Error('Please select a category.');
+    }
+    const pool = this.modmail.getDB();
+    const categories = await pool.categories.fetchAll(
       CategoryResolvable.activity,
       'true',
     );
@@ -84,6 +100,7 @@ export default class Categories {
 
     const embed = Embeds.categorySelect(categories);
     const msg = await channel.send(embed);
+    this.remember(user.id);
     const emotes = categories.map((cat: Category) => cat.emojiID);
 
     emotes.forEach((emojiStr: string) => {
@@ -96,6 +113,7 @@ export default class Categories {
       (_, rUser: User) => rUser.id === user.id,
       { max: 1, time: PROMPT_TIME },
     );
+    this.forget(user.id);
 
     const emote = collection.first();
 
@@ -114,7 +132,7 @@ export default class Categories {
       );
     }
 
-    const category = await pool.fetch(
+    const category = await pool.categories.fetch(
       CategoryResolvable.emote,
       emote.emoji.toString(),
     );
@@ -123,12 +141,12 @@ export default class Categories {
       throw new Error("Couldn't get category based on emote.");
     }
 
-    const categoryChannel = await client.channels.fetch(
+    const categoryChannel = await this.modmail.channels.fetch(
       category.channelID,
       true,
       true,
     ) as CategoryChannel;
-    const categoryGuild = await client.guilds.fetch(
+    const categoryGuild = await this.modmail.guilds.fetch(
       category.guildID,
       true,
       true,
@@ -140,5 +158,17 @@ export default class Categories {
       id: category.id,
       name: category.name,
     };
+  }
+
+  private hasActiveSelector(user: DiscordID): boolean {
+    return this.activeSelectors.has(user);
+  }
+
+  private remember(user: DiscordID): void {
+    this.activeSelectors.add(user);
+  }
+
+  private forget(user: DiscordID): void {
+    this.activeSelectors.delete(user);
   }
 }

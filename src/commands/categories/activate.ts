@@ -1,13 +1,12 @@
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
-import IssueHandler from '../../events/IssueHandler';
 import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
-import Categories from '../../util/Categories';
 import { Requires } from '../../util/Perms';
+import LogUtil from '../../util/Logging';
 
 export default class ActivateCategory extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'activate',
       aliases: [],
@@ -20,12 +19,13 @@ export default class ActivateCategory extends Command {
 
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const pool = await Modmail.getDB();
-    const category = await Categories.getCategory(msg, false);
+    const pool = Modmail.getDB();
+    const catUtil = Modmail.getCatUtil();
+    const category = await catUtil.getCategory(msg, false);
 
     if (category === null) {
       const res = "Couldn't find a category for this guild.";
-      IssueHandler.onCommandWarn(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 

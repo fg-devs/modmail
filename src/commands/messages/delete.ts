@@ -1,8 +1,8 @@
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { DMChannel, Message } from 'discord.js';
 import Modmail from '../../Modmail';
 import { Thread } from '../../models/types';
-import IssueHandler from '../../events/IssueHandler';
+import LogUtil from '../../util/Logging';
 
 type Args = {
   msgID?: string;
@@ -10,7 +10,7 @@ type Args = {
 
 // TODO(dylan): This command is ugly af fix someday
 export default class Delete extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'delete',
       aliases: ['d', 'remove'],
@@ -28,12 +28,15 @@ export default class Delete extends Command {
     });
   }
 
-  public async run(msg: CommandoMessage, { msgID }: Args): Promise<Message | Message[] | null> {
-    const pool = await Modmail.getDB();
+  public async run(
+    msg: CommandoMessage,
+    { msgID }: Args,
+  ): Promise<Message | Message[] | null> {
+    const pool = Modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
     if (thread === null) {
       const res = 'Not currently in a thread..';
-      IssueHandler.onCommandWarn(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 
@@ -41,7 +44,7 @@ export default class Delete extends Command {
     const dm = await (user.dmChannel || user.createDM());
 
     const clientMessage = await this.getClientMsg(dm, thread, msg, msgID);
-    const threadMessage = await Delete.getThreadMsg(thread, msg, msgID);
+    const threadMessage = await this.getThreadMsg(thread, msg, msgID);
 
     if (!clientMessage || !threadMessage) {
       return null;
@@ -61,18 +64,18 @@ export default class Delete extends Command {
     msg: CommandoMessage,
     msgID?: string,
   ): Promise<Message | null> {
-    const pool = await Modmail.getDB();
+    const pool = Modmail.getDB();
     if (msgID) {
       try {
         const dbMessage = await pool.messages.fetch(msgID);
 
-        if (dbMessage.clientID === null) {
+        if (dbMessage === null || dbMessage.clientID === null) {
           return null;
         }
 
         return dm.messages.fetch(dbMessage.clientID, true, true);
-      } catch (e) {
-        IssueHandler.onCommandError(this, e, msg);
+      } catch (err) {
+        LogUtil.cmdWarn(msg, err);
         await msg.say('Unable to locate user message');
         return null;
       }
@@ -91,7 +94,7 @@ export default class Delete extends Command {
     }
   }
 
-  private static async getThreadMsg(
+  private async getThreadMsg(
     thread: Thread,
     msg: CommandoMessage,
     msgID?: string,
@@ -104,7 +107,7 @@ export default class Delete extends Command {
         return null;
       }
     }
-    const pool = await Modmail.getDB();
+    const pool = Modmail.getDB();
     let recentMessage;
 
     try {

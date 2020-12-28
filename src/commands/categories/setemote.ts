@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
-import IssueHandler from '../../events/IssueHandler';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
+import LogUtil from '../../util/Logging';
 import { Requires } from '../../util/Perms';
 
 type Args = {
@@ -11,7 +11,7 @@ type Args = {
 }
 
 export default class SetEmote extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'setemote',
       aliases: ['se'],
@@ -35,14 +35,14 @@ export default class SetEmote extends Command {
 
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
-    const pool = await Modmail.getDB();
+    const pool = Modmail.getDB();
 
     try {
       await pool.categories.setEmote(args.id, args.emoji);
       return msg.say('Updated.');
     } catch (_) {
       const res = "That category doesn't exist.";
-      IssueHandler.onCommandWarn(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
   }

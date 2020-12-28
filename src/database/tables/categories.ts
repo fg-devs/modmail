@@ -1,18 +1,20 @@
+import { PoolClient } from 'pg';
 import { SnowflakeUtil } from 'discord.js';
-import Table from '../table';
-import { ICategoryManger } from '../../models/interfaces';
+import Table from '../../models/table';
 import { CategoryID } from '../../models/identifiers';
-import { CONFIG } from '../../globals';
 import {
   Category,
   CategoryResolvable,
   CreateCategoryOpt,
   DBCategory,
 } from '../../models/types';
+import Modmail from '../../Modmail';
 
-const TABLE = `${CONFIG.database.schema}.categories`;
+export default class CategoryManager extends Table {
+  constructor(modmail: Modmail, pool: PoolClient) {
+    super(modmail, pool, 'categories');
+  }
 
-export default class CategoryManager extends Table implements ICategoryManger {
   /**
    * Handles added attachments and sends them.
    * @method create
@@ -26,7 +28,7 @@ export default class CategoryManager extends Table implements ICategoryManger {
       name, guildID, emote, channelID,
     } = opt;
     await this.pool.query(
-      `INSERT INTO ${TABLE} (id, name, guild_id, emote, channel_id)`
+      `INSERT INTO ${this.name} (id, name, guild_id, emote, channel_id)`
       + ' VALUES ($1, $2, $3, $4, $5)',
       [categoryID, name, guildID, emote, channelID],
     );
@@ -50,7 +52,7 @@ export default class CategoryManager extends Table implements ICategoryManger {
    */
   public async setActive(id: string, active: boolean): Promise<void> {
     const res = await this.pool.query(
-      `UPDATE ${TABLE} SET is_active=$2 WHERE id=$1`,
+      `UPDATE ${this.name} SET is_active=$2 WHERE id=$1`,
       [id, active],
     );
 
@@ -68,7 +70,7 @@ export default class CategoryManager extends Table implements ICategoryManger {
    */
   public async setEmote(id: CategoryID, emote: string): Promise<void> {
     const res = await this.pool.query(
-      `UPDATE ${TABLE} SET emote = $1 WHERE id = $2`,
+      `UPDATE ${this.name} SET emote = $1 WHERE id = $2`,
       [emote, id],
     );
 
@@ -86,7 +88,7 @@ export default class CategoryManager extends Table implements ICategoryManger {
    */
   public async setName(id: CategoryID, name: string): Promise<void> {
     const res = await this.pool.query(
-      `UPDATE ${TABLE} SET name = $1 WHERE id = $2`,
+      `UPDATE ${this.name} SET name = $1 WHERE id = $2`,
       [name, id],
     );
 
@@ -111,7 +113,7 @@ export default class CategoryManager extends Table implements ICategoryManger {
     }
 
     const res = await this.pool.query(
-      `SELECT * FROM ${TABLE} WHERE ${target} = $1`,
+      `SELECT * FROM ${this.name} WHERE ${target} = $1`,
       [parsed || id],
     );
 
@@ -136,6 +138,33 @@ export default class CategoryManager extends Table implements ICategoryManger {
     }
 
     return res[0];
+  }
+
+  /**
+   * Initialize the categories table if it doesn't exist
+   */
+  protected async init(): Promise<void> {
+    await this.pool.query(
+      `CREATE TABLE IF NOT EXISTS ${this.name} (`
+      + ' id bigint not null constraint categories_pk primary key,'
+      + ' channel_id bigint unique not null,'
+      + ' name text not null,'
+      + ' is_active boolean default true not null,'
+      + ' guild_id bigint not null,'
+      + ' emote text not null)',
+    );
+
+    await this.pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS categories_emote_uindex ON ${this.name} (emote);`,
+    );
+
+    await this.pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS categories_id_uindex ON ${this.name} (id);`,
+    );
+
+    await this.pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS categories_name_uindex ON ${this.name} (name);`,
+    );
   }
 
   /**

@@ -1,11 +1,11 @@
-import { Command, CommandoClient, CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import Embeds from '../../util/Embeds';
 import Modmail from '../../Modmail';
-import IssueHandler from '../../events/IssueHandler';
+import LogUtil from '../../util/Logging';
 
 export default class Reply extends Command {
-  constructor(client: CommandoClient) {
+  constructor(client: Modmail) {
     super(client, {
       name: 'reply',
       aliases: ['r'],
@@ -28,16 +28,17 @@ export default class Reply extends Command {
     msg: CommandoMessage,
     { content }: {content: string[]},
   ): Promise<Message | Message[] | null> {
-    const pool = await Modmail.getDB();
+    const pool = Modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
 
     if (thread === null) {
       const res = 'Not currently in a modmail thread';
-      IssueHandler.onCommandWarn(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 
-    const user = await this.client.users.fetch(thread.author.id, true, true);
+    const { client } = msg;
+    const user = await client.users.fetch(thread.author.id);
     const dmChannel = user.dmChannel || await user.createDM();
     const member = await msg.guild.members.fetch(msg.author.id);
     const footer = {

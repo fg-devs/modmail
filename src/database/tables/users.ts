@@ -1,11 +1,13 @@
-import { CONFIG } from '../../globals';
+import { PoolClient } from 'pg';
 import { DiscordID } from '../../models/identifiers';
-import { IUserManager } from '../../models/interfaces';
-import Table from '../table';
+import Table from '../../models/table';
+import Modmail from '../../Modmail';
 
-const TABLE = `${CONFIG.database.schema}.users`;
+export default class UsersManager extends Table {
+  constructor(modmail: Modmail, pool: PoolClient) {
+    super(modmail, pool, 'users');
+  }
 
-export default class UsersManager extends Table implements IUserManager {
   /**
    * Create a new ModmailUser
    * @param {DiscordID} id
@@ -13,8 +15,22 @@ export default class UsersManager extends Table implements IUserManager {
    */
   public async create(id: DiscordID): Promise<void> {
     await this.pool.query(
-      `INSERT INTO ${TABLE} (id) VALUES ($1) ON CONFLICT (id) DO NOTHING;`,
+      `INSERT INTO ${this.name} (id) VALUES ($1) ON CONFLICT (id) DO NOTHING;`,
       [id],
+    );
+  }
+
+  /**
+   * Initialize users table
+   */
+  protected async init(): Promise<void> {
+    await this.pool.query(
+      `CREATE TABLE IF NOT EXISTS ${this.name} (`
+      + ' id bigint not null constraint users_pk primary key)',
+    );
+
+    await this.pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS users_id_uindex ON ${this.name} (id);`,
     );
   }
 }
