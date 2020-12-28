@@ -43,7 +43,7 @@ export default class Table {
     }
 
     protected getLogger(): Logger {
-      return this.modmail.getLogger(`(table) ${this.name}`);
+      return Modmail.getLogger(`(table) ${this.name}`);
     }
 
     /**

@@ -1,7 +1,6 @@
-import { CommandoMessage } from 'discord.js-commando';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
 import Modmail from '../../Modmail';
-import Command from '../../models/command';
 import { CONFIG } from '../../globals';
 import { Requires } from '../../util/Perms';
 import { RoleLevel } from '../../models/types';
@@ -36,7 +35,7 @@ export default class StandardReplyCreate extends Command {
 
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
     await pool.standardReplies.create(args);
     return msg.say(
       'Successfully created a new standard reply'

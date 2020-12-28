@@ -4,6 +4,8 @@ import { DBMuteStatus, MuteStatus } from '../../models/types';
 import Time from '../../util/Time';
 import Table from '../../models/table';
 import Modmail from '../../Modmail';
+import LogUtil from '../../util/Logging';
+import { CONFIG } from '../../globals';
 
 export default class MuteManager extends Table {
   constructor(modmail: Modmail, pool: PoolClient) {
@@ -56,12 +58,22 @@ export default class MuteManager extends Table {
    * @returns {Promise<MuteStatus>}
    */
   public async fetchAll(user: DiscordID): Promise<MuteStatus[]> {
-    const res = await this.pool.query(
-      `SELECT * FROM ${this.name} WHERE user_id=$1`,
-      [user],
-    );
+    const log = this.getLogger();
+    console.debug(this.name);
 
-    return res.rows.map(MuteManager.parse);
+    try {
+      const res = await this.pool.query(
+        `SELECT * FROM ${this.name} WHERE user_id = $1`,
+        [user],
+      );
+
+      return res.rows.map(MuteManager.parse);
+    } catch (err) {
+      log.error(
+        `Failed to fetchAll for "${user}"\n${LogUtil.breakDownErr(err)}`,
+      );
+      return [];
+    }
   }
 
   /**
@@ -124,7 +136,7 @@ export default class MuteManager extends Table {
   protected async init(): Promise<void> {
     await this.pool.query(
       `CREATE TABLE IF NOT EXISTS ${this.name} (`
-      + ' user_id modmail.users not null,'
+      + ` user_id ${CONFIG.database.schema}.users not null,`
       + ' till bigint not null,'
       + ' category_id bigint not null,'
       + ' reason text not null)',

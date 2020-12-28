@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
-import { CommandoMessage } from 'discord.js-commando';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
-import Command from '../../models/command';
+import LogUtil from '../../util/Logging';
 import * as PermUtil from '../../util/Perms';
 
 type Args = {
@@ -38,21 +38,22 @@ export default class AddRole extends Command {
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
     const { roleID } = args;
     const levelStr = args.level.toLowerCase();
-    const category = await this.catUtil.getCategory(msg, true);
+    const catUtil = Modmail.getCatUtil();
+    const category = await catUtil.getCategory(msg, true);
     const level = AddRole.getLevel(levelStr);
 
     if (category === null) {
       const res = "This guild doesn't have an active category.";
-      this.logWarning(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 
     if (level === null) {
       const res = `"${args.level}" isn't a valid level, try again.`;
-      this.logWarning(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
 
     await pool.permissions.add({
       roleID,

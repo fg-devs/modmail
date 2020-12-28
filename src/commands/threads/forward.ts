@@ -1,10 +1,10 @@
 /* eslint-disable no-await-in-loop */
-import { CommandoMessage } from 'discord.js-commando';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
 import Modmail from '../../Modmail';
-import Command from '../../models/command';
 import Embeds from '../../util/Embeds';
 import { CLOSE_THREAD_DELAY } from '../../globals';
+import LogUtil from '../../util/Logging';
 
 export default class Forward extends Command {
   constructor(client: Modmail) {
@@ -18,8 +18,9 @@ export default class Forward extends Command {
   }
 
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const pool = this.modmail.getDB();
-    const selectorRes = await this.catUtil.categorySelector(
+    const pool = Modmail.getDB();
+    const catUtil = Modmail.getCatUtil();
+    const selectorRes = await catUtil.categorySelector(
       msg.channel,
       msg.author,
     );
@@ -27,7 +28,7 @@ export default class Forward extends Command {
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
     if (thread === null) {
       const res = 'Currently not in a thread';
-      this.logWarning(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 

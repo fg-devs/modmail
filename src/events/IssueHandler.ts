@@ -4,12 +4,6 @@ import Modmail from '../Modmail';
 import LogUtil from '../util/Logging';
 
 export default class IssueHandler {
-  private readonly modmail: Modmail;
-
-  constructor(modmail: Modmail) {
-    this.modmail = modmail;
-  }
-
   /**
    * Log command failures
    * @param {Command} _c Command that failed
@@ -21,7 +15,7 @@ export default class IssueHandler {
     err: Error,
     msg: CommandoMessage,
   ): void {
-    const log = this.modmail.getLogger(`(command) ${c.name}`);
+    const log = Modmail.getLogger(`(command) ${c.name}`);
     const message = `${msg.author.tag} executed "${msg.command.name}"
 ${LogUtil.breakDownMsg(msg)}
 ${LogUtil.breakDownErr(err)}`;
@@ -34,7 +28,7 @@ ${LogUtil.breakDownErr(err)}`;
    * @param {Command} c Command being added
    */
   public onCommandRegister(c: Command): void {
-    const log = this.modmail.getLogger(`(command) ${c.name}`);
+    const log = Modmail.getLogger(`(command) ${c.name}`);
     const message = 'registered';
 
     log.debug(message);
@@ -51,7 +45,7 @@ ${LogUtil.breakDownErr(err)}`;
     _p: Promise<Message | Message[] | null>,
     msg: CommandoMessage,
   ): void {
-    const log = this.modmail.getLogger(`(command) ${c.name}`);
+    const log = Modmail.getLogger(`(command) ${c.name}`);
     const message = `${msg.author.tag} executed this command\n`
     + `${LogUtil.breakDownMsg(msg)}`;
 

@@ -1,7 +1,9 @@
-import { CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
+import {
+  Command,
+  CommandoMessage,
+} from 'discord.js-commando';
 import Modmail from '../../Modmail';
-import Command from '../../models/command';
 import { Requires } from '../../util/Perms';
 import { RoleLevel } from '../../models/types';
 
@@ -29,7 +31,7 @@ export default class StandardReplyDelete extends Command {
 
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
     await pool.standardReplies.remove(args.name);
     await msg.react('✅');
     return null;

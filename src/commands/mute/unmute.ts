@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
-import { CommandoMessage } from 'discord.js-commando';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
-import Command from '../../models/command';
 import { Requires } from '../../util/Perms';
+import LogUtil from '../../util/Logging';
 
 type Args = {
   userID: string,
@@ -33,12 +33,13 @@ export default class Unmute extends Command {
     msg: CommandoMessage,
     args: Args,
   ): Promise<Message | Message[] | null> {
-    const pool = this.modmail.getDB();
-    const category = await this.catUtil.getCategory(msg);
+    const pool = Modmail.getDB();
+    const catUtil = Modmail.getCatUtil();
+    const category = await catUtil.getCategory(msg);
 
     if (category === null) {
       const res = 'Please use this command in a guild with an active category.';
-      this.logWarning(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 

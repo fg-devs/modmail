@@ -131,6 +131,6 @@ export default class EventHandler {
   }
 
   private getLogger() {
-    return this.modmail.getLogger('events');
+    return Modmail.getLogger('events');
   }
 }

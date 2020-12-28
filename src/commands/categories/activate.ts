@@ -1,9 +1,9 @@
-import { CommandoMessage } from 'discord.js-commando';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
 import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
 import { Requires } from '../../util/Perms';
-import Command from '../../models/command';
+import LogUtil from '../../util/Logging';
 
 export default class ActivateCategory extends Command {
   constructor(client: Modmail) {
@@ -19,12 +19,13 @@ export default class ActivateCategory extends Command {
 
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const pool = this.modmail.getDB();
-    const category = await this.catUtil.getCategory(msg, false);
+    const pool = Modmail.getDB();
+    const catUtil = Modmail.getCatUtil();
+    const category = await catUtil.getCategory(msg, false);
 
     if (category === null) {
       const res = "Couldn't find a category for this guild.";
-      this.logWarning(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 

@@ -1,9 +1,9 @@
-import { CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
-import Command from '../../models/command';
 import { CLOSE_THREAD_DELAY } from '../../globals';
+import LogUtil from '../../util/Logging';
 
 export default class CloseThread extends Command {
   constructor(client: Modmail) {
@@ -18,12 +18,12 @@ export default class CloseThread extends Command {
   }
 
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
 
     if (thread === null) {
       const res = 'Not currently in a thread';
-      this.logWarning(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 

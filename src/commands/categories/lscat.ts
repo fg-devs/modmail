@@ -1,9 +1,8 @@
 import { Message } from 'discord.js';
-import { CommandoMessage } from 'discord.js-commando';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { CategoryResolvable, RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
-import Command from '../../models/command';
 import { Requires } from '../../util/Perms';
 
 export default class ListCategories extends Command {
@@ -20,7 +19,7 @@ export default class ListCategories extends Command {
 
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
     const cats = await pool.categories.fetchAll(
       CategoryResolvable.activity,
       'true',

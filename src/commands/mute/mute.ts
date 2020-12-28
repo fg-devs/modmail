@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
-import { CommandoMessage } from 'discord.js-commando';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { MuteStatus, RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
-import Command from '../../models/command';
+import LogUtil from '../../util/Logging';
 import { Requires } from '../../util/Perms';
 import Time from '../../util/Time';
 
@@ -45,12 +45,13 @@ export default class Mute extends Command {
 
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
-    const pool = this.modmail.getDB();
-    const category = await this.catUtil.getCategory(msg);
+    const pool = Modmail.getDB();
+    const catUtil = Modmail.getCatUtil();
+    const category = await catUtil.getCategory(msg);
 
     if (category === null) {
       const res = 'Please run this command in a guild with an active category.';
-      this.logWarning(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 

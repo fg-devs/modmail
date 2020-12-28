@@ -1,10 +1,10 @@
-import { CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
-import Command from '../../models/command';
 import { Requires } from '../../util/Perms';
 import { CategoryResolvable, RoleLevel } from '../../models/types';
+import LogUtil from '../../util/Logging';
 
 export default class OpenThread extends Command {
   constructor(client: Modmail) {
@@ -30,7 +30,7 @@ export default class OpenThread extends Command {
     msg: CommandoMessage,
     { userID }: {userID: string},
   ): Promise<Message | Message[] | null> {
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
     const user = await msg.client.users.fetch(userID, true, true);
     const category = await pool.categories.fetch(
       CategoryResolvable.guild,
@@ -39,13 +39,13 @@ export default class OpenThread extends Command {
 
     if (category === null) {
       const res = "This guild isn't part of a category.";
-      this.logWarning(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 
     if (user === null) {
       const res = 'Failed to get that member, is it the correct ID?';
-      this.logWarning(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 
@@ -53,7 +53,7 @@ export default class OpenThread extends Command {
 
     if (hasThread !== null) {
       const res = 'This user already has a thread open';
-      this.logWarning(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 
@@ -69,7 +69,7 @@ export default class OpenThread extends Command {
         await user.createDM();
       } catch (e) {
         const res = 'Failed to create DM with this user.';
-        this.logWarning(msg, res);
+        LogUtil.cmdWarn(msg, res);
         return msg.say(res);
       }
     }

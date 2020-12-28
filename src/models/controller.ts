@@ -23,6 +23,6 @@ export default class Controller {
    * @returns {Logger}
    */
   protected getLogger(): Logger {
-    return this.modmail.getLogger(`(controller) ${this.name}`);
+    return Modmail.getLogger(`(controller) ${this.name}`);
   }
 }

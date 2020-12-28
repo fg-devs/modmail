@@ -10,21 +10,18 @@ import {
   Thread,
 } from '../models/types';
 import Modmail from '../Modmail';
-import CatUtil, { CatSelector } from '../util/Categories';
+import { CatSelector } from '../util/Categories';
 import Embeds from '../util/Embeds';
 import Time from '../util/Time';
 import LogUtil from '../util/Logging';
 import AttachmentController from './attachments';
 
 export default class ThreadController extends Controller {
-  private readonly catutil: CatUtil;
-
   private readonly attachments: AttachmentController;
 
   constructor(modmail: Modmail) {
     super(modmail, 'threads');
 
-    this.catutil = modmail.catUtil;
     this.attachments = new AttachmentController(modmail);
   }
 
@@ -43,7 +40,7 @@ export default class ThreadController extends Controller {
       return;
     }
 
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
     const channel = await this.createChannel(msg, sel);
 
     if (channel === null) {
@@ -74,7 +71,7 @@ export default class ThreadController extends Controller {
    * @param {Thread} thread The active thread
    */
   public async sendMessage(msg: Message, thread: Thread): Promise<void> {
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
     const log = this.getLogger();
 
     try {
@@ -118,13 +115,14 @@ ${LogUtil.breakDownErr(err)}`,
    * failed
    */
   private async handleSelector(msg: Message): Promise<CatSelector | null> {
-    const pool = this.modmail.getDB();
+    const catUtil = Modmail.getCatUtil();
+    const pool = Modmail.getDB();
     const log = this.getLogger();
     let selectorRes: null | CatSelector = null;
     let mute: null | MuteStatus = null;
 
     try {
-      selectorRes = await this.catutil.categorySelector(
+      selectorRes = await catUtil.categorySelector(
         msg.channel as DMChannel,
         msg.author,
       );
@@ -168,7 +166,7 @@ ${LogUtil.breakDownErr(err)}`,
     sel: CatSelector,
   ): Promise<TextChannel | null> {
     const log = this.getLogger();
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
     const channel = await sel.guild.channels.create(
       `${msg.author.username}-${msg.author.discriminator}`,
       { type: 'text' },

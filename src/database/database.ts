@@ -85,7 +85,7 @@ export default class DatabaseManager {
 
     public async init(): Promise<void> {
       const { schema } = CONFIG.database;
-      const log = this.modmail.getLogger('dbmanager');
+      const log = Modmail.getLogger('dbmanager');
 
       await this.pool.query(
         `CREATE SCHEMA IF NOT EXISTS ${schema}`,

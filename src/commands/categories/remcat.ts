@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
-import { CommandoMessage } from 'discord.js-commando';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '../../models/types';
 import Modmail from '../../Modmail';
-import Command from '../../models/command';
 import { Requires } from '../../util/Perms';
+import LogUtil from '../../util/Logging';
 
 type CatArgs = {
   id: string;
@@ -29,14 +29,14 @@ export default class RemoveCategory extends Command {
 
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: CatArgs): Promise<Message | Message[] | null> {
-    const pool = await this.modmail.getDB();
+    const pool = Modmail.getDB();
     const { id } = args;
 
     try {
       await pool.categories.setActive(id, false);
       return msg.say('Disabled category.');
     } catch (err) {
-      this.logError(msg, err);
+      LogUtil.cmdWarn(msg, err);
       return msg.say(`Couldn't find category "${id}"`);
     }
   }

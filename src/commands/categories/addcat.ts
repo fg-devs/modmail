@@ -1,7 +1,7 @@
 import { Message, TextChannel } from 'discord.js';
-import { CommandoMessage } from 'discord.js-commando';
-import Command from '../../models/command';
+import { Command, CommandoMessage } from 'discord.js-commando';
 import Modmail from '../../Modmail';
+import LogUtil from '../../util/Logging';
 
 type CatArgs = {
   name: string;
@@ -34,7 +34,7 @@ export default class AddCategory extends Command {
 
   public async run(msg: CommandoMessage, args: CatArgs): Promise<Message | Message[] | null> {
     const { name, emoji } = args;
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
 
     if (!(msg.channel instanceof TextChannel)) {
       return null;
@@ -43,7 +43,7 @@ export default class AddCategory extends Command {
     const { parent } = msg.channel;
     if (!parent) {
       const res = "This channel isn't in a category.";
-      this.logWarning(msg, res);
+      LogUtil.cmdWarn(msg, res);
       return msg.say(res);
     }
 

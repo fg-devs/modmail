@@ -10,9 +10,9 @@ import ThreadController from './controllers/threads';
 import Categories from './util/Categories';
 
 export default class Modmail extends CommandoClient {
-  private static db: DatabaseManager | null;
+  public static catUtil: Categories;
 
-  public readonly catUtil: Categories;
+  private static db: DatabaseManager | null;
 
   private readonly events: EventHandler;
 
@@ -28,7 +28,7 @@ export default class Modmail extends CommandoClient {
       threadController,
     );
 
-    this.catUtil = new Categories(this);
+    Modmail.catUtil = new Categories(this);
     Modmail.db = null;
     this.events = new EventHandler(this, msgController);
     this.registerEvents();
@@ -81,12 +81,19 @@ export default class Modmail extends CommandoClient {
     throw new Error('getDB was called before starting Modmail.');
   }
 
+  public static getCatUtil(): Categories {
+    if (Modmail.catUtil !== null) {
+      return Modmail.catUtil;
+    }
+    throw new Error('getCatUtil was called before initializing Modmail.');
+  }
+
   /**
    * Get/create active logger
    * @param {string} section Where this logger is going to be used
    * @returns {Logger}
    */
-  public getLogger(section: string): Logger {
+  public static getLogger(section: string): Logger {
     const logger = getLogger(section);
     logger.level = CONFIG.logLevel;
     return logger;
@@ -96,7 +103,7 @@ export default class Modmail extends CommandoClient {
    * Register all the possible events that the bot would want to listen for.
    */
   private registerEvents() {
-    const issues = new IssueHandler(this);
+    const issues = new IssueHandler();
     this.on('commandError', issues.onCommandError.bind(issues))
       .on('commandRun', issues.onCommandRun.bind(issues))
       .on('commandRegister', issues.onCommandRegister.bind(issues));
