@@ -48,16 +48,17 @@ export default class ThreadController extends Controller {
     }
 
     try {
-      const thread = await pool.threads.getCurrentThread(msg.author.id);
+      let thread = await pool.threads.getCurrentThread(msg.author.id);
       if (thread !== null) {
         await this.sendMessage(msg, thread);
         return;
       }
-      await pool.threads.open(
+      thread = await pool.threads.open(
         msg.author.id,
         channel.id,
         sel.id,
       );
+      await this.sendMessage(msg, thread);
     } catch (err) {
       const log = this.getLogger();
       log.error(`Removing dupe thread\n${LogUtil.breakDownErr(err)}`);

@@ -33,20 +33,30 @@ export default class ThreadManager extends Table {
    * @param {DiscordID} author
    * @param {DiscordID} channelID
    * @param {CategoryID} categoryID
-   * @returns {Promise<void>}
-   * @throws {Error}
+   * @returns {Promise<Thread>}
    */
   public async open(
     author: DiscordID,
     channelID: DiscordID,
     categoryID: CategoryID,
-  ): Promise<void> {
+  ): Promise<Thread> {
     const threadID = SnowflakeUtil.generate(Date.now());
     await this.pool.query(
       `INSERT INTO ${this.name} (id, author, channel, category)`
       + ' VALUES ($1, $2, $3, $4)',
       [threadID, author, channelID, categoryID],
     );
+
+    return {
+      author: {
+        id: author,
+      },
+      channel: channelID,
+      category: categoryID,
+      id: threadID,
+      isActive: true,
+      messages: [],
+    };
   }
 
   /**
