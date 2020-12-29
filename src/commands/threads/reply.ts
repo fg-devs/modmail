@@ -26,10 +26,10 @@ export default class Reply extends Command {
 
   public async run(
     msg: CommandoMessage,
-    { content }: {content: string[]},
   ): Promise<Message | Message[] | null> {
     const pool = Modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
+    const content = msg.argString;
 
     if (thread === null) {
       const res = 'Not currently in a modmail thread';
@@ -44,9 +44,8 @@ export default class Reply extends Command {
     const footer = {
       text: member.roles.highest.name,
     };
-    const text = content.join(' ');
-    const threadEmbed = Embeds.messageSend(text, msg.author);
-    const dmEmbed = Embeds.messageReceived(text, msg.author);
+    const threadEmbed = Embeds.messageSend(content, msg.author);
+    const dmEmbed = Embeds.messageReceived(content, msg.author);
 
     threadEmbed.footer = footer;
     dmEmbed.footer = footer;
@@ -57,7 +56,7 @@ export default class Reply extends Command {
     await pool.users.create(msg.author.id);
     await pool.messages.add({
       clientID: dmMessage.id,
-      content: text,
+      content,
       edits: [],
       files: [],
       isDeleted: false,
