@@ -11,7 +11,7 @@ necessary dependencies for Modmail
 $ npm i
 ```
 
-Then you must compile the project and a `dist` (distrobution) directory will
+Then you must compile the project and a `dist` (distribution) directory will
 be generated
 ```sh
 $ npm build
