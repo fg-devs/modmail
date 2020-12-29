@@ -39,7 +39,7 @@ export default class StandardReplyCreate extends Command {
     await pool.standardReplies.create(args);
     return msg.say(
       'Successfully created a new standard reply'
-      + `\n - Usage: \`${CONFIG.prefix}sr ${args.name}\``,
+      + `\n - Usage: \`${CONFIG.bot.prefix}sr ${args.name}\``,
     );
   }
 }

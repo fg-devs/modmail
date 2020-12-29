@@ -108,7 +108,7 @@ export function Requires(required: RoleLevel) {
       return checkRole(msg).then((hasRole) => {
         const hasAccess = hasRole === RoleLevel.Admin
           || hasRole === required
-          || CONFIG.owners.includes(msg.author.id);
+          || CONFIG.bot.owners.includes(msg.author.id);
         if (hasAccess) {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore

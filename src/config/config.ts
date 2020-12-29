@@ -1,36 +1,29 @@
 import fs from 'fs';
 import * as yaml from 'js-yaml';
-import { Conf } from './conf';
+import BotConfig from './botconfig';
+import Conf from './conf';
 import DBConfig from './dbconfig';
 import validate from './validate';
 
 /**
  * This represents the config.yml
  * @class Config
- * @property {string} token
- * @property {string} prefix
- * @property {string[]} owners
+ * @property {BotConfig} bot
  * @property {DBConfig} database
  * @property {string} logLevel Options: debug, warn, info, error
  */
 export default class Config extends Conf {
-    public readonly token: string;
-
-    public readonly prefix: string;
+    public readonly bot: BotConfig;
 
     public readonly database: DBConfig;
-
-    public readonly owners: string[]
 
     public readonly logLevel: string;
 
     constructor() {
       super('config');
-      this.token = '';
-      this.prefix = '';
-      this.owners = [];
       this.logLevel = 'debug';
       this.database = new DBConfig();
+      this.bot = new BotConfig();
     }
 
     /**
@@ -42,6 +35,7 @@ export default class Config extends Conf {
 
       validate<Config>(new Config(), casted);
       validate<DBConfig>(new DBConfig(), casted.database);
+      validate<BotConfig>(new BotConfig(), casted.bot);
 
       return casted;
     }

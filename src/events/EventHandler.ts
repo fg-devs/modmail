@@ -21,7 +21,7 @@ export default class EventHandler {
    * @param {Message} msg
    */
   public async onMessage(msg: Message): Promise<void> {
-    if (!msg.author.bot && !msg.content.startsWith(CONFIG.prefix)) {
+    if (!msg.author.bot && !msg.content.startsWith(CONFIG.bot.prefix)) {
       if (msg.channel.type === 'dm') {
         await this.messages.handleDM(msg);
         await msg.react('✅');
@@ -52,7 +52,7 @@ export default class EventHandler {
   public async onMessageDelete(msg: Message): Promise<void> {
     const pool = this.modmail.getDB();
 
-    if (!msg.author.bot && !msg.content.startsWith(CONFIG.prefix)) {
+    if (!msg.author.bot && !msg.content.startsWith(CONFIG.bot.prefix)) {
       const thread = await pool.threads.getCurrentThread(msg.author.id);
       if (thread === null) {
         return;
