@@ -1,7 +1,8 @@
-token: 'TOKEN'
-prefix: '!'
-owners: ['164837347156951040', '357918459058978816']
 logLevel: 'debug'
+bot:
+  token: 'TOKEN'
+  prefix: '!'
+  owners: ['Owner ID 1', 'Owner ID 2']
 database:
   host: '127.0.0.1'
   port: 5432

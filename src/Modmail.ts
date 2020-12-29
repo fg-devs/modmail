@@ -18,8 +18,8 @@ export default class Modmail extends CommandoClient {
 
   constructor() {
     super({
-      commandPrefix: CONFIG.prefix,
-      owner: CONFIG.owners,
+      commandPrefix: CONFIG.bot.prefix,
+      owner: CONFIG.bot.owners,
     });
 
     const threadController = new ThreadController(this);
@@ -59,7 +59,7 @@ export default class Modmail extends CommandoClient {
    */
   public async start(): Promise<void> {
     Modmail.db = await DatabaseManager.getDB(this);
-    await this.login(CONFIG.token);
+    await this.login(CONFIG.bot.token);
   }
 
   /**

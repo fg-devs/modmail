@@ -1,4 +1,4 @@
-import { Conf } from './conf';
+import Conf from './conf';
 
 /**
  * The "database" section of the config.yml

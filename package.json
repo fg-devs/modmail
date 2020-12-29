@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "repository": "https://github.com/Floor-Gang/modmail",
   "author": "Floor Gang <https://github.com/Floor-Gang>",
-  "license": "gpl-3.0",
+  "license": "GPL-3.0",
   "devDependencies": {
     "@types/js-yaml": "^3.12.5",
     "@types/node": "^14.14.14",
@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node dist/app.js"
+    "start": "node ./dist/app.js"
   },
   "dependencies": {
     "@types/log4js": "^2.3.5",

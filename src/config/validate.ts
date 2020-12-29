@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Conf } from './conf';
+import Conf from './conf';
 
 /**
  * This validates the config.yml recursively
