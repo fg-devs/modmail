@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node dist/app.js"
+    "start": "node ./dist/app.js"
   },
   "dependencies": {
     "@types/log4js": "^2.3.5",
