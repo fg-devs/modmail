@@ -15,6 +15,7 @@ export default class AddCategory extends Command {
       aliases: ['addcat', 'ac'],
       description: 'Add a category',
       ownerOnly: true,
+      guildOnly: true,
       group: 'category',
       memberName: 'addcat',
       args: [

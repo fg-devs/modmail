@@ -10,6 +10,7 @@ export default class Edit extends Command {
       description: 'Edit a message',
       group: 'messages',
       memberName: 'edit',
+      guildOnly: true,
       args: [
         {
           key: 'content',

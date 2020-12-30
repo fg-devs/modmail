@@ -15,6 +15,7 @@ export default class StandardReplyAnon extends Command {
       group: 'standard_replies',
       memberName: 'sra',
       name: 'sra',
+      guildOnly: true,
       args: [
         {
           key: 'name',

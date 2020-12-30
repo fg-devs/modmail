@@ -16,6 +16,7 @@ export default class RemoveCategory extends Command {
       aliases: ['remcat', 'rc', 'rm'],
       description: 'Remove a category',
       group: 'category',
+      guildOnly: true,
       memberName: 'remcat',
       args: [
         {

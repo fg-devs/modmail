@@ -17,6 +17,7 @@ export default class Delete extends Command {
       description: 'Delete a message',
       group: 'messages',
       memberName: 'delete',
+      guildOnly: true,
       args: [
         {
           key: 'messageID',

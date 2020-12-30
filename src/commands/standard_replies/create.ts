@@ -17,6 +17,7 @@ export default class StandardReplyCreate extends Command {
       group: 'standard_replies',
       aliases: ['sradd'],
       memberName: 'srcreate',
+      guildOnly: true,
       name: 'srcreate',
       args: [
         {

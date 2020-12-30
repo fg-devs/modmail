@@ -17,6 +17,7 @@ export default class SetEmote extends Command {
       aliases: ['se'],
       description: 'Set emote for a category',
       group: 'category',
+      guildOnly: true,
       memberName: 'setemote',
       args: [
         {

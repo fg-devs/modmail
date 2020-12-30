@@ -12,6 +12,7 @@ export default class ActivateCategory extends Command {
       aliases: [],
       description: 'Reactivate a category',
       group: 'category',
+      guildOnly: true,
       memberName: 'activate',
       args: [],
     });

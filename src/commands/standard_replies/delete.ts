@@ -18,6 +18,7 @@ export default class StandardReplyDelete extends Command {
       aliases: ['srrm', 'srremove'],
       group: 'standard_replies',
       memberName: 'srdelete',
+      guildOnly: true,
       name: 'srdelete',
       args: [
         {

@@ -13,6 +13,7 @@ export default class StandardReply extends Command {
     super(client, {
       description: 'Reply with a standard reply',
       group: 'standard_replies',
+      guildOnly: true,
       memberName: 'sr',
       name: 'sr',
       args: [

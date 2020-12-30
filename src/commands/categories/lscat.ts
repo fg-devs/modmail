@@ -11,6 +11,7 @@ export default class ListCategories extends Command {
       name: 'lscat',
       aliases: ['lscat', 'lc', 'ls'],
       description: 'List all categories',
+      guildOnly: true,
       group: 'category',
       memberName: 'lscat',
       args: [],
