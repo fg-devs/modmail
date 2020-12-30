@@ -5,15 +5,20 @@ import Modmail from '../Modmail';
 import Embeds from '../util/Embeds';
 import { CONFIG } from '../globals';
 import MessageController from '../controllers/messages';
+import { Mutex, MutexInterface } from 'async-mutex';
+import { DiscordID } from '../models/identifiers';
 
 export default class EventHandler {
   private readonly modmail: Modmail;
 
   private readonly messages: MessageController
 
+  private readonly queue: Map<string, MutexInterface>;
+
   constructor(modmail: Modmail, messages: MessageController) {
     this.modmail = modmail;
     this.messages = messages;
+    this.queue = new Map<string, MutexInterface>();
   }
 
   /**
@@ -23,7 +28,10 @@ export default class EventHandler {
   public async onMessage(msg: Message): Promise<void> {
     if (!msg.author.bot && !msg.content.startsWith(CONFIG.bot.prefix)) {
       if (msg.channel.type === 'dm') {
+        const mutex = this.getMutex(msg.author.id);
+        const release = await mutex.acquire();
         await this.messages.handleDM(msg);
+        release();
       } else {
         await this.messages.handle(msg);
       }
@@ -129,6 +137,15 @@ export default class EventHandler {
       const embed = Embeds.memberLeft(member);
       await (channel as TextChannel).send(embed);
     }
+  }
+
+  private getMutex(userID: DiscordID): MutexInterface {
+    if (!this.queue.has(userID)) {
+      const mutex = new Mutex();
+      this.queue.set(userID, mutex);
+      return mutex;
+    }
+    return this.queue.get(userID) as Mutex;
   }
 
   private getLogger() {
