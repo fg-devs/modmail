@@ -1,30 +1,15 @@
-const MINUTE = 60;
+const MINUTE = 60000;
 const HOUR = MINUTE * 60;
 const DAY = (HOUR) * 24;
 const WEEK = DAY * 7;
 
 export default class Time {
   /**
-   * @param {number} secs UNIX Epoch in seconds
+   * @param {number} ms UNIX Epoch in milliseconds
    * @returns {Date}
    */
-  public static toDate(secs: number): Date {
-    return new Date(secs * 1000);
-  }
-
-  /**
-   * @param {Date} date
-   * @returns {number} UNIX Epoch in seconds
-   */
-  public static fromDate(date: Date): number {
-    return date.getSeconds();
-  }
-
-  /**
-   * @returns {number} UNIX Epoch in seconds
-   */
-  public static now(): number {
-    return Math.floor(Date.now() / 1000);
+  public static toDate(ms: number): Date {
+    return new Date(ms);
   }
 
   /**
@@ -71,6 +56,6 @@ export default class Time {
         throw new Error(`"${length}" is an invalid length`);
     }
 
-    return Math.floor(res + Time.now());
+    return res + Date.now();
   }
 }

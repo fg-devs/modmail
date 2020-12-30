@@ -339,6 +339,24 @@ export default class Embeds {
   }
 
   /**
+   * Embed for a mute status if someone is muted.
+   * @param {string} catName Category name
+   * @param {Date} till Muted until unix timestamp (ms)
+   */
+  public static muted(catName: string, till: number): MessageEmbed {
+    const res = Embeds.getGeneric({
+      title: `You're muted from ${catName}`,
+      color: 'RED',
+      timestamp: Math.floor(till),
+      footer: {
+        text: 'Until',
+      },
+    });
+
+    return res;
+  }
+
+  /**
    * All embeds share the attributes returned here.
    * @param {MessageEmbedOptions} data Additional or overwriting attributes
    * options.

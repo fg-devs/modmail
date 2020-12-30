@@ -9,7 +9,7 @@ import Time from '../../util/Time';
 type Args = {
   userID: string,
   time: string,
-  reason: string[],
+  reason?: string[],
 }
 
 export default class Mute extends Command {
@@ -57,12 +57,15 @@ export default class Mute extends Command {
 
     const mute: MuteStatus = {
       category: category.id,
-      reason: args.reason.join(' '),
+      reason: args.reason ? args.reason.join(' ') : 'No Reason Provided',
       till: Time.parse(args.time),
       user: args.userID,
     };
 
-    await pool.mutes.add(mute);
+    const muted = await pool.mutes.add(mute);
+    if (!muted) {
+      return msg.say('Already muted.');
+    }
     return msg.say('Muted.');
   }
 }
