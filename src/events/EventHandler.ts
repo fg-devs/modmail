@@ -24,7 +24,6 @@ export default class EventHandler {
     if (!msg.author.bot && !msg.content.startsWith(CONFIG.bot.prefix)) {
       if (msg.channel.type === 'dm') {
         await this.messages.handleDM(msg);
-        await msg.react('✅');
       } else {
         await this.messages.handle(msg);
       }

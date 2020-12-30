@@ -37,6 +37,7 @@ export default class ThreadController extends Controller {
     const sel = await this.handleSelector(msg);
 
     if (sel === null) {
+      await msg.react('❌');
       return;
     }
 
@@ -44,6 +45,7 @@ export default class ThreadController extends Controller {
     const channel = await this.createChannel(msg, sel);
 
     if (channel === null) {
+      await msg.react('❌');
       return;
     }
 
@@ -133,9 +135,12 @@ ${LogUtil.breakDownErr(err)}`,
       );
 
       if (mute) {
-        throw new Error(
-          `You're muted from this category until ${Time.toDate(mute.till)}`,
+        const muteEmbed = Embeds.muted(
+          selectorRes.name,
+          mute.till,
         );
+        await msg.channel.send(muteEmbed);
+        return null;
       }
       return selectorRes;
     } catch (err) {
