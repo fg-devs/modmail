@@ -26,10 +26,10 @@ export default class ReplyA extends Command {
 
   public async run(
     msg: CommandoMessage,
-    { content }: {content: string[]},
   ): Promise<Message | Message[] | null> {
     const pool = Modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
+    const content = msg.argString;
 
     if (thread === null) {
       const res = 'Not currently in a modmail thread';
@@ -39,16 +39,15 @@ export default class ReplyA extends Command {
 
     const user = await this.client.users.fetch(thread.author.id, true, true);
     const dmChannel = user.dmChannel || await user.createDM();
-    const text = content.join(' ');
-    const threadEmbed = Embeds.messageSendAnon(text, msg.author);
-    const dmEmbed = Embeds.messageReceivedAnon(text);
+    const threadEmbed = Embeds.messageSendAnon(content, msg.author);
+    const dmEmbed = Embeds.messageReceivedAnon(content);
     const threadMessage = await msg.channel.send(threadEmbed);
     const dmMessage = await dmChannel.send(dmEmbed);
 
     await pool.users.create(msg.author.id);
     await pool.messages.add({
+      content,
       clientID: dmMessage.id,
-      content: text,
       edits: [],
       files: [],
       isDeleted: false,
