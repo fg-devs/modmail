@@ -8,7 +8,7 @@ export default class ListRoles extends Command {
   constructor(client: Modmail) {
     super(client, {
       name: 'listroles',
-      aliases: ['lsroles'],
+      aliases: ['lsroles', 'roles', 'rolelist'],
       description: 'List all roles for a category.',
       guildOnly: true,
       group: 'perms',
