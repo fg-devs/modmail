@@ -1,3 +1,4 @@
+import { Mutex, MutexInterface } from 'async-mutex';
 import {
   DMChannel, GuildMember, Message, TextChannel,
 } from 'discord.js';
@@ -5,8 +6,6 @@ import Modmail from '../Modmail';
 import Embeds from '../util/Embeds';
 import { CONFIG } from '../globals';
 import MessageController from '../controllers/messages';
-import { Mutex, MutexInterface } from 'async-mutex';
-import { DiscordID } from '../models/identifiers';
 
 export default class EventHandler {
   private readonly modmail: Modmail;
@@ -139,7 +138,7 @@ export default class EventHandler {
     }
   }
 
-  private getMutex(userID: DiscordID): MutexInterface {
+  private getMutex(userID: string): MutexInterface {
     if (!this.queue.has(userID)) {
       const mutex = new Mutex();
       this.queue.set(userID, mutex);

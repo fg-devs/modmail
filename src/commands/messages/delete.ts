@@ -1,7 +1,7 @@
+import { Thread } from 'modmail-types';
 import { Command, CommandoMessage } from 'discord.js-commando';
 import { DMChannel, Message } from 'discord.js';
 import Modmail from '../../Modmail';
-import { Thread } from '../../models/types';
 import LogUtil from '../../util/Logging';
 
 type Args = {

@@ -1,8 +1,7 @@
+import { DBThread, Thread } from 'modmail-types';
 import { SnowflakeUtil } from 'discord.js';
 import { PoolClient } from 'pg';
 import Table from '../../models/table';
-import { CategoryID, DiscordID, ThreadID } from '../../models/identifiers';
-import { DBThread, Thread } from '../../models/types';
 import Modmail from '../../Modmail';
 
 export default class ThreadManager extends Table {
@@ -13,11 +12,11 @@ export default class ThreadManager extends Table {
   /**
    * Mark a thread a closed
    * @method close
-   * @param {DiscordID} id
+   * @param {string} id
    * @returns {Promise<void>}
    * @throws {Error} If nothign is updated
    */
-  public async close(id: DiscordID): Promise<void> {
+  public async close(id: string): Promise<void> {
     const res = await this.pool.query(
       `UPDATE ${this.name} SET is_active = false WHERE channel = $1`,
       [id],
@@ -30,15 +29,15 @@ export default class ThreadManager extends Table {
 
   /**
    * @method open
-   * @param {DiscordID} author
-   * @param {DiscordID} channelID
-   * @param {CategoryID} categoryID
+   * @param {string} author
+   * @param {string} channelID
+   * @param {string} categoryID
    * @returns {Promise<Thread>}
    */
   public async open(
-    author: DiscordID,
-    channelID: DiscordID,
-    categoryID: CategoryID,
+    author: string,
+    channelID: string,
+    categoryID: string,
   ): Promise<Thread> {
     const threadID = SnowflakeUtil.generate(Date.now());
     await this.pool.query(
@@ -62,7 +61,7 @@ export default class ThreadManager extends Table {
   /**
    * Count the number of active threads for a user
    * @method countThreads
-   * @param {DiscordID} user
+   * @param {string} user
    * @returns {Promise<number>}
    */
   public async countThreads(user: string): Promise<number> {
@@ -75,10 +74,10 @@ export default class ThreadManager extends Table {
   }
 
   /**
-   * @param {DiscordID} user
+   * @param {string} user
    * @returns {Promise<Thread | null>} if thread was found
    */
-  public async getCurrentThread(user: DiscordID): Promise<Thread | null> {
+  public async getCurrentThread(user: string): Promise<Thread | null> {
     const res = await this.pool.query(
       `SELECT * FROM ${this.name} WHERE author = $1 AND is_active = true LIMIT 1`,
       [user],
@@ -92,11 +91,11 @@ export default class ThreadManager extends Table {
 
   /**
    * @method getThreadByChannel
-   * @param {DiscordID} channelID
+   * @param {string} channelID
    * @returns {Promise<Thread>}
    * @throws {Error} if nothing was resolved
    */
-  public async getThreadByChannel(channelID: DiscordID): Promise<Thread | null> {
+  public async getThreadByChannel(channelID: string): Promise<Thread | null> {
     const res = await this.pool.query(
       `SELECT * FROM ${this.name} WHERE channel = $1 AND is_active = true LIMIT 1`,
       [channelID],
@@ -143,18 +142,18 @@ export default class ThreadManager extends Table {
   private static parse(data: DBThread): Thread {
     return {
       author: { id: data.author },
-      channel: data.channel,
-      id: data.id,
+      channel: data.channel.toString(),
+      id: data.id.toString(),
       isActive: data.is_active,
       messages: [],
-      category: data.category,
+      category: data.category.toString(),
     };
   }
 
   public async updateThread(
-    threadID: ThreadID,
-    channelID: DiscordID,
-    categoryID: CategoryID,
+    threadID: string,
+    channelID: string,
+    categoryID: string,
   ): Promise<void> {
     await this.pool.query(
       'UPDATE modmail.threads SET channel = $1, category = $2 WHERE id = $3',

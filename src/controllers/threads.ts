@@ -1,14 +1,14 @@
 import {
+  Message as MMMessage,
+  MuteStatus,
+  Thread,
+} from 'modmail-types';
+import {
   DMChannel,
   Message,
   TextChannel,
 } from 'discord.js';
 import Controller from '../models/controller';
-import {
-  Message as MMMessage,
-  MuteStatus,
-  Thread,
-} from '../models/types';
 import Modmail from '../Modmail';
 import { CatSelector } from '../util/Categories';
 import Embeds from '../util/Embeds';

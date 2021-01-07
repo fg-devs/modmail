@@ -1,6 +1,5 @@
+import { DBMuteStatus, MuteStatus } from 'modmail-types';
 import { PoolClient } from 'pg';
-import { CategoryID, DiscordID } from '../../models/identifiers';
-import { DBMuteStatus, MuteStatus } from '../../models/types';
 import Table from '../../models/table';
 import Modmail from '../../Modmail';
 import LogUtil from '../../util/Logging';
@@ -13,8 +12,8 @@ export default class MuteManager extends Table {
 
   /**
    * Mute a user for a category
-   * @param {DiscordID} userID
-   * @param {CategoryID} categoryID
+   * @param {string} userID
+   * @param {string} categoryID
    * @returns {Promise<boolean>}
    */
   public async add(mute: MuteStatus): Promise<boolean> {
@@ -34,12 +33,12 @@ export default class MuteManager extends Table {
 
   /**
    * Unmute a user
-   * @param {DiscordID} user
-   * @param {CategoryID} category
+   * @param {string} user
+   * @param {string} category
    * @returns {Promise<void>}
    * @throws {Error} if nothing happened
    */
-  public async delete(user: DiscordID, cat: CategoryID): Promise<void> {
+  public async delete(user: string, cat: string): Promise<void> {
     const res = await this.pool.query(
       `DELETE FROM ${this.name}`
       + ' WHERE user_id=$1 AND category_id=$2 AND till > $3',
@@ -53,10 +52,10 @@ export default class MuteManager extends Table {
 
   /**
    * Get all the mutes for a user
-   * @param {DiscordID} user
+   * @param {string} user
    * @returns {Promise<MuteStatus>}
    */
-  public async fetchAll(user: DiscordID): Promise<MuteStatus[]> {
+  public async fetchAll(user: string): Promise<MuteStatus[]> {
     const log = this.getLogger();
 
     try {
@@ -76,11 +75,11 @@ export default class MuteManager extends Table {
 
   /**
    * Get a muted user for a given category
-   * @param {DiscordID} user
-   * @param {CategoryID} category
+   * @param {string} user
+   * @param {string} category
    * @returns {Promise<MuteStatus | null>}
    */
-  public async fetch(user: DiscordID, category: CategoryID): Promise<MuteStatus | null> {
+  public async fetch(user: string, category: string): Promise<MuteStatus | null> {
     const res = await this.fetchAll(user);
     const now = Date.now();
 
@@ -98,11 +97,11 @@ export default class MuteManager extends Table {
 
   /**
    * Check if a given user is a muted for a category
-   * @param {DiscordID} user
-   * @param {CategoryID} category
+   * @param {string} user
+   * @param {string} category
    * @returns {Promise<boolean>}
    */
-  public async isMuted(user: DiscordID, category: CategoryID): Promise<boolean> {
+  public async isMuted(user: string, category: string): Promise<boolean> {
     const muteStatus = await this.fetch(user, category);
 
     return muteStatus !== null;
@@ -110,12 +109,12 @@ export default class MuteManager extends Table {
 
   /**
    * Unmute a user from a category
-   * @param {DiscordID} user
-   * @param {CategoryID} category
+   * @param {string} user
+   * @param {string} category
    * @returns {Promise<void>}
    * @throws {Error} If they weren't unmuted
    */
-  public async remove(user: DiscordID, category: CategoryID): Promise<void> {
+  public async remove(user: string, category: string): Promise<void> {
     const res = await this.pool.query(
       `DELETE FROM ${this.name} WHERE user_id=$1 AND category_id=$2`,
       [user, category],
@@ -147,8 +146,8 @@ export default class MuteManager extends Table {
    */
   private static parse(data: DBMuteStatus): MuteStatus {
     return {
-      user: data.user_id,
-      category: data.category_id,
+      user: data.user_id.toString(),
+      category: data.category_id.toString(),
       till: data.till,
       reason: data.reason,
     };

@@ -1,9 +1,10 @@
+import { RoleLevel } from 'modmail-types';
 import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
 import { Requires } from '../../util/Perms';
-import { CategoryResolvable, RoleLevel } from '../../models/types';
+import { CategoryResolvable } from '../../models/types';
 import LogUtil from '../../util/Logging';
 
 export default class OpenThread extends Command {

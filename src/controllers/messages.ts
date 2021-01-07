@@ -1,6 +1,6 @@
+import { Thread } from 'modmail-types';
 import { Message, TextChannel } from 'discord.js';
 import Controller from '../models/controller';
-import { Thread } from '../models/types';
 import Modmail from '../Modmail';
 import ThreadController from './threads';
 

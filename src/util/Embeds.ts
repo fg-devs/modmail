@@ -1,3 +1,4 @@
+import { Category, Role, RoleLevel } from 'modmail-types';
 import {
   GuildMember,
   MessageAttachment,
@@ -5,7 +6,6 @@ import {
   MessageEmbedOptions,
   User,
 } from 'discord.js';
-import { Category, Role, RoleLevel } from '../models/types';
 import { CLOSE_THREAD_DELAY } from '../globals';
 import ThreadManager from '../database/tables/threads';
 

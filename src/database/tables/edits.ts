@@ -1,5 +1,5 @@
 import { PoolClient } from 'pg';
-import { Edit } from '../../models/types';
+import { Edit } from 'modmail-types';
 import Table from '../../models/table';
 import Modmail from '../../Modmail';
 

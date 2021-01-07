@@ -1,7 +1,8 @@
+import { DBStandardReply, StandardReply } from 'modmail-types';
 import { PoolClient } from 'pg';
 import { SnowflakeUtil } from 'discord.js';
 import Table from '../../models/table';
-import { CreateStandardReplyOpt, DBStandardReply, StandardReply } from '../../models/types';
+import { CreateStandardReplyOpt } from '../../models/types';
 import Modmail from '../../Modmail';
 
 export default class StandardReplyManager extends Table {

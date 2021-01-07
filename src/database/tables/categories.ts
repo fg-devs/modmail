@@ -1,12 +1,13 @@
+import {
+  Category,
+  DBCategory,
+} from 'modmail-types';
 import { PoolClient } from 'pg';
 import { SnowflakeUtil } from 'discord.js';
 import Table from '../../models/table';
-import { CategoryID } from '../../models/identifiers';
 import {
-  Category,
   CategoryResolvable,
   CreateCategoryOpt,
-  DBCategory,
 } from '../../models/types';
 import Modmail from '../../Modmail';
 
@@ -63,12 +64,12 @@ export default class CategoryManager extends Table {
 
   /**
    * Set a unique emote for a given category.
-   * @param {CategoryID} id Category identifier
+   * @param {string} id Category identifier
    * @param {string} emote New unique emote
    * @returns {Promise<void>}
    * @throws {Error} If nothing was updated
    */
-  public async setEmote(id: CategoryID, emote: string): Promise<void> {
+  public async setEmote(id: string, emote: string): Promise<void> {
     const res = await this.pool.query(
       `UPDATE ${this.name} SET emote = $1 WHERE id = $2`,
       [emote, id],
@@ -81,12 +82,12 @@ export default class CategoryManager extends Table {
 
   /**
    * Set a unique name for a given category.
-   * @param {CategoryID} id Targetted category
+   * @param {string} id Targetted category
    * @param {string} name A new unique name
    * @returns {Promise<void>}
    * @throws {Error} If nothing was updated
    */
-  public async setName(id: CategoryID, name: string): Promise<void> {
+  public async setName(id: string, name: string): Promise<void> {
     const res = await this.pool.query(
       `UPDATE ${this.name} SET name = $1 WHERE id = $2`,
       [name, id],
@@ -197,10 +198,10 @@ export default class CategoryManager extends Table {
    */
   private static parse(data: DBCategory): Category {
     return {
-      channelID: data.channel_id,
+      channelID: data.channel_id.toString(),
       emojiID: data.emote,
-      guildID: data.guild_id,
-      id: data.id,
+      guildID: data.guild_id.toString(),
+      id: data.id.toString(),
       isActive: true,
       name: data.name,
     };

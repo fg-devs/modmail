@@ -1,3 +1,4 @@
+import { Category } from 'modmail-types';
 import {
   CategoryChannel,
   DMChannel,
@@ -6,11 +7,10 @@ import {
   User,
 } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
-import { Category, CategoryResolvable } from '../models/types';
+import { CategoryResolvable } from '../models/types';
 import Embeds from './Embeds';
 import { PROMPT_TIME } from '../globals';
 import Modmail from '../Modmail';
-import { DiscordID } from '../models/identifiers';
 
 export type CatSelector = {
   category: CategoryChannel,
@@ -20,7 +20,7 @@ export type CatSelector = {
 }
 
 export default class Categories {
-  private activeSelectors: Set<DiscordID> = new Set();
+  private activeSelectors: Set<string> = new Set();
 
   private modmail: Modmail;
 
@@ -160,15 +160,15 @@ export default class Categories {
     };
   }
 
-  private hasActiveSelector(user: DiscordID): boolean {
+  private hasActiveSelector(user: string): boolean {
     return this.activeSelectors.has(user);
   }
 
-  private remember(user: DiscordID): void {
+  private remember(user: string): void {
     this.activeSelectors.add(user);
   }
 
-  private forget(user: DiscordID): void {
+  private forget(user: string): void {
     this.activeSelectors.delete(user);
   }
 }

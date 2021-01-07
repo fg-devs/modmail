@@ -1,7 +1,7 @@
+import { FileType } from 'modmail-types';
 import { Message, MessageAttachment, TextChannel } from 'discord.js';
 import { IMAGE_REGEX } from '../globals';
 import Controller from '../models/controller';
-import { FileType } from '../models/types';
 import Modmail from '../Modmail';
 import Embeds from '../util/Embeds';
 

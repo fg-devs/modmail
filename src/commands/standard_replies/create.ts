@@ -1,9 +1,9 @@
+import { RoleLevel } from 'modmail-types';
 import { Command, CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
 import Modmail from '../../Modmail';
 import { CONFIG } from '../../globals';
 import { Requires } from '../../util/Perms';
-import { RoleLevel } from '../../models/types';
 
 type Args = {
   name: string,

@@ -1,6 +1,5 @@
+import { DBRole, Role } from 'modmail-types';
 import { PoolClient } from 'pg';
-import { CategoryID, DiscordID } from '../../models/identifiers';
-import { DBRole, Role } from '../../models/types';
 import * as PermUtil from '../../util/Perms';
 import Table from '../../models/table';
 import Modmail from '../../Modmail';
@@ -28,10 +27,10 @@ export default class PermManager extends Table {
   /**
    * Remove a role. We don't need to intake the category because all role ID's
    * are unique and two categories can't have the same role ID.
-   * @param {DiscordID} id
+   * @param {string} id
    * @returns {Promise<boolean>} Whether it was removed or not
    */
-  public async remove(id: DiscordID): Promise<boolean> {
+  public async remove(id: string): Promise<boolean> {
     const res = await this.pool.query(
       `DELETE FROM ${this.name} WHERE role_id=$1`,
       [id],
@@ -40,7 +39,7 @@ export default class PermManager extends Table {
     return res.rowCount !== 0;
   }
 
-  public async fetch(roleID: DiscordID): Promise<Role | null> {
+  public async fetch(roleID: string): Promise<Role | null> {
     const res = await this.pool.query(
       `SELECT * FROM ${this.name} WHERE role_id=$1`,
       [roleID],
@@ -53,7 +52,7 @@ export default class PermManager extends Table {
     return PermManager.parse(res.rows[0]);
   }
 
-  public async fetchAll(category: CategoryID): Promise<Role[]> {
+  public async fetchAll(category: string): Promise<Role[]> {
     const res = await this.pool.query(
       `SELECT * FROM ${this.name} WHERE category_id=$1`,
       [category],
@@ -81,8 +80,8 @@ export default class PermManager extends Table {
 
   private static parse(role: DBRole): Role {
     return {
-      category: role.category,
-      roleID: role.role_id,
+      category: role.category.toString(),
+      roleID: role.role_id.toString(),
       level: PermUtil.resolveStr(role.level),
     };
   }

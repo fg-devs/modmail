@@ -1,6 +1,5 @@
+import { DBMessage, Message } from 'modmail-types';
 import { PoolClient } from 'pg';
-import { MessageID, ThreadID } from '../../models/identifiers';
-import { DBMessage, Message } from '../../models/types';
 import Table from '../../models/table';
 import Modmail from '../../Modmail';
 
@@ -34,12 +33,12 @@ export default class MessageManager extends Table {
 
   /**
    * Get the last message of a thread
-   * @param {ThreadID} threadID
+   * @param {string} threadID
    * @param {string} author
    * @returns {Promise<Message>}
    * @throws {Error} If nothing was resolved
    */
-  public async getLastMessage(id: ThreadID, author: string): Promise<Message> {
+  public async getLastMessage(id: string, author: string): Promise<Message> {
     const res = await this.pool.query(
       `SELECT * FROM ${this.name}`
       + ' WHERE sender = $1'
@@ -70,11 +69,11 @@ export default class MessageManager extends Table {
 
   /**
    * Set a message to deleted
-   * @param {MessageID} id
+   * @param {string} id
    * @returns {Promise<void>}
    * @throws {Error} If nothing is updated
    */
-  public async setDeleted(id: MessageID): Promise<void> {
+  public async setDeleted(id: string): Promise<void> {
     const res = await this.pool.query(
       `UPDATE ${this.name} SET`
       + ' is_deleted = true'
@@ -90,10 +89,10 @@ export default class MessageManager extends Table {
 
   /**
    * @method fetch
-   * @param {MessageID} id
+   * @param {string} id
    * @returns {Promise<Message | null>}
    */
-  public async fetch(id: MessageID): Promise<Message | null> {
+  public async fetch(id: string): Promise<Message | null> {
     const res = await this.pool.query(
       `SELECT * FROM ${this.name} WHERE modmail_id = $1 OR client_id = $1`,
       [id],
@@ -106,7 +105,7 @@ export default class MessageManager extends Table {
     return MessageManager.parse(res.rows[0]);
   }
 
-  public async getPastMessages(threadID: ThreadID): Promise<Message[]> {
+  public async getPastMessages(threadID: string): Promise<Message[]> {
     const res = await this.pool.query(
       `SELECT * FROM ${this.name} WHERE thread_id = $1 AND is_deleted = false`,
       [threadID],
@@ -149,19 +148,21 @@ export default class MessageManager extends Table {
    */
   private static parse(data: DBMessage): Message {
     return {
-      clientID: data.client_id,
+      clientID: data.client_id !== null
+        ? data.client_id.toString()
+        : data.client_id,
       content: data.content,
       edits: [],
       files: [],
       isDeleted: data.is_deleted,
-      modmailID: data.modmail_id,
-      sender: data.sender,
+      modmailID: data.modmail_id.toString(),
+      sender: data.sender.toString(),
       internal: data.internal,
-      threadID: data.thread_id,
+      threadID: data.thread_id.toString(),
     };
   }
 
-  public async update(oldID: MessageID, newID: MessageID): Promise<void> {
+  public async update(oldID: string, newID: string): Promise<void> {
     await this.pool.query(
       `UPDATE ${this.name} SET modmail_id = $1 WHERE modmail_id = $2`,
       [newID, oldID],

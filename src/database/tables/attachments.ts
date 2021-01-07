@@ -1,7 +1,8 @@
+import { FileType } from 'modmail-types';
 import { SnowflakeUtil } from 'discord.js';
 import { PoolClient } from 'pg';
 import Table from '../../models/table';
-import { CreateAttachmentOpt, FileType } from '../../models/types';
+import { CreateAttachmentOpt } from '../../models/types';
 import Modmail from '../../Modmail';
 
 export default class Attachments extends Table {

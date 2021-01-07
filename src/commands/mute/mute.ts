@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
-import { MuteStatus, RoleLevel } from '../../models/types';
+import { MuteStatus, RoleLevel } from 'modmail-types';
 import Modmail from '../../Modmail';
 import LogUtil from '../../util/Logging';
 import { Requires } from '../../util/Perms';

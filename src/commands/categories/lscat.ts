@@ -1,6 +1,7 @@
+import { RoleLevel } from 'modmail-types';
 import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
-import { CategoryResolvable, RoleLevel } from '../../models/types';
+import { CategoryResolvable } from '../../models/types';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
 import { Requires } from '../../util/Perms';

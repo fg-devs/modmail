@@ -1,5 +1,4 @@
 import { PoolClient } from 'pg';
-import { DiscordID } from '../../models/identifiers';
 import Table from '../../models/table';
 import Modmail from '../../Modmail';
 
@@ -10,10 +9,10 @@ export default class UsersManager extends Table {
 
   /**
    * Create a new ModmailUser
-   * @param {DiscordID} id
+   * @param {string} id
    * @returns {Promise<void>}
    */
-  public async create(id: DiscordID): Promise<void> {
+  public async create(id: string): Promise<void> {
     await this.pool.query(
       `INSERT INTO ${this.name} (id) VALUES ($1) ON CONFLICT (id) DO NOTHING;`,
       [id],
