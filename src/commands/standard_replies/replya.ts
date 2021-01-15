@@ -13,8 +13,9 @@ export default class StandardReplyAnon extends Command {
     super(client, {
       description: 'Reply with a standard reply anonymously',
       group: 'standard_replies',
-      memberName: 'sra',
-      name: 'sra',
+      memberName: 'sreplya',
+      name: 'sreplya',
+      aliases: ['sra', 'sar'],
       guildOnly: true,
       args: [
         {

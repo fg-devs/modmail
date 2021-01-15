@@ -14,8 +14,9 @@ export default class StandardReply extends Command {
       description: 'Reply with a standard reply',
       group: 'standard_replies',
       guildOnly: true,
-      memberName: 'sr',
-      name: 'sr',
+      memberName: 'sreply',
+      name: 'sreply',
+      aliases: ['sr'],
       args: [
         {
           key: 'name',

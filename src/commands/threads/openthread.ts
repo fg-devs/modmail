@@ -7,6 +7,10 @@ import { Requires } from '../../util/Perms';
 import { CategoryResolvable } from '../../models/types';
 import LogUtil from '../../util/Logging';
 
+type Args = {
+  userID: string;
+}
+
 export default class OpenThread extends Command {
   constructor(client: Modmail) {
     super(client, {
@@ -29,8 +33,15 @@ export default class OpenThread extends Command {
   @Requires(RoleLevel.Mod)
   public async run(
     msg: CommandoMessage,
-    { userID }: {userID: string},
+    args: Args,
   ): Promise<Message | Message[] | null> {
+    const optUserID = (/[0-9]+/g).exec(args.userID);
+
+    if (optUserID === null || optUserID.length === 0) {
+      return msg.say('Please mention a user or provide an ID');
+    }
+
+    const userID = optUserID[0];
     const pool = Modmail.getDB();
     const user = await msg.client.users.fetch(userID, true, true);
     const category = await pool.categories.fetch(
