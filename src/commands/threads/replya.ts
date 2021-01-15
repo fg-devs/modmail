@@ -7,11 +7,11 @@ import LogUtil from '../../util/Logging';
 export default class ReplyA extends Command {
   constructor(client: Modmail) {
     super(client, {
-      name: 'anonymousreply',
-      aliases: ['ar', 'anon'],
+      name: 'replya',
+      aliases: ['ar', 'ra'],
       description: 'Anonymously Reply to a user in modmail',
       group: 'threads',
-      memberName: 'anonymous reply',
+      memberName: 'replya',
       guildOnly: true,
       args: [
         {
