@@ -80,7 +80,7 @@ export default class PermManager extends Table {
 
   private static parse(role: DBRole): Role {
     return {
-      category: role.category.toString(),
+      category: role.category_id.toString(),
       roleID: role.role_id.toString(),
       level: PermUtil.resolveStr(role.level),
     };
