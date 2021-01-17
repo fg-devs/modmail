@@ -29,10 +29,7 @@ export default class Unmute extends Command {
   }
 
   @Requires(RoleLevel.Mod)
-  public async run(
-    msg: CommandoMessage,
-    args: Args,
-  ): Promise<Message | Message[] | null> {
+  public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const pool = Modmail.getDB();
     const catUtil = Modmail.getCatUtil();
     const category = await catUtil.getCategory(msg);
@@ -40,10 +37,12 @@ export default class Unmute extends Command {
     if (category === null) {
       const res = 'Please use this command in a guild with an active category.';
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     await pool.mutes.delete(args.userID, category.id);
-    return msg.say('Unmuted.');
+    msg.say('Unmuted.');
+    return null;
   }
 }

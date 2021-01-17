@@ -29,7 +29,7 @@ export default class RemoveRole extends Command {
   }
 
   @Requires(RoleLevel.Admin)
-  public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[]> {
+  public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const { roleID } = args;
     const catUtil = Modmail.getCatUtil();
     const category = await catUtil.getCategory(msg, true);
@@ -37,15 +37,18 @@ export default class RemoveRole extends Command {
     if (category === null) {
       const res = "This guild doesn't have an active category.";
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     const pool = Modmail.getDB();
     const isRemoved = await pool.permissions.remove(roleID);
 
     if (isRemoved) {
-      return msg.say('Removed role.');
+      msg.say('Removed role.');
+    } else {
+      msg.say('Nothing was removed, are you sure the correct ID was provided?');
     }
-    return msg.say('Nothing was removed, are you sure the correct ID was provided?');
+    return null;
   }
 }

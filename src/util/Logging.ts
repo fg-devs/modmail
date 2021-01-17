@@ -9,7 +9,7 @@ export default class LogUtil {
    */
   public static breakDownMsg(msg: CommandoMessage): string {
     return ` * Time: ${msg.createdAt}
- * Full: ${msg.command.name} ${msg.parseArgs()}
+ * Full: ${msg.command?.name} ${msg.parseArgs()}
  * Args: ${msg.parseArgs()}
  * Guild: ${msg.guild ? msg.guild.name : 'No Guild'}`;
   }
@@ -29,8 +29,8 @@ export default class LogUtil {
    * @param {string} context Added context
    */
   public static cmdWarn(msg: CommandoMessage, context: string): void {
-    const log = LogUtil.getCmdLogger(msg.command);
-    const message = `${msg.author.tag} executed "${msg.command.name}"
+    const log = LogUtil.getCmdLogger(msg.command as Command);
+    const message = `${msg.author.tag} executed "${msg.command?.name}"
 
     ${LogUtil.breakDownMsg(msg)}
      * Context: ${context}`;

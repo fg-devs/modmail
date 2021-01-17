@@ -2,6 +2,10 @@ import { Command, CommandoMessage } from 'discord.js-commando';
 import { Message } from 'discord.js';
 import Modmail from '../../Modmail';
 
+type Args = {
+  content: string;
+}
+
 export default class Edit extends Command {
   constructor(client: Modmail) {
     super(client, {
@@ -21,15 +25,13 @@ export default class Edit extends Command {
     });
   }
 
-  public async run(
-    msg: CommandoMessage,
-    { content }: {content: string},
-  ): Promise<Message| Message[] | null> {
+  public async run(msg: CommandoMessage, { content }: Args): Promise<null> {
     const { client } = msg;
     const pool = Modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
     if (thread === null) {
-      return msg.say('Not currently in a thread..');
+      msg.say('Not currently in a thread..');
+      return null;
     }
 
     const user = await client.users.fetch(thread.author.id);
@@ -42,11 +44,13 @@ export default class Edit extends Command {
         msg.author.id,
       );
     } catch (_) {
-      return msg.say('No recent messages in thread');
+      msg.say('No recent messages in thread');
+      return null;
     }
 
     if (recentMessage.clientID === null) {
-      return msg.say('Not a valid message');
+      msg.say('Not a valid message');
+      return null;
     }
 
     const threadMessage = await msg.channel.messages.fetch(

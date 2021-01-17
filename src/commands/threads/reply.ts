@@ -24,17 +24,16 @@ export default class Reply extends Command {
     });
   }
 
-  public async run(
-    msg: CommandoMessage,
-  ): Promise<Message | Message[] | null> {
+  public async run(msg: CommandoMessage): Promise<null> {
     const pool = Modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
-    const content = msg.argString;
+    const content = msg.argString || '';
 
-    if (thread === null) {
+    if (thread === null || msg.guild === null) {
       const res = 'Not currently in a modmail thread';
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     const { client } = msg;

@@ -45,13 +45,15 @@ export default class AddRole extends Command {
     if (category === null) {
       const res = "This guild doesn't have an active category.";
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     if (level === null) {
       const res = `"${args.level}" isn't a valid level, try again.`;
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
     const pool = Modmail.getDB();
 
@@ -61,7 +63,8 @@ export default class AddRole extends Command {
       category: category.id,
     });
 
-    return msg.say(`Role added as ${levelStr}`);
+    msg.say(`Role added as ${levelStr}`);
+    return null;
   }
 
   private static getLevel(level: string): RoleLevel | null {

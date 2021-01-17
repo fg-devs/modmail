@@ -14,9 +14,10 @@ export default class IssueHandler {
     c: Command,
     err: Error,
     msg: CommandoMessage,
+    ...args: any[]
   ): void {
     const log = Modmail.getLogger(`(command) ${c.name}`);
-    const message = `${msg.author.tag} executed "${msg.command.name}"
+    const message = `${msg.author.tag} executed "${msg.command?.name}"
 ${LogUtil.breakDownMsg(msg)}
 ${LogUtil.breakDownErr(err)}`;
 

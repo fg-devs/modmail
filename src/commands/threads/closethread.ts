@@ -17,14 +17,15 @@ export default class CloseThread extends Command {
     });
   }
 
-  public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
+  public async run(msg: CommandoMessage): Promise<null> {
     const pool = Modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
 
     if (thread === null) {
       const res = 'Not currently in a thread';
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     const dmEmbed = Embeds.closeThreadClient();

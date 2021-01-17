@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { Command, CommandoMessage } from 'discord.js-commando';
-import { Message } from 'discord.js';
+import { Message, TextChannel } from 'discord.js';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
 import { CLOSE_THREAD_DELAY } from '../../globals';
@@ -21,7 +21,7 @@ export default class Forward extends Command {
     const pool = Modmail.getDB();
     const catUtil = Modmail.getCatUtil();
     const selectorRes = await catUtil.categorySelector(
-      msg.channel,
+      msg.channel as TextChannel,
       msg.author,
     );
 
@@ -29,7 +29,8 @@ export default class Forward extends Command {
     if (thread === null) {
       const res = 'Currently not in a thread';
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     const user = await this.client.users.fetch(thread.author.id, true, true);

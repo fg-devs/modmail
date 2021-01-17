@@ -1,7 +1,8 @@
 import { Mutex, MutexInterface } from 'async-mutex';
 import {
-  DMChannel, GuildMember, Message, TextChannel,
+  DMChannel, GuildMember, Message, PartialGuildMember, PartialMessage, TextChannel,
 } from 'discord.js';
+import { Thread } from 'modmail-types';
 import Modmail from '../Modmail';
 import Embeds from '../util/Embeds';
 import { CONFIG } from '../globals';
@@ -53,10 +54,14 @@ export default class EventHandler {
 
   /**
    * Called on message delete
-   * @param {Message} msg
+   * @param {Message | PartialMessage} msg
    */
-  public async onMessageDelete(msg: Message): Promise<void> {
+  public async onMessageDelete(msg: Message | PartialMessage): Promise<void> {
     const pool = this.modmail.getDB();
+
+    if (msg.partial) {
+      return;
+    }
 
     if (!msg.author.bot && !msg.content.startsWith(CONFIG.bot.prefix)) {
       const thread = await pool.threads.getCurrentThread(msg.author.id);
@@ -74,11 +79,18 @@ export default class EventHandler {
 
   /**
    * Called on message edit
-   * @param {Message} oldMsg
-   * @param {Message} newMsg
+   * @param {Message | PartialMessage} oldMsg
+   * @param {Message | PartialMessage} newMsg
    */
-  public async onMessageEdit(oldMsg: Message, newMsg: Message): Promise<void> {
+  public async onMessageEdit(
+    oldMsg: Message | PartialMessage,
+    newMsg: Message | PartialMessage,
+  ): Promise<void> {
     const pool = this.modmail.getDB();
+
+    if (oldMsg.partial || newMsg.partial) {
+      return;
+    }
 
     if (newMsg.channel instanceof DMChannel && !newMsg.author.bot) {
       const thread = await pool.threads.getCurrentThread(newMsg.author.id);
@@ -116,13 +128,15 @@ export default class EventHandler {
 
   /**
    * Called on member leave
-   * @param {GuildMember} member
+   * @param {GuildMember | PartialGuildMember} member
    */
-  public async onMemberLeave(member: GuildMember): Promise<void> {
+  public async onMemberLeave(
+    member: GuildMember | PartialGuildMember,
+  ): Promise<void> {
     const pool = this.modmail.getDB();
     const thread = await pool.threads.getCurrentThread(member.id);
 
-    if (thread === null) {
+    if (thread === null || member.partial) {
       return;
     }
 

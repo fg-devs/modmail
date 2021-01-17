@@ -27,21 +27,23 @@ export default class StandardReply extends Command {
     });
   }
 
-  public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] |null> {
+  public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const pool = Modmail.getDB();
     const standardReply = await pool.standardReplies.get(args.name);
     if (standardReply === null) {
       const res = 'Unable to locate that standard reply...';
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
 
-    if (thread === null) {
+    if (thread === null || msg.guild === null) {
       const res = 'Not currently in a modmail thread';
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     const user = await this.client.users.fetch(thread.author.id, true, true);

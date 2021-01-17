@@ -33,7 +33,7 @@ export default class AddCategory extends Command {
     });
   }
 
-  public async run(msg: CommandoMessage, args: CatArgs): Promise<Message | Message[] | null> {
+  public async run(msg: CommandoMessage, args: CatArgs): Promise<null> {
     const { name, emoji } = args;
     const pool = Modmail.getDB();
 
@@ -45,7 +45,8 @@ export default class AddCategory extends Command {
     if (!parent) {
       const res = "This channel isn't in a category.";
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     await pool.categories.create({
@@ -55,6 +56,7 @@ export default class AddCategory extends Command {
       channelID: parent.id,
     });
 
-    return msg.say('Category added.');
+    msg.say('Category added.');
+    return null;
   }
 }

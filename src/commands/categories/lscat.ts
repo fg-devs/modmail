@@ -20,7 +20,7 @@ export default class ListCategories extends Command {
   }
 
   @Requires(RoleLevel.Mod)
-  public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
+  public async run(msg: CommandoMessage): Promise<null> {
     const pool = Modmail.getDB();
     const cats = await pool.categories.fetchAll(
       CategoryResolvable.activity,
@@ -28,6 +28,7 @@ export default class ListCategories extends Command {
     );
     const res = Embeds.listCategories(cats);
 
-    return msg.say(res);
+    msg.say(res);
+    return null;
   }
 }

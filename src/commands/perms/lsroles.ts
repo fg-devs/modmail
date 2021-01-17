@@ -17,20 +17,22 @@ export default class ListRoles extends Command {
     });
   }
 
-  public async run(msg: CommandoMessage): Promise<Message | Message[]> {
+  public async run(msg: CommandoMessage): Promise<null> {
     const catUtil = Modmail.getCatUtil();
     const category = await catUtil.getCategory(msg);
 
     if (!category) {
       const res = "This guild doesn't have a category.";
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     const pool = Modmail.getDB();
     const roles = await pool.permissions.fetchAll(category.id);
     const res = Embeds.listRoles(category, roles);
 
-    return msg.say(res);
+    msg.say(res);
+    return null;
   }
 }

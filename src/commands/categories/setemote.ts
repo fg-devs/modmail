@@ -35,16 +35,18 @@ export default class SetEmote extends Command {
   }
 
   @Requires(RoleLevel.Admin)
-  public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
+  public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const pool = Modmail.getDB();
 
     try {
       await pool.categories.setEmote(args.id, args.emoji);
-      return msg.say('Updated.');
+      msg.say('Updated.');
     } catch (_) {
       const res = "That category doesn't exist.";
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+    } finally {
+      return null;
     }
   }
 }

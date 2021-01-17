@@ -29,12 +29,13 @@ export default class ReplyA extends Command {
   ): Promise<Message | Message[] | null> {
     const pool = Modmail.getDB();
     const thread = await pool.threads.getThreadByChannel(msg.channel.id);
-    const content = msg.argString;
+    const content = msg.argString || '';
 
     if (thread === null) {
       const res = 'Not currently in a modmail thread';
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     const user = await this.client.users.fetch(thread.author.id, true, true);

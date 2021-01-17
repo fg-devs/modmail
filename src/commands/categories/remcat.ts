@@ -29,16 +29,18 @@ export default class RemoveCategory extends Command {
   }
 
   @Requires(RoleLevel.Admin)
-  public async run(msg: CommandoMessage, args: CatArgs): Promise<Message | Message[] | null> {
+  public async run(msg: CommandoMessage, args: CatArgs): Promise<null> {
     const pool = Modmail.getDB();
     const { id } = args;
 
     try {
       await pool.categories.setActive(id, false);
-      return msg.say('Disabled category.');
+      msg.say('Disabled category.');
     } catch (err) {
       LogUtil.cmdWarn(msg, err);
-      return msg.say(`Couldn't find category "${id}"`);
+      msg.say(`Couldn't find category "${id}"`);
+    } finally {
+      return null;
     }
   }
 }

@@ -44,7 +44,7 @@ export default class Mute extends Command {
   }
 
   @Requires(RoleLevel.Mod)
-  public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
+  public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const pool = Modmail.getDB();
     const catUtil = Modmail.getCatUtil();
     const category = await catUtil.getCategory(msg);
@@ -52,7 +52,8 @@ export default class Mute extends Command {
     if (category === null) {
       const res = 'Please run this command in a guild with an active category.';
       LogUtil.cmdWarn(msg, res);
-      return msg.say(res);
+      msg.say(res);
+      return null;
     }
 
     const mute: MuteStatus = {
@@ -64,8 +65,10 @@ export default class Mute extends Command {
 
     const muted = await pool.mutes.add(mute);
     if (!muted) {
-      return msg.say('Already muted.');
+      msg.say('Already muted.');
+      return null;
     }
-    return msg.say('Muted.');
+    msg.say('Muted.');
+    return null;
   }
 }
