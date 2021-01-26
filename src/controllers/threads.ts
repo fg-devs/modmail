@@ -19,6 +19,8 @@ import AttachmentController from './attachments';
 export default class ThreadController extends Controller {
   private readonly attachments: AttachmentController;
 
+  private static readonly MAX = 30;
+
   constructor(modmail: Modmail) {
     super(modmail, 'threads');
 
@@ -42,6 +44,16 @@ export default class ThreadController extends Controller {
     }
 
     const pool = Modmail.getDB();
+    const numOfThreads = await pool.threads.countCategoryThreads(sel.id);
+
+    if (ThreadController.MAX <= numOfThreads) {
+      await msg.reply(
+        'The maximum threads have been met for this category,'
+        + ' try again later.',
+      );
+      await msg.react('❌');
+      return;
+    }
     const channel = await this.createChannel(msg, sel);
 
     if (channel === null) {
