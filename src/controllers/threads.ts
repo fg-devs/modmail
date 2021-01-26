@@ -200,8 +200,9 @@ ${LogUtil.breakDownErr(err)}`,
 
     // setup channel and send details about the user and the thread
     await channel.setParent(sel.category);
-    await channel.send(userDetails);
-    await channel.send(threadDetails);
+    channel.send(userDetails);
+    channel.send(threadDetails);
+    channel.setTopic(`User ID: ${user.id}`);
 
     // create user if they don't exit
     await pool.users.create(msg.author.id);
