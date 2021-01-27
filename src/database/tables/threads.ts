@@ -109,6 +109,22 @@ export default class ThreadManager extends Table {
   }
 
   /**
+   * Count the amount of active threads for a category
+   * @param {string} categoryID
+   * @returns {Promise<number>}
+   */
+  public async countCategoryThreads(categoryID: string): Promise<number> {
+    const res = await this.pool.query(
+      `SELECT COUNT(*) FROM ${this.name}`
+      + ' WHERE is_active=true'
+      + ' AND category=$1',
+      [categoryID],
+    );
+
+    return res.rows[0].count;
+  }
+
+  /**
    * Initialize threads table
    */
   protected async init(): Promise<void> {
