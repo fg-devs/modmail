@@ -7,14 +7,16 @@ import IssueHandler from './events/IssueHandler';
 import DatabaseManager from './database/database';
 import MessageController from './controllers/messages';
 import ThreadController from './controllers/threads';
-import Categories from './util/Categories';
+import Categories from './controllers/categories';
 
 export default class Modmail extends CommandoClient {
-  public static catUtil: Categories;
-
-  private static db: DatabaseManager | null;
+  public static categories: Categories;
 
   private readonly events: EventHandler;
+
+  private static modmail: Modmail | null = null;
+
+  private static db: DatabaseManager | null;
 
   constructor() {
     super({
@@ -28,7 +30,7 @@ export default class Modmail extends CommandoClient {
       threadController,
     );
 
-    Modmail.catUtil = new Categories(this);
+    Modmail.categories = new Categories(this);
     Modmail.db = null;
     this.events = new EventHandler(this, msgController);
     this.registerEvents();
@@ -51,6 +53,7 @@ export default class Modmail extends CommandoClient {
         ['perms'],
       ])
       .registerCommandsIn(path.join(__dirname, 'commands'));
+    Modmail.modmail = this;
   }
 
   /**
@@ -82,10 +85,20 @@ export default class Modmail extends CommandoClient {
   }
 
   public static getCatUtil(): Categories {
-    if (Modmail.catUtil !== null) {
-      return Modmail.catUtil;
+    if (Modmail.categories !== null) {
+      return Modmail.categories;
     }
     throw new Error('getCatUtil was called before initializing Modmail.');
+  }
+
+  /**
+   * Get the instance of modmail
+   */
+  public static getModmail(): Modmail {
+    if (Modmail.modmail !== null) {
+      return Modmail.modmail;
+    }
+    throw new Error('getModmail was called before initializing Modmail.');
   }
 
   /**

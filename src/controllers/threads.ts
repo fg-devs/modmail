@@ -10,7 +10,7 @@ import {
 } from 'discord.js';
 import Controller from '../models/controller';
 import Modmail from '../Modmail';
-import { CatSelector } from '../util/Categories';
+import { CatSelector } from '../controllers/categories';
 import Embeds from '../util/Embeds';
 import Time from '../util/Time';
 import LogUtil from '../util/Logging';
