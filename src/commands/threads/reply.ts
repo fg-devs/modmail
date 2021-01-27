@@ -1,4 +1,3 @@
-import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
 import Embeds from '../../util/Embeds';
 import Modmail from '../../Modmail';

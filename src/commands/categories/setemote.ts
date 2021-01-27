@@ -1,4 +1,3 @@
-import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from 'modmail-types';
 import Modmail from '../../Modmail';
@@ -45,8 +44,7 @@ export default class SetEmote extends Command {
       const res = "That category doesn't exist.";
       LogUtil.cmdWarn(msg, res);
       msg.say(res);
-    } finally {
-      return null;
     }
+    return null;
   }
 }

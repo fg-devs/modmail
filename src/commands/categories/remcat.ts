@@ -1,4 +1,3 @@
-import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from 'modmail-types';
 import Modmail from '../../Modmail';
@@ -39,8 +38,7 @@ export default class RemoveCategory extends Command {
     } catch (err) {
       LogUtil.cmdWarn(msg, err);
       msg.say(`Couldn't find category "${id}"`);
-    } finally {
-      return null;
     }
+    return null;
   }
 }

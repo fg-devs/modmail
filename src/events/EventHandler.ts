@@ -2,7 +2,6 @@ import { Mutex, MutexInterface } from 'async-mutex';
 import {
   DMChannel, GuildMember, Message, PartialGuildMember, PartialMessage, TextChannel,
 } from 'discord.js';
-import { Thread } from 'modmail-types';
 import Modmail from '../Modmail';
 import Embeds from '../util/Embeds';
 import { CONFIG } from '../globals';

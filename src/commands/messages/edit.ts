@@ -1,5 +1,4 @@
 import { Command, CommandoMessage } from 'discord.js-commando';
-import { Message } from 'discord.js';
 import Modmail from '../../Modmail';
 
 type Args = {
