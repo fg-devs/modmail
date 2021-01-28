@@ -1,30 +1,23 @@
 import {
-  Message as MMMessage,
   MuteStatus,
-  Thread,
 } from 'modmail-types';
 import {
   DMChannel,
   Message,
   TextChannel,
 } from 'discord.js';
-import Controller from '../models/controller';
-import Modmail from '../Modmail';
-import { CatSelector } from '../controllers/categories';
-import Embeds from '../util/Embeds';
-import Time from '../util/Time';
-import LogUtil from '../util/Logging';
-import AttachmentController from './attachments';
+import Thread from './thread';
+import Controller from '../../models/controller';
+import Modmail from '../../Modmail';
+import { CatSelector } from '../categories/categories';
+import Embeds from '../../util/Embeds';
+import Time from '../../util/Time';
+import LogUtil from '../../util/Logging';
+import { MAX_THREADS } from '../../globals';
 
 export default class ThreadController extends Controller {
-  private readonly attachments: AttachmentController;
-
-  private static readonly MAX = 30;
-
   constructor(modmail: Modmail) {
     super(modmail, 'threads');
-
-    this.attachments = new AttachmentController(modmail);
   }
 
   /**
@@ -46,7 +39,7 @@ export default class ThreadController extends Controller {
     const pool = Modmail.getDB();
     const numOfThreads = await pool.threads.countCategoryThreads(sel.id);
 
-    if (ThreadController.MAX <= numOfThreads) {
+    if (MAX_THREADS <= numOfThreads) {
       await msg.reply(
         'The maximum threads have been met for this category,'
         + ' try again later.',
@@ -62,17 +55,21 @@ export default class ThreadController extends Controller {
     }
 
     try {
-      let thread = await pool.threads.getCurrentThread(msg.author.id);
+      let thread = await this.getByAuthor(msg.author.id);
+
       if (thread !== null) {
-        await this.sendMessage(msg, thread);
+        await thread.sendToThread(msg);
         return;
       }
-      thread = await pool.threads.open(
+
+      const data = await pool.threads.open(
         msg.author.id,
         channel.id,
         sel.id,
       );
-      await this.sendMessage(msg, thread);
+      thread = new Thread(this.modmail, data);
+
+      await thread.sendToThread(msg);
     } catch (err) {
       const log = this.getLogger();
       log.error(`Removing dupe thread\n${LogUtil.breakDownErr(err)}`);
@@ -80,46 +77,37 @@ export default class ThreadController extends Controller {
     }
   }
 
-  /**
-   * Send a user's message to an active thread
-   * @param {Message} msg The user's message
-   * @param {Thread} thread The active thread
-   */
-  public async sendMessage(msg: Message, thread: Thread): Promise<void> {
+  public async getByAuthor(userID: string): Promise<Thread | null> {
     const pool = Modmail.getDB();
-    const log = this.getLogger();
+    const data = await pool.threads.getByUser(userID);
 
-    try {
-      const thMsgEmbed = Embeds.messageReceived(
-        msg.content,
-        msg.author,
-      );
-      const thChan = await this.modmail.channels.fetch(thread.channel);
-      const thChannel = thChan as TextChannel;
-      const thMessage = await thChannel.send(thMsgEmbed);
-
-      // Modmail message
-      const mmmsg: MMMessage = {
-        clientID: msg.id,
-        content: msg.content,
-        edits: [],
-        files: [],
-        isDeleted: false,
-        internal: false,
-        modmailID: thMessage.id,
-        sender: msg.author.id,
-        threadID: thread.id,
-      };
-
-      await pool.messages.add(mmmsg);
-      await this.attachments.handle(msg, thChannel, thMessage.id);
-      await msg.react('✅');
-    } catch (err) {
-      log.error(
-        `Failed to send message from ${msg.author.tag} to ${thread.id}
-${LogUtil.breakDownErr(err)}`,
-      );
+    if (data !== null) {
+      return new Thread(this.modmail, data);
     }
+
+    return null;
+  }
+
+  public async getByChannel(channelID: string): Promise<Thread | null> {
+    const pool = Modmail.getDB();
+    const data = await pool.threads.getByChannel(channelID);
+
+    if (data !== null) {
+      return new Thread(this.modmail, data);
+    }
+
+    return null;
+  }
+
+  public async getByID(id: string): Promise<Thread | null> {
+    const pool = Modmail.getDB();
+    const data = await pool.threads.getByID(id);
+
+    if (data !== null) {
+      return new Thread(this.modmail, data);
+    }
+
+    return null;
   }
 
   /**
@@ -130,14 +118,14 @@ ${LogUtil.breakDownErr(err)}`,
    * failed
    */
   private async handleSelector(msg: Message): Promise<CatSelector | null> {
-    const catUtil = Modmail.getCatUtil();
+    const catCtrl = this.modmail.categories;
     const pool = Modmail.getDB();
     const log = this.getLogger();
     let selectorRes: null | CatSelector = null;
     let mute: null | MuteStatus = null;
 
     try {
-      selectorRes = await catUtil.categorySelector(
+      selectorRes = await catCtrl.categorySelector(
         msg.channel as DMChannel,
         msg.author,
       );

@@ -35,16 +35,21 @@ export default class SetEmote extends Command {
 
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
-    const pool = Modmail.getDB();
+    const modmail = Modmail.getModmail();
+    const category = await modmail.categories.getByID(args.id);
 
-    try {
-      await pool.categories.setEmote(args.id, args.emoji);
+    if (category !== null) {
+      await category.setEmoji(args.emoji);
       msg.say('Updated.');
-    } catch (_) {
-      const res = "That category doesn't exist.";
-      LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      return null;
     }
+
+    LogUtil.cmdWarn(
+      msg,
+      `Couldn't set emoji "${args.emoji}" for category ${args.id}`
+      + " because it doesn't exist",
+    );
+    msg.say("That category doesn't exist.");
     return null;
   }
 }

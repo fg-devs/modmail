@@ -1,7 +1,5 @@
 import { Command, CommandoMessage } from 'discord.js-commando';
-import Embeds from '../../util/Embeds';
 import Modmail from '../../Modmail';
-import LogUtil from '../../util/Logging';
 
 export default class Reply extends Command {
   constructor(client: Modmail) {
@@ -24,47 +22,14 @@ export default class Reply extends Command {
   }
 
   public async run(msg: CommandoMessage): Promise<null> {
-    const pool = Modmail.getDB();
-    const thread = await pool.threads.getThreadByChannel(msg.channel.id);
-    const content = msg.argString || '';
+    const modmail = Modmail.getModmail();
+    const thread = await modmail.threads.getByChannel(msg.channel.id);
 
-    if (thread === null || msg.guild === null) {
-      const res = 'Not currently in a modmail thread';
-      LogUtil.cmdWarn(msg, res);
-      msg.say(res);
-      return null;
+    if (thread !== null) {
+      await thread.sendToUser(msg, false);
+    } else {
+      await msg.reply('This is not an active thread.');
     }
-
-    const { client } = msg;
-    const user = await client.users.fetch(thread.author.id);
-    const dmChannel = user.dmChannel || await user.createDM();
-    const member = await msg.guild.members.fetch(msg.author.id);
-    const footer = {
-      text: member.roles.highest.name,
-    };
-    const threadEmbed = Embeds.messageSend(content, msg.author);
-    const dmEmbed = Embeds.messageReceived(content, msg.author);
-
-    threadEmbed.footer = footer;
-    dmEmbed.footer = footer;
-
-    const threadMessage = await msg.channel.send(threadEmbed);
-    const dmMessage = await dmChannel.send(dmEmbed);
-
-    await pool.users.create(msg.author.id);
-    await pool.messages.add({
-      clientID: dmMessage.id,
-      content,
-      edits: [],
-      files: [],
-      isDeleted: false,
-      internal: false,
-      modmailID: threadMessage.id,
-      sender: msg.author.id,
-      threadID: thread.id,
-    });
-
-    await msg.delete();
     return null;
   }
 }

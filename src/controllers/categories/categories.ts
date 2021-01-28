@@ -1,4 +1,6 @@
-import { Category } from 'modmail-types';
+import {
+  Category as PartialCategory,
+} from 'modmail-types';
 import {
   CategoryChannel,
   DMChannel,
@@ -7,10 +9,11 @@ import {
   User,
 } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
-import { CategoryResolvable } from '../models/types';
-import Embeds from '../util/Embeds';
-import { PROMPT_TIME } from '../globals';
-import Modmail from '../Modmail';
+import { CategoryResolvable } from '../../models/types';
+import Embeds from '../../util/Embeds';
+import { PROMPT_TIME } from '../../globals';
+import Modmail from '../../Modmail';
+import Category from './category';
 
 export type CatSelector = {
   category: CategoryChannel,
@@ -28,12 +31,29 @@ export default class CatController {
     this.modmail = modmail;
   }
 
+  public async create(
+    name: string,
+    emoji: string,
+    catChan: CategoryChannel,
+  ): Promise<Category> {
+    const pool = Modmail.getDB();
+
+    const data = await pool.categories.create({
+      guildID: catChan.guild.id,
+      name,
+      emote: emoji,
+      channelID: catChan.id,
+    });
+
+    return new Category(this.modmail, data);
+  }
+
   /**
    * Get category based on what guild the message is in
    * @param {CommandoMessage} msg
    * @param {boolean} isActive Whether or not the category must be active
    */
-  public async getCategory(
+  public async getByMessage(
     msg: CommandoMessage,
     isActive = true,
   ): Promise<Category | null> {
@@ -41,17 +61,46 @@ export default class CatController {
       return null;
     }
 
-    const pool = this.modmail.getDB();
-    const category = await pool.categories.fetch(
+    const pool = Modmail.getDB();
+    const data = await pool.categories.fetch(
       CategoryResolvable.guild,
       msg.guild.id,
     );
 
-    if (category === null || category.isActive !== isActive) {
+    if (data === null || data.isActive !== isActive) {
       return null;
     }
 
-    return category;
+    return new Category(this.modmail, data);
+  }
+
+  public async getByID(
+    catID: string,
+    isActive = true,
+  ): Promise<Category | null> {
+    const pool = Modmail.getDB();
+    const data = await pool.categories.fetch(
+      CategoryResolvable.id,
+      catID,
+    );
+
+    if (data === null || data.isActive !== isActive) {
+      return null;
+    }
+
+    return new Category(this.modmail, data);
+  }
+
+  public async getAll(isActive = true): Promise<Category[]> {
+    const pool = Modmail.getDB();
+    const cats = await pool.categories.fetchAll(
+      CategoryResolvable.activity,
+      isActive ? 'true' : 'false',
+    );
+
+    return cats.map(
+      (data: PartialCategory) => new Category(this.modmail, data),
+    );
   }
 
   /**
@@ -63,7 +112,7 @@ export default class CatController {
     let res = '';
     for (let i = 0; i < categories.length; i += 1) {
       const category = categories[i];
-      res += `${category.name} = ${category.emojiID}\n`;
+      res += `${category.getName()} = ${category.getEmoji()}\n`;
     }
 
     return res;
@@ -88,11 +137,12 @@ export default class CatController {
     if (this.hasActiveSelector(user.id)) {
       throw new Error('Please select a category.');
     }
-    const pool = this.modmail.getDB();
-    const categories = await pool.categories.fetchAll(
+
+    const pool = Modmail.getDB();
+    const categories = (await pool.categories.fetchAll(
       CategoryResolvable.activity,
       'true',
-    );
+    )).map((data: PartialCategory) => new Category(this.modmail, data));
 
     if (categories.length === 0) {
       throw new Error('There are no active categories at the moment.');
@@ -101,7 +151,7 @@ export default class CatController {
     const embed = Embeds.categorySelect(categories);
     const msg = await channel.send(embed);
     this.remember(user.id);
-    const emotes = categories.map((cat: Category) => cat.emojiID);
+    const emotes = categories.map((cat: Category) => cat.getEmoji());
 
     emotes.forEach((emojiStr: string) => {
       msg.react(emojiStr)

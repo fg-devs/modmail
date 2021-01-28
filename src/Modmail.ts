@@ -5,12 +5,19 @@ import { CONFIG } from './globals';
 import EventHandler from './events/EventHandler';
 import IssueHandler from './events/IssueHandler';
 import DatabaseManager from './database/database';
-import MessageController from './controllers/messages';
-import ThreadController from './controllers/threads';
-import Categories from './controllers/categories';
+import MessageController from './controllers/messages/messages';
+import ThreadController from './controllers/threads/threads';
+import CatController from './controllers/categories/categories';
+import AttachmentController from './controllers/attachments';
 
 export default class Modmail extends CommandoClient {
-  public static categories: Categories;
+  public readonly attachments: AttachmentController;
+
+  public readonly categories: CatController;
+
+  public readonly threads: ThreadController;
+
+  public readonly messages: MessageController;
 
   private readonly events: EventHandler;
 
@@ -24,15 +31,13 @@ export default class Modmail extends CommandoClient {
       owner: CONFIG.bot.owners,
     });
 
-    const threadController = new ThreadController(this);
-    const msgController = new MessageController(
-      this,
-      threadController,
-    );
+    this.attachments = new AttachmentController(this);
+    this.categories = new CatController(this);
+    this.threads = new ThreadController(this);
+    this.messages = new MessageController(this);
 
-    Modmail.categories = new Categories(this);
     Modmail.db = null;
-    this.events = new EventHandler(this, msgController);
+    this.events = new EventHandler(this);
     this.registerEvents();
     this.registry
       .registerDefaultTypes()
@@ -65,30 +70,11 @@ export default class Modmail extends CommandoClient {
     await this.login(CONFIG.bot.token);
   }
 
-  /**
-   * Get the database manager.
-   * @method getDB
-   * @returns {DatabaseManager}
-   */
-  public getDB(): DatabaseManager {
-    if (Modmail.db !== null) {
-      return Modmail.db;
-    }
-    throw new Error('getDB was called before starting Modmail.');
-  }
-
   public static getDB(): DatabaseManager {
     if (Modmail.db !== null) {
       return Modmail.db;
     }
     throw new Error('getDB was called before starting Modmail.');
-  }
-
-  public static getCatUtil(): Categories {
-    if (Modmail.categories !== null) {
-      return Modmail.categories;
-    }
-    throw new Error('getCatUtil was called before initializing Modmail.');
   }
 
   /**

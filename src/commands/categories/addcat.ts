@@ -35,7 +35,7 @@ export default class AddCategory extends Command {
 
   public async run(msg: CommandoMessage, args: CatArgs): Promise<null> {
     const { name, emoji } = args;
-    const pool = Modmail.getDB();
+    const modmail = Modmail.getModmail();
 
     if (!(msg.channel instanceof TextChannel)) {
       return null;
@@ -49,14 +49,15 @@ export default class AddCategory extends Command {
       return null;
     }
 
-    await pool.categories.create({
-      guildID: msg.channel.guild.id,
-      name,
-      emote: emoji,
-      channelID: parent.id,
-    });
+    try {
+      await modmail.categories.create(name, emoji, parent);
+      msg.say('Category added.');
+    } catch (e) {
+      const res = 'Something internal went wrong.';
+      LogUtil.cmdError(msg, e, res);
+      msg.say(res);
+    }
 
-    msg.say('Category added.');
     return null;
   }
 }

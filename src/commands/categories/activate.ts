@@ -19,9 +19,8 @@ export default class ActivateCategory extends Command {
 
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage): Promise<null> {
-    const pool = Modmail.getDB();
-    const catUtil = Modmail.getCatUtil();
-    const category = await catUtil.getCategory(msg, false);
+    const modmail = Modmail.getModmail();
+    const category = await modmail.categories.getByMessage(msg, false);
 
     if (category === null) {
       const res = "Couldn't find a category for this guild.";
@@ -30,7 +29,7 @@ export default class ActivateCategory extends Command {
       return null;
     }
 
-    await pool.categories.setActive(category.id, true);
+    await category.setActive(true);
     msg.say('Reactivated.');
     return null;
   }

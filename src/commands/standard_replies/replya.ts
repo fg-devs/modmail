@@ -1,6 +1,5 @@
 import { Command, CommandoMessage } from 'discord.js-commando';
 import Modmail from '../../Modmail';
-import Embeds from '../../util/Embeds';
 import LogUtil from '../../util/Logging';
 
 type Args = {
@@ -28,16 +27,8 @@ export default class StandardReplyAnon extends Command {
 
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const pool = Modmail.getDB();
-    const standardReply = await pool.standardReplies.get(args.name);
-
-    if (standardReply === null) {
-      const res = 'Unable to locate that standard reply...';
-      LogUtil.cmdWarn(msg, res);
-      msg.say(res);
-      return null;
-    }
-
-    const thread = await pool.threads.getThreadByChannel(msg.channel.id);
+    const modmail = Modmail.getModmail();
+    const thread = await modmail.threads.getByChannel(msg.channel.id);
 
     if (thread === null) {
       const res = 'Not currently in a modmail thread';
@@ -46,27 +37,17 @@ export default class StandardReplyAnon extends Command {
       return null;
     }
 
-    const user = await this.client.users.fetch(thread.author.id, true, true);
-    const dmChannel = user.dmChannel || await user.createDM();
-    const threadEmbed = Embeds.messageSendAnon(standardReply.reply, msg.author);
-    const dmEmbed = Embeds.messageReceivedAnon(standardReply.reply);
-    const threadMessage = await msg.channel.send(threadEmbed);
-    const dmMessage = await dmChannel.send(dmEmbed);
+    const standardReply = await pool.standardReplies.get(args.name);
+    if (standardReply === null) {
+      const res = 'Unable to locate that standard reply...';
+      LogUtil.cmdWarn(msg, res);
+      msg.say(res);
+      return null;
+    }
 
-    await pool.users.create(msg.author.id);
-    await pool.messages.add({
-      clientID: dmMessage.id,
-      content: standardReply.reply,
-      edits: [],
-      files: [],
-      isDeleted: false,
-      internal: false,
-      modmailID: threadMessage.id,
-      sender: msg.author.id,
-      threadID: thread.id,
-    });
-
+    await thread.sendSR(msg, standardReply.reply, true);
     await msg.delete();
+
     return null;
   }
 }

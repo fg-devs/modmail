@@ -1,6 +1,5 @@
 import { Command, CommandoMessage } from 'discord.js-commando';
 import Modmail from '../../Modmail';
-import Embeds from '../../util/Embeds';
 import LogUtil from '../../util/Logging';
 
 type Args = {
@@ -27,16 +26,9 @@ export default class StandardReply extends Command {
   }
 
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
+    const modmail = Modmail.getModmail();
     const pool = Modmail.getDB();
-    const standardReply = await pool.standardReplies.get(args.name);
-    if (standardReply === null) {
-      const res = 'Unable to locate that standard reply...';
-      LogUtil.cmdWarn(msg, res);
-      msg.say(res);
-      return null;
-    }
-
-    const thread = await pool.threads.getThreadByChannel(msg.channel.id);
+    const thread = await modmail.threads.getByChannel(msg.channel.id);
 
     if (thread === null || msg.guild === null) {
       const res = 'Not currently in a modmail thread';
@@ -45,37 +37,17 @@ export default class StandardReply extends Command {
       return null;
     }
 
-    const user = await this.client.users.fetch(thread.author.id, true, true);
-    const dmChannel = user.dmChannel || await user.createDM();
-    const member = await msg.guild.members.fetch(msg.author.id);
+    const standardReply = await pool.standardReplies.get(args.name);
+    if (standardReply === null) {
+      const res = 'Unable to locate that standard reply...';
+      LogUtil.cmdWarn(msg, res);
+      msg.say(res);
+      return null;
+    }
 
-    const footer = {
-      text: member.roles.highest.name,
-    };
-
-    const threadEmbed = Embeds.messageSend(standardReply.reply, msg.author);
-    const dmEmbed = Embeds.messageReceived(standardReply.reply, msg.author);
-
-    threadEmbed.footer = footer;
-    dmEmbed.footer = footer;
-
-    const threadMessage = await msg.channel.send(threadEmbed);
-    const dmMessage = await dmChannel.send(dmEmbed);
-
-    await pool.users.create(msg.author.id);
-    await pool.messages.add({
-      clientID: dmMessage.id,
-      content: standardReply.reply,
-      edits: [],
-      files: [],
-      isDeleted: false,
-      internal: false,
-      modmailID: threadMessage.id,
-      sender: msg.author.id,
-      threadID: thread.id,
-    });
-
+    await thread.sendSR(msg, standardReply.reply, false);
     await msg.delete();
+
     return null;
   }
 }
