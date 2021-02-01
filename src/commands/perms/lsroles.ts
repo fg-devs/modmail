@@ -1,8 +1,9 @@
-import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
+import { RoleLevel } from 'modmail-types';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
 import LogUtil from '../../util/Logging';
+import * as PermUtil from '../../util/Perms';
 
 export default class ListRoles extends Command {
   constructor(client: Modmail) {
@@ -17,6 +18,7 @@ export default class ListRoles extends Command {
     });
   }
 
+  @PermUtil.Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage): Promise<null> {
     const catUtil = Modmail.getCatUtil();
     const category = await catUtil.getCategory(msg);
