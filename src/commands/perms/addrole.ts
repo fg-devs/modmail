@@ -38,8 +38,8 @@ export default class AddRole extends Command {
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
     const { roleID } = args;
     const levelStr = args.level.toLowerCase();
-    const catUtil = Modmail.getCatUtil();
-    const category = await catUtil.getCategory(msg, true);
+    const modmail = Modmail.getModmail();
+    const category = await modmail.categories.getByMessage(msg, true);
     const level = AddRole.getLevel(levelStr);
 
     if (category === null) {
@@ -60,7 +60,7 @@ export default class AddRole extends Command {
     await pool.permissions.add({
       roleID,
       level,
-      category: category.id,
+      category: category.getID(),
     });
 
     msg.say(`Role added as ${levelStr}`);

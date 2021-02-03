@@ -1,16 +1,33 @@
 import { Thread } from 'modmail-types';
 import { Message, TextChannel } from 'discord.js';
-import Controller from '../models/controller';
-import Modmail from '../Modmail';
-import ThreadController from './threads';
+import MMMessage from './message';
+import Controller from '../../models/controller';
+import Modmail from '../../Modmail';
 
 export default class MessageController extends Controller {
-  private readonly threads: ThreadController;
-
-  constructor(modmail: Modmail, threads: ThreadController) {
+  constructor(modmail: Modmail) {
     super(modmail, 'messages');
+  }
 
-    this.threads = threads;
+  public async getLastFrom(
+    threadID: string,
+    authorID: string,
+  ): Promise<MMMessage | null> {
+    const pool = Modmail.getDB();
+    const data = await pool.messages.getLastMessage(threadID, authorID);
+
+    if (data === null) { return null; }
+
+    return new MMMessage(this.modmail, data);
+  }
+
+  public async getByID(id: string): Promise<MMMessage | null> {
+    const pool = Modmail.getDB();
+    const data = await pool.messages.fetch(id);
+
+    if (data === null) { return null; }
+
+    return new MMMessage(this.modmail, data);
   }
 
   /**
@@ -19,8 +36,8 @@ export default class MessageController extends Controller {
    * @returns {Promise<void>}
    */
   public async handle(msg: Message): Promise<void> {
-    const pool = this.modmail.getDB();
-    const thread = await pool.threads.getThreadByChannel(msg.channel.id);
+    const pool = Modmail.getDB();
+    const thread = await this.modmail.threads.getByChannel(msg.channel.id);
 
     if (thread === null) {
       return;
@@ -35,7 +52,7 @@ export default class MessageController extends Controller {
       isDeleted: false,
       modmailID: msg.id,
       sender: msg.author.id,
-      threadID: thread.id,
+      threadID: thread.getID(),
     });
   }
 
@@ -45,14 +62,14 @@ export default class MessageController extends Controller {
    * @returns {Promise<void>}
    */
   public async handleDM(msg: Message): Promise<void> {
-    const pool = this.modmail.getDB();
+    const { threads } = this.modmail;
 
-    const thread = await pool.threads.getCurrentThread(msg.author.id);
+    const thread = await threads.getByAuthor(msg.author.id);
 
     if (thread !== null) {
-      await this.threads.sendMessage(msg, thread);
+      await thread.sendToThread(msg);
     } else {
-      await this.threads.create(msg);
+      await threads.create(msg);
     }
   }
 
@@ -65,7 +82,7 @@ export default class MessageController extends Controller {
    * @returns {Promise<void>}
    */
   public async markAsDeleted(msg: Message, thread: Thread): Promise<void> {
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
 
     // get the thread channel for this message
     const thChan = await this.modmail.channels.fetch(
@@ -118,7 +135,7 @@ export default class MessageController extends Controller {
     newVersion: Message,
     thread: Thread,
   ): Promise<void> {
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
     let thChannel;
     let thMessage;
 

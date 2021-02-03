@@ -19,13 +19,13 @@ export default class Forward extends Command {
 
   public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
     const pool = Modmail.getDB();
-    const catUtil = Modmail.getCatUtil();
-    const selectorRes = await catUtil.categorySelector(
+    const modmail = Modmail.getModmail();
+    const selectorRes = await modmail.categories.categorySelector(
       msg.channel as TextChannel,
       msg.author,
     );
 
-    const thread = await pool.threads.getThreadByChannel(msg.channel.id);
+    const thread = await pool.threads.getByChannel(msg.channel.id);
     if (thread === null) {
       const res = 'Currently not in a thread';
       LogUtil.cmdWarn(msg, res);

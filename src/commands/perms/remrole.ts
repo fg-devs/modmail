@@ -1,4 +1,3 @@
-import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from 'modmail-types';
 import Modmail from '../../Modmail';
@@ -31,8 +30,8 @@ export default class RemoveRole extends Command {
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const { roleID } = args;
-    const catUtil = Modmail.getCatUtil();
-    const category = await catUtil.getCategory(msg, true);
+    const modmail = Modmail.getModmail();
+    const category = await modmail.categories.getByMessage(msg, true);
 
     if (category === null) {
       const res = "This guild doesn't have an active category.";

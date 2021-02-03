@@ -1,23 +1,18 @@
 import { Mutex, MutexInterface } from 'async-mutex';
 import {
-  DMChannel, GuildMember, Message, PartialGuildMember, PartialMessage, TextChannel,
+  DMChannel, GuildMember, Message, PartialGuildMember, PartialMessage,
 } from 'discord.js';
-import { Thread } from 'modmail-types';
 import Modmail from '../Modmail';
 import Embeds from '../util/Embeds';
 import { CONFIG } from '../globals';
-import MessageController from '../controllers/messages';
 
 export default class EventHandler {
   private readonly modmail: Modmail;
 
-  private readonly messages: MessageController
-
   private readonly queue: Map<string, MutexInterface>;
 
-  constructor(modmail: Modmail, messages: MessageController) {
+  constructor(modmail: Modmail) {
     this.modmail = modmail;
-    this.messages = messages;
     this.queue = new Map<string, MutexInterface>();
   }
 
@@ -26,14 +21,15 @@ export default class EventHandler {
    * @param {Message} msg
    */
   public async onMessage(msg: Message): Promise<void> {
+    const msgCtrl = this.modmail.messages;
     if (!msg.author.bot && !msg.content.startsWith(CONFIG.bot.prefix)) {
       if (msg.channel.type === 'dm') {
         const mutex = this.getMutex(msg.author.id);
         const release = await mutex.acquire();
-        await this.messages.handleDM(msg);
+        await msgCtrl.handleDM(msg);
         release();
       } else {
-        await this.messages.handle(msg);
+        await msgCtrl.handle(msg);
       }
     }
   }
@@ -57,20 +53,22 @@ export default class EventHandler {
    * @param {Message | PartialMessage} msg
    */
   public async onMessageDelete(msg: Message | PartialMessage): Promise<void> {
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
 
     if (msg.partial) {
       return;
     }
 
     if (!msg.author.bot && !msg.content.startsWith(CONFIG.bot.prefix)) {
-      const thread = await pool.threads.getCurrentThread(msg.author.id);
+      const thread = await this.modmail.threads.getByAuthor(msg.author.id);
       if (thread === null) {
         return;
       }
 
-      if (msg.channel instanceof DMChannel) {
-        await this.messages.markAsDeleted(msg, thread);
+      const thMsg = await thread.getMessage(msg.id);
+
+      if (thMsg !== null) {
+        await thMsg.delete();
       } else {
         await pool.messages.setDeleted(msg.id);
       }
@@ -84,21 +82,20 @@ export default class EventHandler {
    */
   public async onMessageEdit(
     oldMsg: Message | PartialMessage,
-    newMsg: Message | PartialMessage,
+    newMsgOpt: Message | PartialMessage,
   ): Promise<void> {
-    const pool = this.modmail.getDB();
-
-    if (oldMsg.partial || newMsg.partial) {
-      return;
-    }
+    const newMsg = newMsgOpt.partial
+      ? await newMsgOpt.fetch()
+      : newMsgOpt as Message;
 
     if (newMsg.channel instanceof DMChannel && !newMsg.author.bot) {
-      const thread = await pool.threads.getCurrentThread(newMsg.author.id);
-      if (thread === null) {
-        return;
+      const msgCtrl = this.modmail.messages;
+      const thMsg = await msgCtrl.getByID(oldMsg.id);
+
+      if (thMsg !== null) {
+        await thMsg.editClient(oldMsg, newMsg);
+        await newMsg.react('✏');
       }
-      await this.messages.editMessage(oldMsg, newMsg, thread);
-      await newMsg.react('✏');
     }
   }
 
@@ -107,48 +104,37 @@ export default class EventHandler {
    * @param {GuildMember} member
    */
   public async onMemberJoin(member: GuildMember): Promise<void> {
-    const pool = this.modmail.getDB();
-    const thread = await pool.threads.getCurrentThread(member.id);
+    const thread = await this.modmail.threads.getByAuthor(member.id);
 
     if (thread === null) {
       return;
     }
 
-    const channel = await this.modmail.channels.fetch(
-      thread.channel,
-      true,
-      true,
-    );
+    const threadChan = await thread.getThreadChannel();
 
-    if (channel) {
+    if (threadChan) {
       const embed = Embeds.memberJoined(member);
-      await (channel as TextChannel).send(embed);
+      await threadChan.send(embed);
     }
   }
 
-  /**
-   * Called on member leave
-   * @param {GuildMember | PartialGuildMember} member
-   */
   public async onMemberLeave(
     member: GuildMember | PartialGuildMember,
   ): Promise<void> {
-    const pool = this.modmail.getDB();
-    const thread = await pool.threads.getCurrentThread(member.id);
+    const thread = await this.modmail.threads.getByAuthor(member.id);
 
-    if (thread === null || member.partial) {
+    if (thread === null) {
       return;
     }
 
-    const channel = await this.modmail.channels.fetch(
-      thread.channel,
-      true,
-      true,
-    );
+    const threadChan = await thread.getThreadChannel();
 
-    if (channel) {
-      const embed = Embeds.memberLeft(member);
-      await (channel as TextChannel).send(embed);
+    if (threadChan) {
+      const target = member.partial
+        ? await this.modmail.users.fetch(member.id, true)
+        : member.user;
+      const embed = Embeds.memberLeft(target);
+      await threadChan.send(embed);
     }
   }
 

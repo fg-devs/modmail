@@ -31,23 +31,14 @@ export default class MuteManager extends Table {
     return true;
   }
 
-  /**
-   * Unmute a user
-   * @param {string} user
-   * @param {string} category
-   * @returns {Promise<void>}
-   * @throws {Error} if nothing happened
-   */
-  public async delete(user: string, cat: string): Promise<void> {
+  public async delete(user: string, cat: string): Promise<boolean> {
     const res = await this.pool.query(
       `DELETE FROM ${this.name}`
       + ' WHERE user_id=$1 AND category_id=$2 AND till > $3',
       [user, cat, Date.now()],
     );
 
-    if (res.rowCount === 0) {
-      throw new Error(`${user} wasn't muted`);
-    }
+    return res.rowCount > 0;
   }
 
   /**
