@@ -1,5 +1,4 @@
 import { RoleLevel } from 'modmail-types';
-import { Message } from 'discord.js';
 import {
   Command,
   CommandoMessage,

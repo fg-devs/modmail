@@ -20,18 +20,18 @@ export default class ListRoles extends Command {
 
   @PermUtil.Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage): Promise<null> {
-    const catUtil = Modmail.getCatUtil();
-    const category = await catUtil.getCategory(msg);
+    const modmail = Modmail.getModmail();
+    const category = await modmail.categories.getByMessage(msg, true);
 
     if (!category) {
-      const res = "This guild doesn't have a category.";
+      const res = "This guild doesn't have an active category.";
       LogUtil.cmdWarn(msg, res);
       msg.say(res);
       return null;
     }
 
     const pool = Modmail.getDB();
-    const roles = await pool.permissions.fetchAll(category.id);
+    const roles = await pool.permissions.fetchAll(category.getID());
     const res = Embeds.listRoles(category, roles);
 
     msg.say(res);

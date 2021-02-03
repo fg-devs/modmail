@@ -58,30 +58,21 @@ export default class ThreadManager extends Table {
     };
   }
 
-  /**
-   * Count the number of active threads for a user
-   * @method countThreads
-   * @param {string} user
-   * @returns {Promise<number>}
-   */
-  public async countThreads(user: string): Promise<number> {
+  public async countThreads(userID: string): Promise<number> {
     const res = await this.pool.query(
       `SELECT COUNT(*) FROM ${this.name} WHERE author = $1 AND is_active = false`,
-      [user],
+      [userID],
     );
 
     return res.rows[0].count;
   }
 
-  /**
-   * @param {string} user
-   * @returns {Promise<Thread | null>} if thread was found
-   */
-  public async getCurrentThread(user: string): Promise<Thread | null> {
+  public async getByUser(userID: string): Promise<Thread | null> {
     const res = await this.pool.query(
       `SELECT * FROM ${this.name} WHERE author = $1 AND is_active = true LIMIT 1`,
-      [user],
+      [userID],
     );
+
     if (res.rowCount === 0) {
       return null;
     }
@@ -89,13 +80,20 @@ export default class ThreadManager extends Table {
     return ThreadManager.parse(res.rows[0]);
   }
 
-  /**
-   * @method getThreadByChannel
-   * @param {string} channelID
-   * @returns {Promise<Thread>}
-   * @throws {Error} if nothing was resolved
-   */
-  public async getThreadByChannel(channelID: string): Promise<Thread | null> {
+  public async getByID(threadID: string): Promise<Thread | null> {
+    const res = await this.pool.query(
+      `SELECT * FROM ${this.name} WHERE id = $1`,
+      [threadID],
+    );
+
+    if (res.rowCount === 0) {
+      return null;
+    }
+
+    return ThreadManager.parse(res.rows[0]);
+  }
+
+  public async getByChannel(channelID: string): Promise<Thread | null> {
     const res = await this.pool.query(
       `SELECT * FROM ${this.name} WHERE channel = $1 AND is_active = true LIMIT 1`,
       [channelID],

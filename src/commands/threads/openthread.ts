@@ -1,5 +1,4 @@
 import { RoleLevel } from 'modmail-types';
-import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
@@ -45,7 +44,8 @@ export default class OpenThread extends Command {
 
     const userID = optUserID[0];
     const pool = Modmail.getDB();
-    const user = await msg.client.users.fetch(userID, true, true);
+    const modmail = Modmail.getModmail();
+    const user = await msg.client.users.fetch(userID, true);
     const category = await pool.categories.fetch(
       CategoryResolvable.guild,
       msg.guild.id,
@@ -65,9 +65,9 @@ export default class OpenThread extends Command {
       return null;
     }
 
-    const hasThread = await pool.threads.getCurrentThread(user.id);
+    const thread = await modmail.threads.getByAuthor(user.id);
 
-    if (hasThread !== null) {
+    if (thread !== null) {
       const res = 'This user already has a thread open';
       LogUtil.cmdWarn(msg, res);
       msg.say(res);

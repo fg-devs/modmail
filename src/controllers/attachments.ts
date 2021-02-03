@@ -83,7 +83,7 @@ export default class AttachmentController extends Controller {
     msg: Message,
     attachment: MessageAttachment,
   ): Promise<void> {
-    const pool = this.modmail.getDB();
+    const pool = Modmail.getDB();
     return pool.attachments.create({
       messageID: id,
       name: attachment.name || '',

@@ -44,40 +44,22 @@ export default class CategoryManager extends Table {
     };
   }
 
-  /**
-   * Set the activity of a category based on a provided emote.
-   * @param {string} emoji
-   * @param {boolean} active
-   * @returns {Promise<void>}
-   * @throws {Error} if nothing was updated
-   */
-  public async setActive(id: string, active: boolean): Promise<void> {
+  public async setActive(id: string, active: boolean): Promise<boolean> {
     const res = await this.pool.query(
       `UPDATE ${this.name} SET is_active=$2 WHERE id=$1`,
       [id, active],
     );
 
-    if (res.rowCount === 0) {
-      throw new Error('Nothing was updated');
-    }
+    return res.rowCount > 0;
   }
 
-  /**
-   * Set a unique emote for a given category.
-   * @param {string} id Category identifier
-   * @param {string} emote New unique emote
-   * @returns {Promise<void>}
-   * @throws {Error} If nothing was updated
-   */
-  public async setEmote(id: string, emote: string): Promise<void> {
+  public async setEmote(id: string, emote: string): Promise<boolean> {
     const res = await this.pool.query(
       `UPDATE ${this.name} SET emote = $1 WHERE id = $2`,
       [emote, id],
     );
 
-    if (res.rowCount === 0) {
-      throw new Error('Nothing was updated');
-    }
+    return res.rowCount > 0;
   }
 
   /**

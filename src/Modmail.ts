@@ -5,16 +5,25 @@ import { CONFIG } from './globals';
 import EventHandler from './events/EventHandler';
 import IssueHandler from './events/IssueHandler';
 import DatabaseManager from './database/database';
-import MessageController from './controllers/messages';
-import ThreadController from './controllers/threads';
-import Categories from './util/Categories';
+import MessageController from './controllers/messages/messages';
+import ThreadController from './controllers/threads/threads';
+import CatController from './controllers/categories/categories';
+import AttachmentController from './controllers/attachments';
 
 export default class Modmail extends CommandoClient {
-  public static catUtil: Categories;
+  public readonly attachments: AttachmentController;
 
-  private static db: DatabaseManager | null;
+  public readonly categories: CatController;
+
+  public readonly threads: ThreadController;
+
+  public readonly messages: MessageController;
 
   private readonly events: EventHandler;
+
+  private static modmail: Modmail | null = null;
+
+  private static db: DatabaseManager | null;
 
   constructor() {
     super({
@@ -22,15 +31,13 @@ export default class Modmail extends CommandoClient {
       owner: CONFIG.bot.owners,
     });
 
-    const threadController = new ThreadController(this);
-    const msgController = new MessageController(
-      this,
-      threadController,
-    );
+    this.attachments = new AttachmentController(this);
+    this.categories = new CatController(this);
+    this.threads = new ThreadController(this);
+    this.messages = new MessageController(this);
 
-    Modmail.catUtil = new Categories(this);
     Modmail.db = null;
-    this.events = new EventHandler(this, msgController);
+    this.events = new EventHandler(this);
     this.registerEvents();
     this.registry
       .registerDefaultTypes()
@@ -51,6 +58,7 @@ export default class Modmail extends CommandoClient {
         ['perms'],
       ])
       .registerCommandsIn(path.join(__dirname, 'commands'));
+    Modmail.modmail = this;
   }
 
   /**
@@ -62,18 +70,6 @@ export default class Modmail extends CommandoClient {
     await this.login(CONFIG.bot.token);
   }
 
-  /**
-   * Get the database manager.
-   * @method getDB
-   * @returns {DatabaseManager}
-   */
-  public getDB(): DatabaseManager {
-    if (Modmail.db !== null) {
-      return Modmail.db;
-    }
-    throw new Error('getDB was called before starting Modmail.');
-  }
-
   public static getDB(): DatabaseManager {
     if (Modmail.db !== null) {
       return Modmail.db;
@@ -81,11 +77,14 @@ export default class Modmail extends CommandoClient {
     throw new Error('getDB was called before starting Modmail.');
   }
 
-  public static getCatUtil(): Categories {
-    if (Modmail.catUtil !== null) {
-      return Modmail.catUtil;
+  /**
+   * Get the instance of modmail
+   */
+  public static getModmail(): Modmail {
+    if (Modmail.modmail !== null) {
+      return Modmail.modmail;
     }
-    throw new Error('getCatUtil was called before initializing Modmail.');
+    throw new Error('getModmail was called before initializing Modmail.');
   }
 
   /**

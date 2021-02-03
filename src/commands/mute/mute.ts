@@ -1,6 +1,5 @@
-import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
-import { MuteStatus, RoleLevel } from 'modmail-types';
+import { RoleLevel } from 'modmail-types';
 import Modmail from '../../Modmail';
 import LogUtil from '../../util/Logging';
 import { Requires } from '../../util/Perms';
@@ -45,9 +44,8 @@ export default class Mute extends Command {
 
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
-    const pool = Modmail.getDB();
-    const catUtil = Modmail.getCatUtil();
-    const category = await catUtil.getCategory(msg);
+    const modmail = Modmail.getModmail();
+    const category = await modmail.categories.getByMessage(msg);
 
     if (category === null) {
       const res = 'Please run this command in a guild with an active category.';
@@ -55,15 +53,14 @@ export default class Mute extends Command {
       msg.say(res);
       return null;
     }
+    const till = Time.parse(args.time);
+    const reason = args.reason ? args.reason.join(' ') : undefined;
+    const muted = await category.mute(
+      args.userID,
+      till,
+      reason,
+    );
 
-    const mute: MuteStatus = {
-      category: category.id,
-      reason: args.reason ? args.reason.join(' ') : 'No Reason Provided',
-      till: Time.parse(args.time),
-      user: args.userID,
-    };
-
-    const muted = await pool.mutes.add(mute);
     if (!muted) {
       msg.say('Already muted.');
       return null;

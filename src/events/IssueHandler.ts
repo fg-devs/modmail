@@ -14,6 +14,7 @@ export default class IssueHandler {
     c: Command,
     err: Error,
     msg: CommandoMessage,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-explicit-any
     ...args: any[]
   ): void {
     const log = Modmail.getLogger(`(command) ${c.name}`);

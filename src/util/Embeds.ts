@@ -1,4 +1,4 @@
-import { Category, Role, RoleLevel } from 'modmail-types';
+import { Role, RoleLevel } from 'modmail-types';
 import {
   GuildMember,
   MessageAttachment,
@@ -8,6 +8,7 @@ import {
 } from 'discord.js';
 import { CLOSE_THREAD_DELAY } from '../globals';
 import ThreadManager from '../database/tables/threads';
+import Category from '../controllers/categories/category';
 
 /**
  * @class Embeds
@@ -88,8 +89,8 @@ export default class Embeds {
     for (let i = 0; i < categories.length; i += 1) {
       const cat = categories[i];
       res.fields.push({
-        name: `${cat.emojiID} - ${cat.name}`,
-        value: `${cat.id}`,
+        name: `${cat.getEmoji()} - ${cat.getName()}`,
+        value: `${cat.getID()}`,
         inline: false,
       });
     }
@@ -212,13 +213,13 @@ export default class Embeds {
    * All embeds share the attributes returned here.
    * @returns {MessageEmbed}
    */
-  public static memberLeft(member: GuildMember): MessageEmbed {
+  public static memberLeft(user: User): MessageEmbed {
     return Embeds.getGeneric({
       title: 'User left the server',
-      description: `${member} left the server`,
+      description: `${user} left the server`,
       author: {
-        icon_url: member.user.avatarURL() || member.user.defaultAvatarURL,
-        name: member.user.tag,
+        icon_url: user.avatarURL() || user.defaultAvatarURL,
+        name: user.tag,
       },
     });
   }
@@ -321,7 +322,7 @@ export default class Embeds {
    */
   public static listRoles(cat: Category, roles: Role[]): MessageEmbed {
     const res = Embeds.getGeneric({
-      title: `Roles of ${cat.name} - ${cat.emojiID}`,
+      title: `Roles of ${cat.getName()} - ${cat.getEmoji()}`,
       description: '',
       color: 'BLURPLE',
     });

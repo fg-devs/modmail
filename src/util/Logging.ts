@@ -37,6 +37,19 @@ export default class LogUtil {
     log.warn(message);
   }
 
+  public static cmdError(
+    msg: CommandoMessage,
+    err: Error,
+    context: string,
+  ): void {
+    const log = LogUtil.getCmdLogger(msg.command as Command);
+    const message = `${msg.author.tag} executed "${msg.command?.name}"
+    ${LogUtil.breakDownMsg(msg)}
+     * Context: ${context}
+     ${LogUtil.breakDownErr(err)}`;
+    log.error(message);
+  }
+
   private static getCmdLogger(c: Command) {
     return Modmail.getLogger(`(command) ${c.name}`);
   }
