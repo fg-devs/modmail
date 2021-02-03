@@ -1,4 +1,4 @@
-import { ServerMessage } from 'modmail-types';
+import { ServerMessage, ServerResponse } from 'modmail-types';
 import { parentPort, MessagePort } from 'worker_threads';
 import Modmail from '../Modmail';
 
@@ -19,7 +19,7 @@ export default class WorkerHandler {
   public async onMessage(msg: ServerMessage): Promise<void> {
     if (msg.task === 'get_member_roles') {
       const [guildID, memberID] = msg.args;
-      await this.getRoles(guildID, memberID);
+      await this.getRoles(msg.id, guildID, memberID);
     }
   }
 
@@ -28,19 +28,27 @@ export default class WorkerHandler {
    * @param guildID
    * @param userID
    */
-  public async getRoles(guildID: string, userID: string): Promise<void> {
+  public async getRoles(
+    id: string,
+    guildID: string,
+    userID: string,
+  ): Promise<void> {
+    const res: ServerResponse = {
+      id,
+      data: [],
+    };
     try {
       const guild = await this.modmail.guilds.fetch(guildID, true);
-      const member = await guild.member(userID);
+      const member = await guild.members.fetch(userID);
 
       if (member === null) {
-        this.parent.postMessage([]);
+        this.parent.postMessage(res);
         return;
       }
-      const roles = member.roles.cache.map((r) => r.id);
-      this.parent.postMessage(roles);
+      res.data = member.roles.cache.map((r) => r.id);
+      this.parent.postMessage(res);
     } catch (_) {
-      this.parent.postMessage([]);
+      this.parent.postMessage(res);
     }
   }
 }
