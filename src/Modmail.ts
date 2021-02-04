@@ -1,3 +1,4 @@
+import { parentPort } from 'worker_threads';
 import { CommandoClient } from 'discord.js-commando';
 import path from 'path';
 import { Logger, getLogger } from 'log4js';
@@ -5,10 +6,11 @@ import { CONFIG } from './globals';
 import EventHandler from './events/EventHandler';
 import IssueHandler from './events/IssueHandler';
 import DatabaseManager from './database/database';
-import MessageController from './controllers/messages/messages';
-import ThreadController from './controllers/threads/threads';
 import CatController from './controllers/categories/categories';
+import ThreadController from './controllers/threads/threads';
+import MessageController from './controllers/messages/messages';
 import AttachmentController from './controllers/attachments';
+import WorkerHandler from './events/WorkerHandler';
 
 export default class Modmail extends CommandoClient {
   public readonly attachments: AttachmentController;
@@ -103,6 +105,7 @@ export default class Modmail extends CommandoClient {
    */
   private registerEvents() {
     const issues = new IssueHandler();
+
     this.on('commandError', issues.onCommandError.bind(issues))
       .on('commandRun', issues.onCommandRun.bind(issues))
       .on('commandRegister', issues.onCommandRegister.bind(issues));
@@ -115,5 +118,11 @@ export default class Modmail extends CommandoClient {
       .on('guildMemberRemove', this.events.onMemberLeave.bind(this.events));
 
     this.once('ready', this.events.onReady.bind(this.events));
+
+    if (parentPort) {
+      const work = new WorkerHandler(this);
+
+      parentPort.on('message', work.onMessage.bind(work));
+    }
   }
 }
