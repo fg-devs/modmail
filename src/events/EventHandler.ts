@@ -30,8 +30,11 @@ export default class EventHandler {
       if (msg.channel.type === 'dm') {
         const mutex = this.getMutex(msg.author.id);
         const release = await mutex.acquire();
-        await this.messages.handleDM(msg);
-        release();
+        try {
+          await this.messages.handleDM(msg);
+        } finally {
+          release();
+        }
       } else {
         await this.messages.handle(msg);
       }
