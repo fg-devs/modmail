@@ -123,7 +123,9 @@ export default class WorkerHandler {
     let i = 0;
     while (!iMember.done && i < limit) {
       const fetchTask = WorkerHandler.getRoleState(iMember.value);
+      const state = WorkerHandler.parseGuildMember(iMember.value, '');
       tasks.push(fetchTask);
+      states.push(state);
       iMember = members.next();
       i += 1;
     }
@@ -131,7 +133,7 @@ export default class WorkerHandler {
     const fetchTasks = await Promise.all(tasks);
     i = 0;
     while (i < fetchTasks.length) {
-      const roleState = fetchTasks[i][1];
+      const roleState = fetchTasks[i];
       states[i].role = roleState;
       i += 1;
     }
