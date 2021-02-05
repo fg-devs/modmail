@@ -27,7 +27,7 @@ export default class EventHandler {
         const mutex = this.getMutex(msg.author.id);
         const release = await mutex.acquire();
         try {
-          await this.messages.handleDM(msg);
+          await msgCtrl.handleDM(msg);
         } finally {
           release();
         }
