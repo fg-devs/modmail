@@ -85,8 +85,6 @@ export default class WorkerHandler {
     }
     const dRoles = member.roles.cache.map((r) => r.id);
     const roles = await pool.permissions.fetchFrom(dRoles);
-    console.debug(dRoles);
-    console.debug(roles);
     let roleState = '';
 
     for (let i = 0; i < roles.length; i += 1) {
