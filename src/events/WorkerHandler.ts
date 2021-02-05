@@ -52,6 +52,7 @@ export default class WorkerHandler {
         data: e,
       };
     }
+    log.debug('Sent:\n', res);
     this.parent.postMessage(res);
   }
 
