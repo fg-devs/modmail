@@ -22,8 +22,8 @@ export default class WorkerHandler {
 
     try {
       if (msg.task === 'get_member_roles') {
-        const [guildID, memberID] = msg.args;
-        const data = await this.getRoles(guildID, memberID);
+        const [guildID, userID] = msg.args;
+        const data = await this.getRoles(guildID, userID);
         const res: ServerResponse = {
           id: msg.id,
           data,
