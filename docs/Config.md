@@ -1,4 +1,6 @@
 # Modmail Configuration
+You can set `CONFIG` enviroment variable with a file path for custom config
+placement.
 
 ## General Configuration
 Everything that is on the root of the config is listed here

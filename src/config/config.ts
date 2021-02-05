@@ -19,6 +19,8 @@ export default class Config extends Conf {
 
     public readonly logLevel: string;
 
+    private static location = process.env.CONFIG || './config.yml';
+
     constructor() {
       super('config');
       this.logLevel = 'debug';
@@ -30,7 +32,7 @@ export default class Config extends Conf {
      * @throws {Error} If an attribute is missing from the config.yml
      */
     public static getConfig(): Config {
-      const fileContents = fs.readFileSync('./config.yml', 'utf-8');
+      const fileContents = fs.readFileSync(Config.location, 'utf-8');
       const casted = yaml.safeLoad(fileContents) as Config;
 
       validate<Config>(new Config(), casted);
