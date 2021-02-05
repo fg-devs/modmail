@@ -43,12 +43,12 @@ export default class WorkerHandler {
         res.data = await this.getRoles(guildID, userID);
         this.parent.postMessage(res);
         // Get a member
-      } if (msg.task === WORKER_CALLS.getMember) {
+      } else if (msg.task === WORKER_CALLS.getMember) {
         const req = msg as GetMemberStateReq;
         const [guildID, userID] = req.args;
         res.data = await this.getMemberState(guildID, userID);
         // Get all member states
-      } if (msg.task === WORKER_CALLS.getAllMembers) {
+      } else if (msg.task === WORKER_CALLS.getAllMembers) {
         const req = msg as GetAllMemberStatesReq;
         const [guildID, after, limit] = req.args;
         res.data = await this.getAllMemberStates(guildID, after, limit);
