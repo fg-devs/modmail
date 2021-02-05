@@ -1,5 +1,4 @@
 import { GuildMember } from 'discord.js';
-import { stat } from 'fs';
 import {
   GetAllMemberStatesReq,
   GetMemberStateReq,
@@ -34,18 +33,21 @@ export default class WorkerHandler {
       data: null,
       id: msg.id,
     };
-    log.debug(`Received task "${msg.task}"`);
+    log.debug(`Received task "${msg.task}":\n`, msg);
 
     try {
+      // Get a roles of a member
       if (msg.task === WORKER_CALLS.getRoles) {
         const req = msg as GetRolesReq;
         const [guildID, userID] = req.args;
         res.data = await this.getRoles(guildID, userID);
         this.parent.postMessage(res);
+        // Get a member
       } if (msg.task === WORKER_CALLS.getMember) {
         const req = msg as GetMemberStateReq;
         const [guildID, userID] = req.args;
         res.data = await this.getMemberState(guildID, userID);
+        // Get all member states
       } if (msg.task === WORKER_CALLS.getAllMembers) {
         const req = msg as GetAllMemberStatesReq;
         const [guildID, after, limit] = req.args;
