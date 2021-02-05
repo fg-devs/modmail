@@ -1,4 +1,7 @@
+import { GuildMember } from 'discord.js';
+import { stat } from 'fs';
 import {
+  GetAllMemberStatesReq,
   GetMemberStateReq,
   GetRolesReq,
   MemberState,
@@ -43,6 +46,10 @@ export default class WorkerHandler {
         const req = msg as GetMemberStateReq;
         const [guildID, userID] = req.args;
         res.data = await this.getMemberState(guildID, userID);
+      } if (msg.task === WORKER_CALLS.getAllMembers) {
+        const req = msg as GetAllMemberStatesReq;
+        const [guildID, after, limit] = req.args;
+        res.data = await this.getAllMemberStates(guildID, after, limit);
       } else {
         throw new Error(`Unknown task "${msg.task}"`);
       }
@@ -76,13 +83,76 @@ export default class WorkerHandler {
     guildID: string,
     userID: string,
   ): Promise<MemberState> {
-    const pool = Modmail.getDB();
     const guild = await this.modmail.guilds.fetch(guildID, true);
     const member = await guild.members.fetch(userID);
 
     if (member === null) {
       throw new Error("That member isn't in this guild.");
     }
+
+    const roleState = await WorkerHandler.getRoleState(member);
+    const state: MemberState = WorkerHandler.parseGuildMember(
+      member,
+      roleState,
+    );
+
+    return state;
+  }
+
+  public async getAllMemberStates(
+    guildID: string,
+    after = '',
+    limit = 1000,
+  ): Promise<MemberState[]> {
+    const guild = await this.modmail.guilds.fetch(guildID, true);
+    const tasks: Promise<string>[] = [];
+    const states: MemberState[] = [];
+    let members;
+
+    if (after !== '') {
+      members = guild.members.cache.values();
+    } else {
+      members = guild.members.cache
+        .filter((m) => m.id > after)
+        .values();
+    }
+
+    let iMember = members.next();
+    let i = 0;
+    while (!iMember.done && i < limit) {
+      const fetchTask = WorkerHandler.getRoleState(iMember.value);
+      tasks.push(fetchTask);
+      iMember = members.next();
+      i += 1;
+    }
+
+    const fetchTasks = await Promise.all(tasks);
+    i = 0;
+    while (i < fetchTasks.length) {
+      const roleState = fetchTasks[i][1];
+      states[i].role = roleState;
+      i += 1;
+    }
+
+    return states;
+  }
+
+  private static parseGuildMember(
+    member: GuildMember,
+    role: string,
+  ): MemberState {
+    return {
+      avatarURL: member.user.avatarURL() || member.user.defaultAvatarURL,
+      discriminator: member.user.discriminator,
+      id: member.id,
+      nickname: member.nickname || '',
+      username: member.user.username,
+      role,
+    };
+  }
+
+  private static async getRoleState(member: GuildMember): Promise<string> {
+    const pool = Modmail.getDB();
     const dRoles = member.roles.cache.map((r) => r.id);
     const roles = await pool.permissions.fetchFrom(dRoles);
     let roleState = '';
@@ -95,16 +165,7 @@ export default class WorkerHandler {
       }
     }
 
-    const state: MemberState = {
-      avatarURL: member.user.avatarURL() || member.user.defaultAvatarURL,
-      discriminator: member.user.discriminator,
-      id: member.id,
-      nickname: member.nickname || '',
-      username: member.user.username,
-      role: roleState,
-    };
-
-    return state;
+    return roleState;
   }
 
   private getLogger(id: string) {
