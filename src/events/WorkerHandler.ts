@@ -1,12 +1,14 @@
-import { GuildMember } from 'discord.js';
+import { GuildMember, User } from 'discord.js';
 import {
   GetAllMemberStatesReq,
   GetMemberStateReq,
   GetRolesReq,
+  GetUserStateReq,
   MemberState,
   RoleLevel,
   ServerMessage,
   ServerResponse,
+  UserState,
   WORKER_CALLS,
 } from 'modmail-types';
 import { parentPort, MessagePort } from 'worker_threads';
@@ -52,6 +54,10 @@ export default class WorkerHandler {
         const req = msg as GetAllMemberStatesReq;
         const [guildID, after, limit] = req.args;
         res.data = await this.getAllMemberStates(guildID, after, limit);
+      } else if (msg.task === WORKER_CALLS.getUserState) {
+        const req = msg as GetUserStateReq;
+        const [userID] = req.args;
+        res.data = await this.getUserState(userID);
       } else {
         throw new Error(`Unknown task "${msg.task}"`);
       }
@@ -79,6 +85,16 @@ export default class WorkerHandler {
     }
 
     return member.roles.cache.map((r) => r.id);
+  }
+
+  public async getUserState(userID: string): Promise<UserState> {
+    const user = await this.modmail.users.fetch(userID, true);
+
+    if (user === null) {
+      throw new Error("That user doesn't in this guild.");
+    }
+
+    return WorkerHandler.parseUser(user);
   }
 
   public async getMemberState(
@@ -146,12 +162,18 @@ export default class WorkerHandler {
     role: string,
   ): MemberState {
     return {
-      avatarURL: member.user.avatarURL() || member.user.defaultAvatarURL,
-      discriminator: member.user.discriminator,
-      id: member.id,
-      nickname: member.nickname || '',
-      username: member.user.username,
+      ...WorkerHandler.parseUser(member.user),
       role,
+      nickname: member.nickname || '',
+    };
+  }
+
+  private static parseUser(user: User): UserState {
+    return {
+      avatarURL: user.avatarURL() || user.defaultAvatarURL,
+      discriminator: user.discriminator,
+      id: user.id,
+      username: user.username,
     };
   }
 
