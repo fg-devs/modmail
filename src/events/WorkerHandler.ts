@@ -106,7 +106,7 @@ export default class WorkerHandler {
     after = '',
     limit = 1000,
   ): Promise<MemberState[]> {
-    const guild = await this.modmail.guilds.fetch(guildID, true);
+    const guild = await this.modmail.guilds.fetch(guildID);
     const tasks: Promise<string>[] = [];
     const states: MemberState[] = [];
     let members;
