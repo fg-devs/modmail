@@ -54,7 +54,7 @@ export default class PermManager extends Table {
 
   public async fetchFrom(roleIDs: string[]): Promise<Role[]> {
     const res = await this.pool.query(
-      `SELECT * FROM ${this.name} WHERE role_id IN ($1)`,
+      `SELECT * FROM ${this.name} WHERE role_id = ANY ($1)`,
       [roleIDs],
     );
 
