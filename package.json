@@ -28,7 +28,7 @@
     "discord.js-commando": "github:discordjs/Commando#0c2541af3710e3d283464e465f21f2c3597f9647",
     "js-yaml": "^3.14.1",
     "log4js": "^6.3.0",
-    "modmail-types": "github:Floor-Gang/modmail-types#eec71ff4a719a94798c901122b926cf6a0452345",
+    "modmail-types": "github:Floor-Gang/modmail-types#60c6867fadca9b249d822058eff717133765a11a",
     "pg": "^8.5.1"
   }
 }
