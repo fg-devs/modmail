@@ -52,6 +52,15 @@ export default class PermManager extends Table {
     return PermManager.parse(res.rows[0]);
   }
 
+  public async fetchFrom(roleIDs: string[]): Promise<Role[]> {
+    const res = await this.pool.query(
+      `SELECT * FROM ${this.name} WHERE role_id IN ($1)`,
+      [roleIDs],
+    );
+
+    return res.rows.map((role) => PermManager.parse(role));
+  }
+
   public async fetchAll(category: string): Promise<Role[]> {
     const res = await this.pool.query(
       `SELECT * FROM ${this.name} WHERE category_id=$1`,
