@@ -23,7 +23,7 @@ export default class WorkerHandler {
     try {
       if (msg.task === 'get_member_roles') {
         const [guildID, memberID] = msg.args;
-        const data = this.getRoles(msg.id, guildID, memberID);
+        const data = await this.getRoles(guildID, memberID);
         const res: ServerResponse = {
           id: msg.id,
           data,
@@ -46,11 +46,7 @@ export default class WorkerHandler {
    * @param guildID
    * @param userID
    */
-  public async getRoles(
-    id: string,
-    guildID: string,
-    userID: string,
-  ): Promise<string[]> {
+  public async getRoles(guildID: string, userID: string): Promise<string[]> {
     const guild = await this.modmail.guilds.fetch(guildID, true);
     const member = await guild.members.fetch(userID);
 
