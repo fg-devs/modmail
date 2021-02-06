@@ -212,16 +212,16 @@ export default class Thread {
     const pool = Modmail.getDB();
     const content = msg.argString || '';
     const dmChannel = await this.getDMChannel();
-    const member = await this.getMember();
+    const user = await this.getUser();
 
-    if (member === null) {
+    if (user === null) {
       throw new Error(
         `Couldn't retrieve member for ${this.ref.author.id}, did they leave?`,
       );
     }
 
     const footer = {
-      text: member.roles.highest.name,
+      text: msg.member?.roles.highest.name,
     };
     const threadEmbed = anonymously
       ? Embeds.messageSendAnon(content, msg.author)
@@ -250,5 +250,9 @@ export default class Thread {
     });
 
     await msg.delete();
+  }
+
+  private async getUser(): Promise<User> {
+    return this.modmail.users.fetch(this.ref.author.id);
   }
 }
