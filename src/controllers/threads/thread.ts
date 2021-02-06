@@ -223,7 +223,9 @@ export default class Thread {
     }
 
     const footer = {
-      text: msg.member ? msg.member.roles.highest.name : 'Moderator',
+      text: anonymously
+        ? 'Staff'
+        : msg.member?.roles.highest.name || 'Staff',
     };
     const threadEmbed = anonymously
       ? Embeds.messageSendAnon(content, msg.author)
