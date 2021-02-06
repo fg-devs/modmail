@@ -181,7 +181,7 @@ export default class Thread {
     };
 
     const threadEmbed = anonymously
-      ? Embeds.messageSendAnon(context, user)
+      ? Embeds.messageSendAnon(context, msg.author)
       : Embeds.messageSend(context, msg.author);
 
     const dmEmbed = anonymously
