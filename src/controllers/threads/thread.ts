@@ -172,16 +172,16 @@ export default class Thread {
   ): Promise<void> {
     const pool = Modmail.getDB();
     const dmChannel = await this.getDMChannel();
-    const member = await this.getMember();
+    const user = await this.getUser();
 
-    if (member === null) { return; }
+    if (user === null) { return; }
 
     const footer = {
-      text: member.roles.highest.name,
+      text: msg.member ? msg.member.roles.highest.name : 'Moderator',
     };
 
     const threadEmbed = anonymously
-      ? Embeds.messageSendAnon(context, member.user)
+      ? Embeds.messageSendAnon(context, user)
       : Embeds.messageSend(context, msg.author);
 
     const dmEmbed = anonymously
@@ -221,7 +221,7 @@ export default class Thread {
     }
 
     const footer = {
-      text: msg.member?.roles.highest.name,
+      text: msg.member ? msg.member.roles.highest.name : 'Moderator',
     };
     const threadEmbed = anonymously
       ? Embeds.messageSendAnon(content, msg.author)
