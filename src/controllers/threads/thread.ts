@@ -177,7 +177,9 @@ export default class Thread {
     if (user === null) { return; }
 
     const footer = {
-      text: msg.member ? msg.member.roles.highest.name : 'Moderator',
+      text: anonymously
+        ? msg.member?.roles.highest.name || 'Staff'
+        : 'Staff',
     };
 
     const threadEmbed = anonymously

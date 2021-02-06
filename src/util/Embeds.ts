@@ -147,7 +147,7 @@ export default class Embeds {
       description: content,
       color: 0x7CFC00,
       footer: {
-        text: 'Anonymous',
+        text: 'Staff',
       },
     });
   }
@@ -161,7 +161,7 @@ export default class Embeds {
   public static messageReceivedAnon(content: string): MessageEmbed {
     return Embeds.getGeneric({
       author: {
-        name: 'Moderator',
+        name: 'Staff',
       },
       description: content,
       color: 0xE8D90C,
