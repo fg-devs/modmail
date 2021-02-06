@@ -178,8 +178,8 @@ export default class Thread {
 
     const footer = {
       text: anonymously
-        ? msg.member?.roles.highest.name || 'Staff'
-        : 'Staff',
+        ? 'Staff'
+        : msg.member?.roles.highest.name || 'Staff',
     };
 
     const threadEmbed = anonymously
