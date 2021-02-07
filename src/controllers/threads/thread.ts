@@ -36,14 +36,17 @@ export default class Thread {
     const dmChannel = await this.getDMChannel();
     const thChannel = await this.getThreadChannel();
 
-    await dmChannel.send(dmEmbed);
 
-    if (thChannel !== null) {
-      await thChannel.send(threadEmbed);
-      await new Promise((r) => setTimeout(r, CLOSE_THREAD_DELAY));
-      await thChannel.delete('Thread closed');
+    try {
+      await dmChannel.send(dmEmbed);
+    } finally {
+      if (thChannel !== null) {
+        await thChannel.send(threadEmbed);
+        await new Promise((r) => setTimeout(r, CLOSE_THREAD_DELAY));
+        await thChannel.delete('Thread closed');
+      }
+      await pool.threads.close(this.ref.channel);
     }
-    await pool.threads.close(this.ref.channel);
   }
 
   public getID(): string {
