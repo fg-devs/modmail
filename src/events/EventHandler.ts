@@ -81,7 +81,7 @@ export default class EventHandler {
   /**
    * Called on message edit
    * @param {Message | PartialMessage} oldMsg
-   * @param {Message | PartialMessage} newMsg
+   * @param {Message | PartialMessage} newMsgOpt
    */
   public async onMessageEdit(
     oldMsg: Message | PartialMessage,
