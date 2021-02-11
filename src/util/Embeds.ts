@@ -6,8 +6,8 @@ import {
   MessageEmbedOptions,
   User,
 } from 'discord.js';
+import { ThreadsTable } from '@Floor-Gang/modmail-database';
 import { CLOSE_THREAD_DELAY } from '../globals';
-import ThreadManager from '../database/tables/threads';
 import Category from '../controllers/categories/category';
 
 /**
@@ -49,10 +49,10 @@ export default class Embeds {
    * @returns {Promise<MessageEmbed>}
    */
   public static async memberDetails(
-    db: ThreadManager,
+    db: ThreadsTable,
     user: User,
   ): Promise<MessageEmbed> {
-    const numOfThreads = await db.countThreads(user.id);
+    const numOfThreads = await db.countUser(user.id);
     const createdDays = this.getDays(user.createdAt);
     return Embeds.getGeneric({
       author: {
@@ -155,7 +155,6 @@ export default class Embeds {
   /**
    * All embeds share the attributes returned here.
    * @param {string} content
-   * @param {User} author
    * @returns {MessageEmbed}
    */
   public static messageReceivedAnon(content: string): MessageEmbed {
@@ -345,7 +344,7 @@ export default class Embeds {
    * @param {Date} till Muted until unix timestamp (ms)
    */
   public static muted(catName: string, till: number): MessageEmbed {
-    const res = Embeds.getGeneric({
+    return Embeds.getGeneric({
       title: `You're muted from ${catName}`,
       color: 'RED',
       timestamp: Math.floor(till),
@@ -353,8 +352,6 @@ export default class Embeds {
         text: 'Until',
       },
     });
-
-    return res;
   }
 
   /**

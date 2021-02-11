@@ -37,7 +37,7 @@ export default class ThreadController extends Controller {
     }
 
     const pool = Modmail.getDB();
-    const numOfThreads = await pool.threads.countCategoryThreads(sel.id);
+    const numOfThreads = await pool.threads.countCategory(sel.id);
 
     if (MAX_THREADS <= numOfThreads) {
       await msg.reply(
