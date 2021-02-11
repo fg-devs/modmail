@@ -22,6 +22,7 @@
     "start": "node ./dist/app.js"
   },
   "dependencies": {
+    "@Floor-Gang/modmail-database": "^1.4.0",
     "@types/log4js": "^2.3.5",
     "async-mutex": "^0.2.6",
     "discord.js": "^12.5.1",
