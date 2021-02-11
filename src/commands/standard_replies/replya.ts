@@ -33,7 +33,7 @@ export default class StandardReplyAnon extends Command {
     if (thread === null) {
       const res = 'Not currently in a modmail thread';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
@@ -41,7 +41,7 @@ export default class StandardReplyAnon extends Command {
     if (standardReply === null) {
       const res = 'Unable to locate that standard reply...';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 

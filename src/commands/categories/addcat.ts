@@ -45,17 +45,17 @@ export default class AddCategory extends Command {
     if (!parent) {
       const res = "This channel isn't in a category.";
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
     try {
       await modmail.categories.create(name, emoji, parent);
-      msg.say('Category added.');
+      await msg.say('Category added.');
     } catch (e) {
       const res = 'Something internal went wrong.';
       LogUtil.cmdError(msg, e, res);
-      msg.say(res);
+      await msg.say(res);
     }
 
     return null;

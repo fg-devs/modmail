@@ -117,6 +117,7 @@ export default class ThreadController extends Controller {
    * @returns {Promise<CatSelector | null>} null if the selection process
    * failed
    */
+  // TODO(dylan):
   private async handleSelector(msg: Message): Promise<CatSelector | null> {
     const catCtrl = this.modmail.categories;
     const pool = Modmail.getDB();
@@ -188,9 +189,9 @@ export default class ThreadController extends Controller {
 
     // setup channel and send details about the user and the thread
     await channel.setParent(sel.category);
-    channel.send(userDetails);
-    channel.send(threadDetails);
-    channel.setTopic(`User ID: ${user.id}`);
+    await channel.send(userDetails);
+    await channel.send(threadDetails);
+    await channel.setTopic(`User ID: ${user.id}`);
 
     // create user if they don't exit
     await pool.users.create(msg.author.id);

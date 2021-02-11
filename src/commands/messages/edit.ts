@@ -28,7 +28,7 @@ export default class Edit extends Command {
     const modmail = Modmail.getModmail();
     const thread = await modmail.threads.getByChannel(msg.channel.id);
     if (thread === null) {
-      msg.say('Not currently in a thread..');
+      await msg.say('Not currently in a thread..');
       return null;
     }
     const thMsg = await thread.getLastMessage(msg.author.id);

@@ -21,7 +21,7 @@ export default class CloseThread extends Command {
     if (thread === null) {
       const res = 'Not currently in a thread';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 

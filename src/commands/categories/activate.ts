@@ -25,12 +25,12 @@ export default class ActivateCategory extends Command {
     if (category === null) {
       const res = "Couldn't find a category for this guild.";
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
     await category.setActive(true);
-    msg.say('Reactivated.');
+    await msg.say('Reactivated.');
     return null;
   }
 }

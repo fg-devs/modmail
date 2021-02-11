@@ -35,12 +35,12 @@ export default class RemoveCategory extends Command {
 
     if (category !== null) {
       await category.setActive(false);
-      msg.say('Disabled category.');
+      await msg.say('Disabled category.');
       return null;
     }
 
     LogUtil.cmdWarn(msg, `Couldn't disable category "${id}" for ${msg.author.id}`);
-    msg.say(`Couldn't find category "${id}"`);
+    await msg.say(`Couldn't find category "${id}"`);
     return null;
   }
 }

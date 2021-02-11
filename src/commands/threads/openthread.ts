@@ -38,7 +38,7 @@ export default class OpenThread extends Command {
     }
 
     if (optUserID === null || optUserID.length === 0) {
-      msg.say('Please mention a user or provide an ID');
+      await msg.say('Please mention a user or provide an ID');
       return null;
     }
 
@@ -54,14 +54,14 @@ export default class OpenThread extends Command {
     if (category === null) {
       const res = "This guild isn't part of a category.";
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
     if (user === null) {
       const res = 'Failed to get that member, is it the correct ID?';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
@@ -70,7 +70,7 @@ export default class OpenThread extends Command {
     if (thread !== null) {
       const res = 'This user already has a thread open';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
@@ -87,7 +87,7 @@ export default class OpenThread extends Command {
       } catch (e) {
         const res = 'Failed to create DM with this user.';
         LogUtil.cmdWarn(msg, res);
-        msg.say(res);
+        await msg.say(res);
         return null;
       }
     }

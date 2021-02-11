@@ -29,7 +29,7 @@ export default class Forward extends Command {
     if (thread === null) {
       const res = 'Currently not in a thread';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 

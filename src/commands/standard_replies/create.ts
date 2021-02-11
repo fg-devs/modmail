@@ -37,7 +37,7 @@ export default class StandardReplyCreate extends Command {
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const pool = Modmail.getDB();
     await pool.standardReplies.create(args);
-    msg.say(
+    await msg.say(
       'Successfully created a new standard reply'
       + `\n - Usage: \`${CONFIG.bot.prefix}sr ${args.name}\``,
     );
