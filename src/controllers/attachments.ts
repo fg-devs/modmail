@@ -31,7 +31,7 @@ export default class AttachmentController extends Controller {
   public async handle(
     msg: MMMessage,
     messageAttachments: Iterator<MessageAttachment>,
-    anonymously = false,
+    anonymously: boolean,
   ): Promise<void> {
     const thread = await msg.getThread();
 

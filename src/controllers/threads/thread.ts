@@ -179,7 +179,7 @@ export default class Thread {
     await msg.delete();
   }
 
-  public async sendMsg(msg: CommandoMessage, anonymously = false): Promise<void> {
+  public async sendMsg(msg: CommandoMessage, anonymously: boolean): Promise<void> {
     const content = msg.argString || '';
     const attachments = msg.attachments.values();
 

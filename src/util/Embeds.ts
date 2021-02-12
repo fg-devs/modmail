@@ -108,34 +108,27 @@ export default class Embeds {
     sender: User | GuildMember,
     anonymously = false,
   ): MessageEmbed {
-    let embed;
+    const embed = Embeds.getGeneric({
+      description: content,
+      color: 0x7CFC00,
+    });
 
     if (sender instanceof GuildMember) {
-      embed = Embeds.getGeneric({
-        author: {
-          name: sender.user.tag,
-          icon_url: sender.user.avatarURL() || sender.user.defaultAvatarURL,
-        },
-        description: content,
-        color: 0x7CFC00,
-        footer: {
-          text: anonymously
-            ? 'Staff'
-            : sender.roles.highest.name || 'Staff',
-        },
-      });
+      embed.author = {
+        name: sender.user.tag,
+        iconURL: sender.user.avatarURL() || sender.user.defaultAvatarURL,
+      };
+      embed.footer = {
+        text: anonymously
+          ? 'Staff'
+          : sender.roles.highest.name || 'Staff',
+      };
     } else {
-      embed = Embeds.getGeneric({
-        author: {
-          name: sender.tag,
-          icon_url: sender.avatarURL() || sender.defaultAvatarURL,
-        },
-        description: content,
-        color: 0x7CFC00,
-        footer: {
-          text: 'Staff',
-        },
-      });
+      embed.author = {
+        name: sender.tag,
+        iconURL: sender.avatarURL() || sender.defaultAvatarURL,
+      };
+      embed.footer = { text: 'Staff' };
     }
 
     return embed;
