@@ -301,10 +301,10 @@ export default class Thread {
       }
       if (msgAtts) {
         msgAtts.forEach((att) => {
-          embed = this.ref.author.id === msg.getSenderID()
+          const attEmbed = this.ref.author.id === msg.getSenderID()
             ? Embeds.attachmentRecv(att, user, false)
             : Embeds.attachmentSend(att, user, false);
-          const attTask = channel.send(embed);
+          const attTask = channel.send(attEmbed);
           msgTasks.push(attTask);
         });
       }
