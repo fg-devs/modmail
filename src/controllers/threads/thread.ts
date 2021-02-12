@@ -9,6 +9,8 @@ import { CommandoMessage } from 'discord.js-commando';
 import {
   Thread as PartialThread,
   Message as PartialMessage,
+  Attachment,
+  Edit,
 } from '@Floor-Gang/modmail-types';
 import Category from '../categories/category';
 import Modmail from '../../Modmail';
@@ -228,6 +230,7 @@ export default class Thread {
   }
 
   public async forward(forwarder: User, category: Category): Promise<boolean> {
+    const modmail = Modmail.getModmail();
     const pool = Modmail.getDB();
     const author = await this.getUser();
     const channel = await ThreadController.setupChannel(
@@ -243,28 +246,59 @@ export default class Thread {
 
     await pool.threads.forward(this.ref.id, category.getID(), channel.id);
 
-    const messages = await pool.messages.fetchAll(this.ref.id);
+    const messages = await modmail.messages.getAll(this.ref.id);
     const users = new Map<string, User>();
+    const attachments = new Map<string, Attachment[]>();
+    const edits = new Map<string, Edit[]>();
     const usrTasks: Promise<User>[] = [];
     const msgTasks: Promise<Message>[] = [];
+    const attTasks: Promise<Attachment[]>[] = [];
+    const edtTasks: Promise<Edit[]>[] = [];
 
     // fetch all users for each message
     for (let i = 0; i < messages.length; i += 1) {
-      const message = messages[i];
-      const task = this.modmail.users.fetch(message.sender);
-      usrTasks.push(task);
+      const msg = messages[i];
+      usrTasks.push(msg.getUser());
+      edtTasks.push(msg.getEdits());
+      attTasks.push(msg.getAttachments());
     }
 
     (await Promise.all(usrTasks)).forEach((user) => users.set(user.id, user));
+    (await Promise.all(edtTasks)).forEach((msgEdits) => {
+      if (msgEdits.length > 0) {
+        edits.set(msgEdits[0].message, msgEdits);
+      }
+    });
+    (await Promise.all(attTasks)).forEach((msgAtt) => {
+      if (msgAtt.length > 0) {
+        attachments.set(msgAtt[0].messageID, msgAtt);
+      }
+    });
 
     for (let i = 0; i < messages.length; i += 1) {
-      const message = messages[i];
-      const user = users.get(message.sender);
-      if (user) {
-        const embed = message.internal
-          ? Embeds.internalMessage(message.content, user)
-          : Embeds.messageSend(message.content, user);
-        const task = channel.send(embed);
+      const msg = messages[i];
+      const user = users.get(msg.getSender());
+      if (user === undefined) {
+        continue;
+      }
+      const msgAtts = attachments.get(msg.getID());
+      const msgEdits = edits.get(msg.getID());
+      let embed;
+      let task;
+
+      if (msgEdits) {
+        embed = Embeds.edits(user, msgEdits);
+        task = channel.send(embed);
+        msgTasks.push(task);
+      } else if (msgAtts) {
+        msgAtts.forEach((att) => {
+          embed = Embeds.messageAttachment(att, user);
+          task = channel.send(embed);
+          msgTasks.push(task);
+        });
+      } else {
+        embed = Embeds.messageSend(msg.getContent(), user);
+        task = channel.send(embed);
         msgTasks.push(task);
       }
     }

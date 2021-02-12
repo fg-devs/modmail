@@ -1,7 +1,8 @@
-import { Role, RoleLevel } from '@Floor-Gang/modmail-types';
+import {
+  Attachment, Edit, Role, RoleLevel,
+} from '@Floor-Gang/modmail-types';
 import {
   GuildMember,
-  MessageAttachment,
   MessageEmbed,
   MessageEmbedOptions,
   User,
@@ -9,7 +10,6 @@ import {
 import { CLOSE_THREAD_DELAY } from '../globals';
 import Category from '../controllers/categories/category';
 import Modmail from '../Modmail';
-
 /**
  * @class Embeds
  * Embed builder utility class
@@ -223,6 +223,18 @@ export default class Embeds {
     });
   }
 
+  public static edits(user: User, edits: Edit[]): MessageEmbed {
+    const last = edits[edits.length - 1];
+    const embed = Embeds.messageSend(last.content, user);
+
+    for (let i = 0; i < edits.length; i += 1) {
+      const edit = edits[i];
+      embed.addField(`Version ${edit.version}`, edit.content);
+    }
+
+    return embed;
+  }
+
   public static threadNotice(category: Category): MessageEmbed {
     return Embeds.getGeneric({
       title: 'New Thread',
@@ -283,14 +295,13 @@ export default class Embeds {
    * @returns {MessageEmbed}
    */
   public static messageAttachmentImage(
-    attachment: MessageAttachment,
+    attachment: Attachment,
     author: User,
   ): MessageEmbed {
     return Embeds.getGeneric({
       title: 'Message Attachment',
       image: {
-        url: attachment.url,
-        proxy_url: attachment.proxyURL,
+        url: attachment.source,
       },
       author: {
         name: author.tag,
@@ -302,17 +313,17 @@ export default class Embeds {
 
   /**
    * All embeds share the attributes returned here.
-   * @param {MessageAttachment} attachment
+   * @param {Attachment} attachment
    * @param {User} author
    * @returns {MessageEmbed}
    */
   public static messageAttachment(
-    attachment: MessageAttachment,
+    attachment: Attachment,
     author: User,
   ): MessageEmbed {
     return Embeds.getGeneric({
       title: 'Message Attachment',
-      description: `[${attachment.name}](${attachment.url})`,
+      description: `[${attachment.name}](${attachment.source})`,
       author: {
         name: author.tag,
         icon_url: author.avatarURL() || author.defaultAvatarURL,

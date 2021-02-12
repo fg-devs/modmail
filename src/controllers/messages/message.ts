@@ -1,12 +1,15 @@
 import {
+  Attachment,
+  Edit,
   Message as PartialMessage,
 } from '@Floor-Gang/modmail-types';
 import {
   Message as DMessage,
-  PartialMessage as PartialDMessage,
+  PartialMessage as PartialDMessage, User,
 } from 'discord.js';
 import Modmail from '../../Modmail';
 import Thread from '../threads/thread';
+import Embeds from '../../util/Embeds';
 
 export default class Message {
   private readonly modmail: Modmail;
@@ -19,6 +22,22 @@ export default class Message {
     this.modmail = modmail;
     this.ref = data;
     this.thread = null;
+  }
+
+  public getID(): string {
+    return this.ref.modmailID;
+  }
+
+  public getClientID(): string | null {
+    return this.ref.clientID;
+  }
+
+  public getSender(): string {
+    return this.ref.sender;
+  }
+
+  public getContent(): string {
+    return this.ref.content;
   }
 
   public async getClientMessage(): Promise<DMessage | null> {
@@ -57,6 +76,22 @@ export default class Message {
     }
   }
 
+  public async getAttachments(): Promise<Attachment[]> {
+    const pool = Modmail.getDB();
+
+    return pool.attachments.fetch(this.ref.modmailID);
+  }
+
+  public async getEdits(): Promise<Edit[]> {
+    const pool = Modmail.getDB();
+
+    return pool.edits.fetch(this.ref.modmailID);
+  }
+
+  public async getUser(): Promise<User> {
+    return this.modmail.users.fetch(this.ref.sender);
+  }
+
   public async editClient(
     oldMsg: DMessage | PartialDMessage,
     newMsg: DMessage,
@@ -79,38 +114,29 @@ export default class Message {
 
     if (thMessage === undefined) { return; }
 
-    const embed = thMessage.embeds[0];
-    embed.description = newMsg.content;
-    embed.addField(
-      `Version ${embed.fields.length + 1}: `,
-      oldMsg.content,
-      false,
-    );
+    // store the new edit to the edits table
+    await pool.edits.add(newMsg.content, thMessage.id);
+    const edits = await pool.edits.fetch(thMessage.id);
+    const embed = Embeds.edits(thMessage.author, edits);
     // edit the thread iteration of the message that was edited
     await thMessage.edit(embed);
-    // store the new edit to the edits table
-    await pool.edits.add({
-      content: newMsg.content,
-      message: thMessage.id,
-      version: 0,
-    });
   }
 
   public async edit(newContent: string): Promise<void> {
     const pool = Modmail.getDB();
-    const threadMessage = await this.getModmailMessage();
+    const thMessage = await this.getModmailMessage();
     const clientMessage = await this.getClientMessage();
 
-    if (threadMessage !== null) {
-      const threadEmbed = threadMessage.embeds[0];
+    if (thMessage !== null) {
+      const threadEmbed = thMessage.embeds[0];
       threadEmbed.description = newContent;
 
-      await threadMessage.edit(threadEmbed);
-      await pool.edits.add({
-        content: newContent,
-        message: threadMessage.id,
-        version: 0,
-      });
+      // store the new edit to the edits table
+      await pool.edits.add(newContent, thMessage.id);
+      const edits = await pool.edits.fetch(thMessage.id);
+      const embed = Embeds.edits(thMessage.author, edits);
+      // edit the thread iteration of the message that was edited
+      await thMessage.edit(embed);
     }
 
     if (clientMessage !== null) {
