@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Guild, Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@Floor-Gang/modmail-types';
 import Modmail from '../../Modmail';
@@ -43,7 +43,7 @@ export default class AddRole extends Command {
     const level = AddRole.getLevel(levelStr);
 
     if (category === null || !category.isActive()) {
-      const res = "This guild doesn't have an active category.";
+      const res = 'This guild doesn\'t have an active category.';
       LogUtil.cmdWarn(msg, res);
       await msg.say(res);
       return null;
@@ -55,8 +55,14 @@ export default class AddRole extends Command {
       await msg.say(res);
       return null;
     }
-    const pool = Modmail.getDB();
 
+    const isReal = await AddRole.isReal(msg.guild as Guild, roleID);
+    if (!isReal) {
+      await msg.say('That role doesn\'t exist.');
+      return null;
+    }
+
+    const pool = Modmail.getDB();
     await pool.permissions.add({
       roleID,
       level,
@@ -72,6 +78,15 @@ export default class AddRole extends Command {
       return PermUtil.resolveStr(level);
     } catch (_) {
       return null;
+    }
+  }
+
+  private static async isReal(guild: Guild, roleID: string): Promise<boolean> {
+    try {
+      const role = await guild.roles.fetch(roleID);
+      return role !== null;
+    } catch (_) {
+      return false;
     }
   }
 }
