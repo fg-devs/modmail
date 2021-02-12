@@ -2,6 +2,7 @@ import { Command, CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@Floor-Gang/modmail-types';
 import Modmail from '../../Modmail';
 import * as PermsUtil from '../../util/Perms';
+import { MessageAttachment } from 'discord.js';
 
 export default class StandardReplyCreate extends Command {
   constructor(client: Modmail) {
@@ -20,21 +21,19 @@ export default class StandardReplyCreate extends Command {
   public async run(msg: CommandoMessage): Promise<null> {
     const pool = Modmail.getDB();
     const srs = await pool.standardReplies.fetchAll();
-    let res = 'Standard Replies:';
+    let res = 'Standard Replies:\n';
 
     for (let i = 0; i < srs.length; i += 1) {
       const sr = srs[i];
       res += `[${sr.id}] "${sr.name}"\n${sr.reply}\n`;
     }
 
-    await msg.reply({
-      files: [
-        {
-          name: 'Standard Replies.txt',
-          attachment: res,
-        },
-      ],
-    });
+    const attachment = new MessageAttachment(
+      Buffer.from(res),
+      'standard_replies.txt',
+    );
+
+    await msg.reply('Here are all the standard replies', attachment);
 
     return null;
   }
