@@ -21,11 +21,11 @@ export default class StandardReplyCreate extends Command {
   public async run(msg: CommandoMessage): Promise<null> {
     const pool = Modmail.getDB();
     const srs = await pool.standardReplies.fetchAll();
-    let res = 'Standard Replies:\n';
+    let res = 'Standard Replies\n\n';
 
     for (let i = 0; i < srs.length; i += 1) {
       const sr = srs[i];
-      res += `[${sr.id}] "${sr.name}"\n${sr.reply}\n`;
+      res += `"${sr.name}:"\n${sr.reply}\n`;
     }
 
     const attachment = new MessageAttachment(
