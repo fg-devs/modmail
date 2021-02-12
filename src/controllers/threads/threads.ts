@@ -51,6 +51,15 @@ export default class ThreadController extends Controller {
     }
 
     const isAdminOnly = await ThreadController.isAboutStaff(dms);
+    // check if they already have an open thread
+    const currentThread = await this.modmail.threads.getByAuthor(
+      msg.author.id,
+    );
+    if (currentThread !== null) {
+      await msg.reply('You already have a open thread.');
+      return;
+    }
+
     const channel = await this.createChannel(
       msg.author,
       category,
