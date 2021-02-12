@@ -290,8 +290,8 @@ export default class Thread {
 
       if (msgEdits) {
         embed = msg.getClientID() !== null
-          ? Embeds.editsRecv(user, msgEdits)
-          : Embeds.editsSend(user, msgEdits);
+          ? Embeds.editsSend(user, msgEdits)
+          : Embeds.editsRecv(user, msgEdits);
       } else if (msg.isInternal()) {
         embed = Embeds.internalMessage(msg.getContent(), user);
       } else {

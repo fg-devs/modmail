@@ -154,29 +154,14 @@ export default class Embeds {
   ): MessageEmbed {
     const embed = Embeds.messageSend(content, sender, anonymously);
 
+    if (sender instanceof User) {
+      embed.footer = {
+        text: 'User',
+      };
+    }
     embed.color = 0xE8D90C;
 
     return embed;
-  }
-
-  /**
-   * All embeds share the attributes returned here.
-   * @param {string} content
-   * @param {User} author
-   * @returns {MessageEmbed}
-   */
-  public static messageSendAnon(content: string, author: User): MessageEmbed {
-    return Embeds.getGeneric({
-      author: {
-        name: author.tag,
-        icon_url: author.avatarURL() || author.defaultAvatarURL,
-      },
-      description: content,
-      color: 0x7CFC00,
-      footer: {
-        text: 'Staff',
-      },
-    });
   }
 
   /**
