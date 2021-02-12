@@ -6,9 +6,9 @@ import {
   MessageEmbedOptions,
   User,
 } from 'discord.js';
-import { ThreadsTable } from '@Floor-Gang/modmail-database';
 import { CLOSE_THREAD_DELAY } from '../globals';
 import Category from '../controllers/categories/category';
+import Modmail from '../Modmail';
 
 /**
  * @class Embeds
@@ -44,14 +44,13 @@ export default class Embeds {
 
   /**
    * Details about a member in a message embed. Usually used for a new thread.
-   * @param {DatabaseManager} db To count how many past threads a user had.
    * @param {User} user
    * @returns {Promise<MessageEmbed>}
    */
   public static async memberDetails(
-    db: ThreadsTable,
     user: User,
   ): Promise<MessageEmbed> {
+    const db = Modmail.getDB().threads;
     const numOfThreads = await db.countUser(user.id);
     const createdDays = this.getDays(user.createdAt);
     return Embeds.getGeneric({
@@ -71,7 +70,7 @@ export default class Embeds {
    * @param {Category[]} categories
    * @returns {MessageEmbed}
    */
-  public static categorySelect(categories: Category[]): MessageEmbed {
+  public static categorySelector(categories: Category[]): MessageEmbed {
     const res = Embeds.listCategories(categories);
 
     res.description = 'React to the category that you want to talk to.';
