@@ -234,7 +234,12 @@ export default class ThreadController extends Controller {
     channel: TextChannel,
   ): Promise<void> {
     const roles = await category.getRoles();
-    const perms: OverwriteResolvable[] = [];
+    const perms: OverwriteResolvable[] = [
+      {
+        deny: ['VIEW_CHANNEL'],
+        id: category.getGuildID(),
+      }
+    ];
 
     for (let i = 0; i < roles.length; i += 1) {
       const role = roles[i];
@@ -242,11 +247,6 @@ export default class ThreadController extends Controller {
       if (role.level === RoleLevel.Admin) {
         perms.push({
           allow: ['VIEW_CHANNEL'],
-          id: role.roleID,
-        });
-      } else {
-        perms.push({
-          deny: ['VIEW_CHANNEL'],
           id: role.roleID,
         });
       }
