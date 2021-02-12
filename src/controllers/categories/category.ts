@@ -29,6 +29,10 @@ export default class Category {
     return this.ref.guildID;
   }
 
+  public getDescription(): string {
+    return this.ref.description;
+  }
+
   public async setActive(isActive: boolean): Promise<boolean> {
     const pool = Modmail.getDB();
 

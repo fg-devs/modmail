@@ -1,4 +1,4 @@
-import { Role, RoleLevel } from 'modmail-types';
+import { Role, RoleLevel } from '@Floor-Gang/modmail-types';
 import {
   GuildMember,
   MessageAttachment,
@@ -90,7 +90,7 @@ export default class Embeds {
       const cat = categories[i];
       res.fields.push({
         name: `${cat.getEmoji()} - ${cat.getName()}`,
-        value: `${cat.getID()}`,
+        value: cat.getDescription(),
         inline: false,
       });
     }
