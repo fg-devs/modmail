@@ -21,7 +21,7 @@ export default class ListRoles extends Command {
   @PermUtil.Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage): Promise<null> {
     const modmail = Modmail.getModmail();
-    const category = await modmail.categories.getByMessage(msg);
+    const category = await modmail.categories.getByGuild(msg.guild?.id || '');
 
     if (!category || !category.isActive()) {
       const res = 'This guild doesn\'t have an active category.';

@@ -30,7 +30,7 @@ export default class Unmute extends Command {
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const modmail = Modmail.getModmail();
-    const category = await modmail.categories.getByMessage(msg);
+    const category = await modmail.categories.getByGuild(msg.guild?.id || '');
 
     if (category === null) {
       const res = 'Please use this command in a guild with an active category.';

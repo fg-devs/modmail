@@ -39,7 +39,7 @@ export default class AddRole extends Command {
     const { roleID } = args;
     const levelStr = args.level.toLowerCase();
     const modmail = Modmail.getModmail();
-    const category = await modmail.categories.getByMessage(msg);
+    const category = await modmail.categories.getByGuild(msg.guild?.id || '');
     const level = AddRole.getLevel(levelStr);
 
     if (category === null || !category.isActive()) {

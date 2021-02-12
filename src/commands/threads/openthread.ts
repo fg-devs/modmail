@@ -4,6 +4,7 @@ import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
 import { Requires } from '../../util/Perms';
 import LogUtil from '../../util/Logging';
+import ThreadController from '../../controllers/threads/threads';
 
 type Args = {
   userID: string;
@@ -45,10 +46,10 @@ export default class OpenThread extends Command {
     const pool = Modmail.getDB();
     const modmail = Modmail.getModmail();
     const user = await msg.client.users.fetch(userID, true);
-    const category = await pool.categories.fetchByGuild(msg.guild.id);
+    const category = await modmail.categories.getByGuild(msg.guild.id);
 
     if (category === null || !category.isActive) {
-      const res = "This guild isn't part of a category.";
+      const res = 'This guild isn\'t part of a category.';
       LogUtil.cmdWarn(msg, res);
       await msg.say(res);
       return null;
@@ -70,34 +71,36 @@ export default class OpenThread extends Command {
       return null;
     }
 
-    const channel = await msg.guild.channels.create(
-      `${user.username}-${user.discriminator}`,
-      {
-        type: 'text',
-      },
+    const channel = await ThreadController.setupChannel(
+      user,
+      category,
+      false,
     );
 
-    if (user.dmChannel === undefined) {
-      try {
-        await user.createDM();
-      } catch (e) {
-        const res = 'Failed to create DM with this user.';
-        LogUtil.cmdWarn(msg, res);
-        await msg.say(res);
-        return null;
-      }
+    if (channel === null) {
+      await msg.reply('Failed to create a channel for this user.');
+      return null;
     }
-    // TODO(dylan): make sure the user is DM'able in the first place
-    const userDetails = await Embeds.memberDetails(user);
-    await channel.setParent(category.channelID);
-    await channel.send(userDetails);
-    await channel.send(Embeds.newThreadFor(msg.author, user));
-    await pool.users.create(user.id);
-    await pool.threads.open(user.id, channel.id, category.id, false);
 
-    await msg.react('✅');
-    await new Promise((r) => setTimeout(r, 5000));
-    await msg.delete();
+    try {
+      const notice = Embeds.threadNotice(category);
+      const dms = await user.createDM();
+      await dms.send(notice);
+      await pool.users.create(user.id);
+      await pool.threads.open(user.id, channel.id, category.getID(), false);
+
+      await msg.react('✅');
+    } catch (e) {
+      let res;
+      if (e.message.includes('Discord API')) {
+        res = 'This user has their DM\'s off';
+      } else {
+        res = 'Something internal went wrong';
+      }
+      await msg.reply(res);
+      LogUtil.cmdError(msg, e, res);
+      await channel.delete();
+    }
 
     return null;
   }

@@ -31,7 +31,7 @@ export default class RemoveRole extends Command {
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const { roleID } = args;
     const modmail = Modmail.getModmail();
-    const category = await modmail.categories.getByMessage(msg);
+    const category = await modmail.categories.getByGuild(msg.guild?.id || '');
 
     if (category === null || !category.isActive()) {
       const res = 'This guild doesn\'t have an active category.';

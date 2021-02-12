@@ -223,6 +223,14 @@ export default class Embeds {
     });
   }
 
+  public static threadNotice(category: Category): MessageEmbed {
+    return Embeds.getGeneric({
+      title: 'New Thread',
+      description: `You're being contacted by ${category.getName()}`,
+      color: 0xADD8E6,
+    });
+  }
+
   /**
    * All embeds share the attributes returned here.
    * @returns {MessageEmbed}

@@ -21,7 +21,7 @@ export default class ActivateCategory extends Command {
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage): Promise<null> {
     const modmail = Modmail.getModmail();
-    const category = await modmail.categories.getByMessage(msg);
+    const category = await modmail.categories.getByGuild(msg.guild?.id || '');
     const channel = await msg.channel as TextChannel;
 
     if (category === null) {

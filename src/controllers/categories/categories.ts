@@ -2,7 +2,6 @@ import { Category as PartialCategory } from '@Floor-Gang/modmail-types';
 import {
   CategoryChannel, Guild,
 } from 'discord.js';
-import { CommandoMessage } from 'discord.js-commando';
 import Modmail from '../../Modmail';
 import Category from './category';
 
@@ -50,13 +49,9 @@ export default class CatController {
     return new Category(this.modmail, data);
   }
 
-  public async getByMessage(msg: CommandoMessage): Promise<Category | null> {
-    if (!msg.guild) {
-      return null;
-    }
-
+  public async getByGuild(guildID: string): Promise<Category | null> {
     const pool = Modmail.getDB();
-    const data = await pool.categories.fetchByGuild(msg.guild.id);
+    const data = await pool.categories.fetchByGuild(guildID);
 
     if (data === null) {
       return null;
