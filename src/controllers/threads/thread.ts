@@ -287,7 +287,6 @@ export default class Thread {
       const msgAtts = attachments.get(msg.getID());
       const msgEdits = edits.get(msg.getID());
       let embed;
-      let task;
 
       if (msgEdits) {
         embed = Embeds.edits(user, msgEdits);
@@ -295,15 +294,16 @@ export default class Thread {
         embed = Embeds.internalMessage(msg.getContent(), user);
       } else {
         embed = Embeds.messageSend(msg.getContent(), user, false);
-        if (msgAtts) {
-          msgAtts.forEach((att) => {
-            embed = Embeds.attachmentSend(att, user, false);
-            task = channel.send(embed);
-            msgTasks.push(task);
-          });
-        }
       }
-      task = channel.send(embed);
+      if (msgAtts) {
+        msgAtts.forEach((att) => {
+          embed = Embeds.attachmentSend(att, user, false);
+          const attTask = channel.send(embed);
+          msgTasks.push(attTask);
+        });
+      }
+
+      const task = channel.send(embed);
       msgTasks.push(task);
     }
 
