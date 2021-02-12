@@ -1,6 +1,6 @@
 import {
   Category as PartialCategory,
-} from 'modmail-types';
+} from '@Floor-Gang/modmail-types';
 import {
   CategoryChannel,
   DMChannel,

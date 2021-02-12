@@ -10,7 +10,7 @@ import {
   ServerResponse,
   UserState,
   WORKER_CALLS,
-} from 'modmail-types';
+} from '@Floor-Gang/modmail-types';
 import { parentPort, MessagePort } from 'worker_threads';
 import Modmail from '../Modmail';
 import * as PermUtil from '../util/Perms';

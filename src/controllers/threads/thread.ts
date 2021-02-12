@@ -9,7 +9,7 @@ import { CommandoMessage } from 'discord.js-commando';
 import {
   Thread as PartialThread,
   Message as PartialMessage,
-} from 'modmail-types';
+} from '@Floor-Gang/modmail-types';
 import Category from '../categories/category';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';

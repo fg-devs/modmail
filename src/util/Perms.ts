@@ -1,4 +1,4 @@
-import { RoleLevel } from 'modmail-types';
+import { RoleLevel } from '@Floor-Gang/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { CONFIG } from '../globals';
 import { CategoryResolvable } from '../models/types';

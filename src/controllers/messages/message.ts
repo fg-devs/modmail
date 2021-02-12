@@ -1,6 +1,6 @@
 import {
   Message as PartialMessage,
-} from 'modmail-types';
+} from '@Floor-Gang/modmail-types';
 import {
   Message as DMessage,
   PartialMessage as PartialDMessage,

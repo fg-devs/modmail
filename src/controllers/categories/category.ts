@@ -1,6 +1,6 @@
 import {
   Category as PartialCategory, MuteStatus,
-} from 'modmail-types';
+} from '@Floor-Gang/modmail-types';
 import Modmail from '../../Modmail';
 
 export default class Category {

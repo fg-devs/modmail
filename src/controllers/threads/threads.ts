@@ -1,6 +1,6 @@
 import {
   MuteStatus,
-} from 'modmail-types';
+} from '@Floor-Gang/modmail-types';
 import {
   DMChannel,
   Message,

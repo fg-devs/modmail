@@ -1,4 +1,4 @@
-import { Thread } from 'modmail-types';
+import { Thread } from '@Floor-Gang/modmail-types';
 import { Message, TextChannel } from 'discord.js';
 import MMMessage from './message';
 import Controller from '../../models/controller';
