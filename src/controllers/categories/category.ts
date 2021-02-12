@@ -38,6 +38,10 @@ export default class Category {
     return this.ref.description;
   }
 
+  public toString(): string {
+    return `${this.ref.name} (${this.ref.id})`;
+  }
+
   public async getRoles(adminOnly = false): Promise<Role[]> {
     const pool = Modmail.getDB();
     const roles = await pool.permissions.fetchAll(this.ref.id);
