@@ -1,5 +1,5 @@
 import {
-  DMChannel, GuildMember, Message, TextChannel, User,
+  DMChannel, GuildMember, Message, MessageEmbed, TextChannel, User,
 } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
 import {
@@ -288,6 +288,7 @@ export default class Thread {
       const msgAtts = attachments.get(msg.getID());
       const msgEdits = edits.get(msg.getID());
       let embed;
+      let attEmbed: MessageEmbed | null = null;
 
       if (msgEdits) {
         embed = this.ref.author.id === msg.getSenderID()
@@ -302,15 +303,17 @@ export default class Thread {
       }
       if (msgAtts) {
         msgAtts.forEach((att) => {
-          const attEmbed = this.ref.author.id === msg.getSenderID()
+          attEmbed = this.ref.author.id === msg.getSenderID()
             ? Embeds.attachmentRecv(att, user, false)
             : Embeds.attachmentSend(att, user, false);
-          const attTask = channel.send(attEmbed);
-          msgTasks.push(attTask);
         });
       }
 
       const task = channel.send(embed);
+      if (attEmbed !== null) {
+        const attTask = channel.send(attEmbed);
+        msgTasks.push(attTask);
+      }
       msgTasks.push(task);
     }
 
