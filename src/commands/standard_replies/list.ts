@@ -25,7 +25,7 @@ export default class StandardReplyCreate extends Command {
 
     for (let i = 0; i < srs.length; i += 1) {
       const sr = srs[i];
-      res += `"${sr.name}:"\n${sr.reply}\n`;
+      res += `"${sr.name}":\n${sr.reply}\n`;
     }
 
     const attachment = new MessageAttachment(
