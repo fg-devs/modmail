@@ -135,7 +135,7 @@ export default class Message {
     // store the new edit to the edits table
     await pool.edits.add(newMsg.content, thMessage.id);
     const edits = await pool.edits.fetch(thMessage.id);
-    const embed = Embeds.edits(thMessage.author, edits);
+    const embed = Embeds.editsRecv(newMsg.author, edits);
     // edit the thread iteration of the message that was edited
     await thMessage.edit(embed);
   }
@@ -152,7 +152,7 @@ export default class Message {
       // store the new edit to the edits table
       await pool.edits.add(newContent, thMessage.id);
       const edits = await pool.edits.fetch(thMessage.id);
-      const embed = Embeds.edits(thMessage.author, edits);
+      const embed = Embeds.editsSend(thMessage.author, edits);
       // edit the thread iteration of the message that was edited
       await thMessage.edit(embed);
     }

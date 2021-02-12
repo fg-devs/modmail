@@ -60,12 +60,12 @@ export default class AttachmentController extends Controller {
 
     for (let i = 0; i < attachments.length; i += 1) {
       const attachment = attachments[i];
-      const threadEmbed = Embeds.attachmentSend(
+      const threadEmbed = Embeds.attachmentRecv(
         attachment,
         sender,
         anonymously,
       );
-      const dmEmbed = Embeds.attachmentRecv(
+      const dmEmbed = Embeds.attachmentSend(
         attachment,
         sender,
         anonymously,
@@ -115,7 +115,7 @@ export default class AttachmentController extends Controller {
 
     for (let i = 0; i < attachments.length; i += 1) {
       const attachment = attachments[i];
-      const threadEmbed = Embeds.attachmentSend(
+      const threadEmbed = Embeds.attachmentRecv(
         attachment,
         user,
       );

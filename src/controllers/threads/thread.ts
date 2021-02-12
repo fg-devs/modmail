@@ -289,7 +289,9 @@ export default class Thread {
       let embed;
 
       if (msgEdits) {
-        embed = Embeds.edits(user, msgEdits);
+        embed = msg.getClientID() !== null
+          ? Embeds.editsRecv(user, msgEdits)
+          : Embeds.editsSend(user, msgEdits);
       } else if (msg.isInternal()) {
         embed = Embeds.internalMessage(msg.getContent(), user);
       } else {

@@ -169,7 +169,7 @@ export default class MessageController extends Controller {
     await pool.edits.add(newVersion.content, thMessage.id);
 
     const edits = await pool.edits.fetch(thMessage.id);
-    const embed = Embeds.edits(newVersion.author, edits);
+    const embed = Embeds.editsRecv(newVersion.author, edits);
     // edit the thread iteration of the message that was edited
     await thMessage.edit(embed);
   }

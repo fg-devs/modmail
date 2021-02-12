@@ -181,21 +181,6 @@ export default class Embeds {
 
   /**
    * All embeds share the attributes returned here.
-   * @param {string} content
-   * @returns {MessageEmbed}
-   */
-  public static messageReceivedAnon(content: string): MessageEmbed {
-    return Embeds.getGeneric({
-      author: {
-        name: 'Staff',
-      },
-      description: content,
-      color: 0xE8D90C,
-    });
-  }
-
-  /**
-   * All embeds share the attributes returned here.
    * @returns {MessageEmbed}
    */
   public static closeThread(): MessageEmbed {
@@ -250,9 +235,21 @@ export default class Embeds {
     });
   }
 
-  public static edits(user: User, edits: Edit[]): MessageEmbed {
+  public static editsSend(user: User, edits: Edit[]): MessageEmbed {
     const last = edits[edits.length - 1];
     const embed = Embeds.messageSend(last.content, user, false);
+
+    for (let i = 0; i < edits.length; i += 1) {
+      const edit = edits[i];
+      embed.addField(`Version ${edit.version}`, edit.content);
+    }
+
+    return embed;
+  }
+
+  public static editsRecv(user: User, edits: Edit[]): MessageEmbed {
+    const last = edits[edits.length - 1];
+    const embed = Embeds.messageRecv(last.content, user, false);
 
     for (let i = 0; i < edits.length; i += 1) {
       const edit = edits[i];
