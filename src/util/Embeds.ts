@@ -1,15 +1,13 @@
 import {
-  Attachment, Edit, Role, RoleLevel,
+  Attachment, Edit, FileType, Role, RoleLevel,
 } from '@Floor-Gang/modmail-types';
 import {
-  GuildMember,
-  MessageEmbed,
-  MessageEmbedOptions,
-  User,
+  GuildMember, MessageEmbed, MessageEmbedOptions, User,
 } from 'discord.js';
 import { CLOSE_THREAD_DELAY } from '../globals';
 import Category from '../controllers/categories/category';
 import Modmail from '../Modmail';
+
 /**
  * @class Embeds
  * Embed builder utility class
@@ -101,35 +99,65 @@ export default class Embeds {
   /**
    * All embeds share the attributes returned here.
    * @param {string} content
-   * @param {User} author
+   * @param {GuildMember} sender
+   * @param {boolean} anonymously
    * @returns {MessageEmbed}
    */
-  public static messageSend(content: string, author: User): MessageEmbed {
-    return Embeds.getGeneric({
-      author: {
-        name: author.tag,
-        icon_url: author.avatarURL() || author.defaultAvatarURL,
-      },
-      description: content,
-      color: 0x7CFC00,
-    });
+  public static messageSend(
+    content: string,
+    sender: User | GuildMember,
+    anonymously = false,
+  ): MessageEmbed {
+    let embed;
+
+    if (sender instanceof GuildMember) {
+      embed = Embeds.getGeneric({
+        author: {
+          name: sender.user.tag,
+          icon_url: sender.user.avatarURL() || sender.user.defaultAvatarURL,
+        },
+        description: content,
+        color: 0x7CFC00,
+        footer: {
+          text: anonymously
+            ? 'Staff'
+            : sender.roles.highest.name || 'Staff',
+        },
+      });
+    } else {
+      embed = Embeds.getGeneric({
+        author: {
+          name: sender.tag,
+          icon_url: sender.avatarURL() || sender.defaultAvatarURL,
+        },
+        description: content,
+        color: 0x7CFC00,
+        footer: {
+          text: 'Staff',
+        },
+      });
+    }
+
+    return embed;
   }
 
   /**
    * All embeds share the attributes returned here.
    * @param {string} content
-   * @param {User} author
+   * @param {GuildMember | User} sender
+   * @param {boolean} anonymously
    * @returns {MessageEmbed}
    */
-  public static messageReceived(content: string, author: User): MessageEmbed {
-    return Embeds.getGeneric({
-      author: {
-        name: author.tag,
-        icon_url: author.avatarURL() || author.defaultAvatarURL,
-      },
-      description: content,
-      color: 0xE8D90C,
-    });
+  public static messageRecv(
+    content: string,
+    sender: GuildMember | User,
+    anonymously = false,
+  ): MessageEmbed {
+    const embed = Embeds.messageSend(content, sender, anonymously);
+
+    embed.color = 0xE8D90C;
+
+    return embed;
   }
 
   /**
@@ -175,7 +203,7 @@ export default class Embeds {
     return Embeds.getGeneric({
       title: 'Conversation closed',
       description: 'This channel will get deleted in'
-      + ` ${CLOSE_THREAD_DELAY / 1000} seconds...`,
+        + ` ${CLOSE_THREAD_DELAY / 1000} seconds...`,
     });
   }
 
@@ -290,46 +318,43 @@ export default class Embeds {
 
   /**
    * All embeds share the attributes returned here.
-   * @param {MessageAttachment} attachment
-   * @param {User} author
-   * @returns {MessageEmbed}
-   */
-  public static messageAttachmentImage(
-    attachment: Attachment,
-    author: User,
-  ): MessageEmbed {
-    return Embeds.getGeneric({
-      title: 'Message Attachment',
-      image: {
-        url: attachment.source,
-      },
-      author: {
-        name: author.tag,
-        icon_url: author.avatarURL() || author.defaultAvatarURL,
-      },
-      color: 0xE8D90C,
-    });
-  }
-
-  /**
-   * All embeds share the attributes returned here.
    * @param {Attachment} attachment
    * @param {User} author
+   * @param {boolean} anonymously
    * @returns {MessageEmbed}
    */
-  public static messageAttachment(
+  public static attachmentSend(
     attachment: Attachment,
-    author: User,
+    author: GuildMember | User,
+    anonymously = false,
   ): MessageEmbed {
-    return Embeds.getGeneric({
-      title: 'Message Attachment',
-      description: `[${attachment.name}](${attachment.source})`,
-      author: {
-        name: author.tag,
-        icon_url: author.avatarURL() || author.defaultAvatarURL,
-      },
-      color: 0xE8D90C,
-    });
+    const embed = Embeds.messageSend(
+      'Message Attachment',
+      author,
+      anonymously,
+    );
+
+    if (attachment.type === FileType.Image) {
+      embed.image = {
+        url: attachment.source,
+      };
+    } else {
+      embed.description = `[${attachment.name}](${attachment.source})`;
+    }
+
+    return embed;
+  }
+
+  public static attachmentRecv(
+    attachment: Attachment,
+    author: GuildMember | User,
+    anonymously = false,
+  ): MessageEmbed {
+    const embed = Embeds.attachmentSend(attachment, author, anonymously);
+
+    embed.color = 0xE8D90C;
+
+    return embed;
   }
 
   /**

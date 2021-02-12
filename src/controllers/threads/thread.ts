@@ -1,9 +1,10 @@
-import { DMChannel, GuildMember, Message, TextChannel, User, } from 'discord.js';
+import {
+  DMChannel, GuildMember, Message, MessageAttachment, TextChannel, User,
+} from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
 import {
   Attachment,
   Edit,
-  FileType,
   Message as PartialMessage,
   Thread as PartialThread,
 } from '@Floor-Gang/modmail-types';
@@ -127,13 +128,14 @@ export default class Thread {
    * Send a user's message to an active thread
    * @param {Message} msg The user's message
    */
-  public async sendToThread(msg: Message): Promise<void> {
+  public async recvMsg(msg: Message): Promise<void> {
     const pool = Modmail.getDB();
     const attCtrl = this.modmail.attachments;
 
-    const thMsgEmbed = Embeds.messageReceived(
+    const thMsgEmbed = Embeds.messageRecv(
       msg.content,
       msg.author,
+      false,
     );
     const thChannel = await this.getThreadChannel();
 
@@ -160,7 +162,7 @@ export default class Thread {
     };
 
     await pool.messages.add(modmailMsg);
-    await attCtrl.handle(msg, thChannel, thMessage.id);
+    await attCtrl.handleDM(msg);
     await msg.react('✅');
   }
 
@@ -174,11 +176,33 @@ export default class Thread {
     await msg.delete();
   }
 
+  public async recvAttachment(msg: Message, attachment: Attachment): Promise<void> {
+    const thEmbed = Embeds.attachmentRecv(attachment, msg.author, false);
+    const thChannel = await this.getThreadChannel();
+
+    if (thChannel === null) {
+      return;
+    }
+
+    await thChannel.send(thEmbed);
+  }
+
   public async sendMsg(msg: CommandoMessage, anonymously = false): Promise<void> {
     const content = msg.argString || '';
+    const attachments = msg.attachments.values();
+    const attTasks: Promise<void>[] = [];
 
     await this.send(content, msg.member as GuildMember, anonymously);
 
+    let attOpt = attachments.next();
+    let task;
+    while (!attOpt.done) {
+      task = this.sendAttachment(msg, attOpt.value, anonymously);
+      attTasks.push(task);
+      attOpt = attachments.next();
+    }
+
+    await Promise.all(attTasks);
     await msg.delete();
   }
 
@@ -196,13 +220,9 @@ export default class Thread {
       throw new Error('The thread channel doesn\'t exist anymore.');
     }
 
-    const threadEmbed = anonymously
-      ? Embeds.messageSendAnon(content, sender.user)
-      : Embeds.messageSend(content, sender.user);
+    const threadEmbed = Embeds.messageSend(content, sender, anonymously);
 
-    const dmEmbed = anonymously
-      ? Embeds.messageReceivedAnon(content)
-      : Embeds.messageReceived(content, sender.user);
+    const dmEmbed = Embeds.messageRecv(content, sender, anonymously);
 
     threadEmbed.footer = footer;
     dmEmbed.footer = footer;
@@ -222,6 +242,35 @@ export default class Thread {
       sender: sender.id,
       threadID: this.ref.id,
     });
+  }
+
+  private async sendAttachment(
+    msg: CommandoMessage,
+    msgAtt: MessageAttachment,
+    anonymously = false,
+  ): Promise<void> {
+    const dmChannel = await this.getDMChannel();
+    const thChannel = await this.getThreadChannel();
+    const modmail = Modmail.getModmail();
+    const attachment = await modmail.attachments.create(msg as Message, msgAtt);
+
+    if (thChannel === null) {
+      throw new Error('The thread channel doesn\'t exist anymore.');
+    }
+
+    const threadEmbed = Embeds.attachmentSend(
+      attachment,
+      msg.member || msg.author,
+      anonymously,
+    );
+    const dmEmbed = Embeds.attachmentRecv(
+      attachment,
+      msg.member || msg.author,
+      anonymously,
+    );
+
+    await thChannel.send(threadEmbed);
+    await dmChannel.send(dmEmbed);
   }
 
   public async forward(forwarder: User, category: Category): Promise<boolean> {
@@ -287,9 +336,7 @@ export default class Thread {
         msgTasks.push(task);
       } else if (msgAtts) {
         msgAtts.forEach((att) => {
-          embed = att.type === FileType.Image
-            ? Embeds.messageAttachmentImage(att, user)
-            : Embeds.messageAttachment(att, user);
+          embed = Embeds.attachmentSend(att, user, false);
           task = channel.send(embed);
           msgTasks.push(task);
         });

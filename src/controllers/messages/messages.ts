@@ -75,7 +75,7 @@ export default class MessageController extends Controller {
     const thread = await threads.getByAuthor(msg.author.id);
 
     if (thread !== null) {
-      await thread.sendToThread(msg);
+      await thread.recvMsg(msg);
     } else {
       await threads.createFor(msg);
     }
