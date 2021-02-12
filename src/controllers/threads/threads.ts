@@ -138,7 +138,7 @@ export default class ThreadController extends Controller {
     user: User,
     category: Category,
     isAdminOnly: boolean,
-  ): Promise<TextChannel> {
+  ): Promise<TextChannel | null> {
     const guild = await category.getGuild();
     const parent = await category.getCategory();
 
@@ -157,16 +157,21 @@ export default class ThreadController extends Controller {
       { type: 'text' },
     );
 
-    await channel.setParent(parent);
-    await channel.send(userDetails);
-    await channel.send(threadDetails);
-    await channel.setTopic(`User ID: ${user.id}`);
+    try {
+      await channel.setParent(parent);
+      await channel.send(userDetails);
+      await channel.send(threadDetails);
+      await channel.setTopic(`User ID: ${user.id}`);
 
-    if (isAdminOnly) {
-      await ThreadController.makeAdminOnly(category, channel);
+      if (isAdminOnly) {
+        await ThreadController.makeAdminOnly(category, channel);
+      }
+
+      return channel;
+    } catch (e) {
+      await channel.delete();
+      throw e;
     }
-
-    return channel;
   }
 
   private async getCategory(channel: DMChannel): Promise<Category | null> {
