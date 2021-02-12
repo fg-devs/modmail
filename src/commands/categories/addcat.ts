@@ -6,6 +6,7 @@ import LogUtil from '../../util/Logging';
 type CatArgs = {
   name: string;
   emoji: string;
+  description: string[];
 }
 
 export default class AddCategory extends Command {
@@ -29,12 +30,21 @@ export default class AddCategory extends Command {
           prompt: 'The category emoji',
           type: 'string',
         },
+        {
+          key: 'description',
+          prompt: 'The category description',
+          type: 'string',
+          infinite: true,
+        },
       ],
     });
   }
 
   public async run(msg: CommandoMessage, args: CatArgs): Promise<null> {
     const { name, emoji } = args;
+    const desc = args.description.length === 0
+      ? ''
+      : args.description.join(' ');
     const modmail = Modmail.getModmail();
 
     if (!(msg.channel instanceof TextChannel)) {
@@ -50,7 +60,7 @@ export default class AddCategory extends Command {
     }
 
     try {
-      await modmail.categories.create(name, emoji, parent);
+      await modmail.categories.create(parent, emoji, name, desc);
       await msg.say('Category added.');
     } catch (e) {
       const res = 'Something internal went wrong.';

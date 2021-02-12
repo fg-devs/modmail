@@ -32,15 +32,17 @@ export default class CatController {
   }
 
   public async create(
-    name: string,
-    emoji: string,
     catChan: CategoryChannel,
+    emoji: string,
+    name: string,
+    desc: string,
   ): Promise<Category> {
     const pool = Modmail.getDB();
 
     const data = await pool.categories.create({
       guildID: catChan.guild.id,
       name,
+      description: desc,
       emote: emoji,
       channelID: catChan.id,
     });
