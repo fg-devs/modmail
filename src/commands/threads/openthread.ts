@@ -92,7 +92,7 @@ export default class OpenThread extends Command {
       await msg.react('✅');
     } catch (e) {
       let res;
-      if (e.message.includes('Discord API')) {
+      if (e.message.includes('DiscordAPIError')) {
         res = 'This user has their DM\'s off';
       } else {
         res = 'Something internal went wrong';
