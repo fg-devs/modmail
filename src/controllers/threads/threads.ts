@@ -23,13 +23,13 @@ export default class ThreadController extends Controller {
    * Create a new thread
    * @param {Message} msg Message sent by user in a DM
    */
-  public async createFor(msg: Message): Promise<void> {
+  public async createFor(msg: Message): Promise<Thread | null> {
     const pool = Modmail.getDB();
     const dms = await msg.author.createDM();
     const category = await this.getCategory(dms);
 
     if (category === null) {
-      return;
+      return null;
     }
 
     // check if the category is maxed out
@@ -39,7 +39,7 @@ export default class ThreadController extends Controller {
       await msg.reply(
         'This category has met it\'s max threads, try again later.',
       );
-      return;
+      return null;
     }
 
     const isMuted = await category.isMuted(msg.author.id);
@@ -47,7 +47,7 @@ export default class ThreadController extends Controller {
     // check if they're muted from the category selected
     if (isMuted) {
       await msg.reply('You\'re muted from this category.');
-      return;
+      return null;
     }
 
     const isAdminOnly = await ThreadController.isAboutStaff(dms);
@@ -57,7 +57,7 @@ export default class ThreadController extends Controller {
     );
     if (currentThread !== null) {
       await msg.reply('You already have a open thread.');
-      return;
+      return null;
     }
 
     const channel = await this.createChannel(
@@ -67,10 +67,10 @@ export default class ThreadController extends Controller {
     );
 
     if (channel === null) {
-      return;
+      return null;
     }
 
-    await pool.threads.open(
+    const thread = await pool.threads.open(
       msg.author.id,
       channel.id,
       category.getID(),
@@ -79,6 +79,7 @@ export default class ThreadController extends Controller {
     await msg.reply(
       'The thread is open, all messages now will be sent to the staff',
     );
+    return new Thread(this.modmail, thread);
   }
 
   public async getByAuthor(userID: string): Promise<Thread | null> {

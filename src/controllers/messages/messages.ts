@@ -72,12 +72,15 @@ export default class MessageController extends Controller {
   public async handleDM(msg: Message): Promise<void> {
     const { threads } = this.modmail;
 
-    const thread = await threads.getByAuthor(msg.author.id);
+    let thread = await threads.getByAuthor(msg.author.id);
 
     if (thread !== null) {
       await thread.recvMsg(msg);
     } else {
-      await threads.createFor(msg);
+      thread = await threads.createFor(msg);
+      if (thread !== null) {
+        await thread.recvMsg(msg);
+      }
     }
   }
 
