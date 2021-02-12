@@ -74,7 +74,7 @@ export default class Embeds {
   public static categorySelect(categories: Category[]): MessageEmbed {
     const res = Embeds.listCategories(categories);
 
-    res.title = 'Select The Category You Want to Talk In';
+    res.description = 'React to the category that you want to talk to.';
 
     return res;
   }
