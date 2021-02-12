@@ -39,12 +39,12 @@ export default class Thread {
     try {
       await dmChannel.send(dmEmbed);
     } finally {
+      await pool.threads.close(this.ref.channel);
       if (thChannel !== null) {
         await thChannel.send(threadEmbed);
         await new Promise((r) => setTimeout(r, CLOSE_THREAD_DELAY));
         await thChannel.delete('Thread closed');
       }
-      await pool.threads.close(this.ref.channel);
     }
   }
 
