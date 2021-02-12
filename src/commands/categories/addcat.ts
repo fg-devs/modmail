@@ -63,7 +63,14 @@ export default class AddCategory extends Command {
       await modmail.categories.create(parent, emoji, name, desc);
       await msg.say('Category added.');
     } catch (e) {
-      const res = 'Something internal went wrong.';
+      let res;
+      if (e.message.includes('channel_id') || e.message.includes('guild_id')) {
+        res = 'This guild already has a category';
+      } else if (e.message.includes('emoji')) {
+        res = 'This emoji is already being used.';
+      } else {
+        res = 'Something internal went wrong.';
+      }
       LogUtil.cmdError(msg, e, res);
       await msg.say(res);
     }
