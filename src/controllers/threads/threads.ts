@@ -24,6 +24,7 @@ export default class ThreadController extends Controller {
    * @param {Message} msg Message sent by user in a DM
    */
   public async createFor(msg: Message): Promise<void> {
+    const pool = Modmail.getDB();
     const dms = await msg.author.createDM();
     const category = await this.getCategory(dms);
 
@@ -50,12 +51,22 @@ export default class ThreadController extends Controller {
     }
 
     const isAdminOnly = await ThreadController.isAboutStaff(dms);
-    await ThreadController.createChannel(
+    const channel = await ThreadController.createChannel(
       msg.author,
       category,
       isAdminOnly,
     );
 
+    if (channel === null) {
+      return;
+    }
+
+    await pool.threads.open(
+      msg.author.id,
+      channel.id,
+      category.getID(),
+      isAdminOnly,
+    );
     await msg.reply(
       'The thread is open, all messages now will be sent to the staff',
     );
