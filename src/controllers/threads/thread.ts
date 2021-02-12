@@ -1,16 +1,11 @@
-import {
-  DMChannel,
-  GuildMember,
-  Message,
-  TextChannel,
-  User,
-} from 'discord.js';
+import { DMChannel, GuildMember, Message, TextChannel, User, } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
 import {
-  Thread as PartialThread,
-  Message as PartialMessage,
   Attachment,
   Edit,
+  FileType,
+  Message as PartialMessage,
+  Thread as PartialThread,
 } from '@Floor-Gang/modmail-types';
 import Category from '../categories/category';
 import Modmail from '../../Modmail';
@@ -292,7 +287,9 @@ export default class Thread {
         msgTasks.push(task);
       } else if (msgAtts) {
         msgAtts.forEach((att) => {
-          embed = Embeds.messageAttachment(att, user);
+          embed = att.type === FileType.Image
+            ? Embeds.messageAttachmentImage(att, user)
+            : Embeds.messageAttachment(att, user);
           task = channel.send(embed);
           msgTasks.push(task);
         });
