@@ -51,7 +51,7 @@ export default class ThreadController extends Controller {
     }
 
     const isAdminOnly = await ThreadController.isAboutStaff(dms);
-    const channel = await ThreadController.createChannel(
+    const channel = await this.createChannel(
       msg.author,
       category,
       isAdminOnly,
@@ -112,7 +112,7 @@ export default class ThreadController extends Controller {
    * @param {boolean} isAdminOnly
    * @returns {Promise<TextChannel | null>} Nullable if something went wrong
    */
-  private static async createChannel(
+  private async createChannel(
     user: User,
     category: Category,
     isAdminOnly: boolean,
@@ -120,7 +120,7 @@ export default class ThreadController extends Controller {
     const pool = Modmail.getDB();
 
     // setup channel and send details about the user and the thread
-    const channel = await ThreadController.setupChannel(user, category, isAdminOnly);
+    const channel = await this.setupChannel(user, category, isAdminOnly);
 
     // create user if they don't exit
     await pool.users.create(user.id);
@@ -128,7 +128,7 @@ export default class ThreadController extends Controller {
     return channel;
   }
 
-  private static async setupChannel(
+  private async setupChannel(
     user: User,
     category: Category,
     isAdminOnly: boolean,
@@ -157,7 +157,7 @@ export default class ThreadController extends Controller {
     await channel.setTopic(`User ID: ${user.id}`);
 
     if (isAdminOnly) {
-      await ThreadController.makeAdminOnly(category, channel);
+      await this.makeAdminOnly(category, channel);
     }
 
     return channel;
@@ -218,12 +218,13 @@ export default class ThreadController extends Controller {
     return lower.startsWith('y');
   }
 
-  private static async makeAdminOnly(
+  private async makeAdminOnly(
     category: Category,
     channel: TextChannel,
   ): Promise<void> {
     const roles = await category.getRoles();
     const perms: OverwriteResolvable[] = [];
+    const logger = this.getLogger();
 
     for (let i = 0; i < roles.length; i += 1) {
       const role = roles[i];
@@ -240,6 +241,11 @@ export default class ThreadController extends Controller {
         });
       }
     }
-    await channel.overwritePermissions(perms, 'Made thread admin only.');
+
+    try {
+      await channel.overwritePermissions(perms, 'Made thread admin only.');
+    } catch (e) {
+      logger.error(`Failed to make ${channel.id} an admin only thread`, e);
+    }
   }
 }
