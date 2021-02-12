@@ -71,7 +71,7 @@ export default class Mute extends Command {
 
   private static fuzzy(args: Args): [string, string] {
     // check if the time is an ID
-    if ((/[A-z]/g).test(args.time)) {
+    if (args.userID.startsWith('<@') || (/^\d+$/g).test(args.userID)) {
       return [args.userID.replace(/[^0-9]/g, ''), args.time];
     }
     // [userID, time]
