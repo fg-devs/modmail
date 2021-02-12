@@ -207,13 +207,11 @@ export default class CatController {
     }
 
     const categoryChannel = await this.modmail.channels.fetch(
-      category.channelID,
-      true,
+      category.channelID as string,
       true,
     ) as CategoryChannel;
     const categoryGuild = await this.modmail.guilds.fetch(
       category.guildID,
-      true,
       true,
     );
 

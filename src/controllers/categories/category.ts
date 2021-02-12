@@ -1,6 +1,7 @@
 import {
   Category as PartialCategory, MuteStatus,
 } from '@Floor-Gang/modmail-types';
+import { CategoryChannel } from 'discord.js';
 import Modmail from '../../Modmail';
 
 export default class Category {
@@ -33,10 +34,33 @@ export default class Category {
     return this.ref.description;
   }
 
-  public async setActive(isActive: boolean): Promise<boolean> {
+  public async getCategory(): Promise<CategoryChannel | null> {
+    if (this.ref.channelID === null) {
+      return null;
+    }
+
+    try {
+      const channel = await this.modmail.channels.fetch(
+        this.ref.channelID,
+        true,
+      );
+
+      return channel as CategoryChannel;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  public async reactivate(channelID: string): Promise<boolean> {
     const pool = Modmail.getDB();
 
-    return pool.categories.setActive(this.ref.id, isActive);
+    return pool.categories.reactivate(this.ref.id, channelID);
+  }
+
+  public async deactivate(): Promise<boolean> {
+    const pool = Modmail.getDB();
+
+    return pool.categories.deactivate(this.ref.id);
   }
 
   public async setEmoji(emoji: string): Promise<boolean> {

@@ -34,7 +34,7 @@ export default class RemoveCategory extends Command {
     const category = await modmail.categories.getByEmoji(emoji);
 
     if (category !== null) {
-      await category.setActive(false);
+      await category.deactivate();
       await msg.say('Disabled category.');
       return null;
     }
