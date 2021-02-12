@@ -295,7 +295,9 @@ export default class Thread {
       } else if (msg.isInternal()) {
         embed = Embeds.internalMessage(msg.getContent(), user);
       } else {
-        embed = Embeds.messageSend(msg.getContent(), user, false);
+        embed = msg.getClientID() !== null
+          ? Embeds.messageSend(msg.getContent(), user, false)
+          : Embeds.messageRecv(msg.getContent(), user, false);
       }
       if (msgAtts) {
         msgAtts.forEach((att) => {

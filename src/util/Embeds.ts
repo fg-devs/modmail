@@ -4,7 +4,7 @@ import {
 import {
   GuildMember, MessageEmbed, MessageEmbedOptions, User,
 } from 'discord.js';
-import { CLOSE_THREAD_DELAY } from '../globals';
+import { CLOSE_THREAD_DELAY, COLORS } from '../globals';
 import Category from '../controllers/categories/category';
 import Modmail from '../Modmail';
 
@@ -34,7 +34,7 @@ export default class Embeds {
    */
   public static newThread(creator: User): MessageEmbed {
     return Embeds.getGeneric({
-      color: 0xB00B69,
+      color: COLORS.INTERNAL,
       title: 'New Thread',
       description: `${creator} created a new thread.`,
     });
@@ -58,7 +58,7 @@ export default class Embeds {
       },
       description: `${user} was created ${createdDays} days ago, `
         + `with **${numOfThreads}** past threads`,
-      color: 0x7289da,
+      color: COLORS.INTERNAL,
       fields: [],
     });
   }
@@ -80,7 +80,7 @@ export default class Embeds {
     const res = Embeds.getGeneric({
       title: 'Available Categories',
       fields: [],
-      color: 0xB00B69,
+      color: COLORS.INTERNAL,
     });
 
     for (let i = 0; i < categories.length; i += 1) {
@@ -110,7 +110,7 @@ export default class Embeds {
   ): MessageEmbed {
     const embed = Embeds.getGeneric({
       description: content,
-      color: 0x7CFC00,
+      color: COLORS.SEND,
     });
     const user = sender instanceof User
       ? sender
@@ -159,7 +159,7 @@ export default class Embeds {
         text: 'User',
       };
     }
-    embed.color = 0xE8D90C;
+    embed.color = COLORS.RECEIVE;
 
     return embed;
   }
@@ -248,7 +248,7 @@ export default class Embeds {
     return Embeds.getGeneric({
       title: 'New Thread',
       description: `You're being contacted by ${category.getName()}`,
-      color: 0xADD8E6,
+      color: COLORS.INTERNAL,
     });
   }
 
@@ -263,7 +263,7 @@ export default class Embeds {
         icon_url: author.avatarURL() || author.defaultAvatarURL,
       },
       description: content,
-      color: 0xADD8E6,
+      color: COLORS.INTERNAL,
       footer: {
         text: 'Internal message',
       },
@@ -333,7 +333,7 @@ export default class Embeds {
   ): MessageEmbed {
     const embed = Embeds.attachmentSend(attachment, author, anonymously);
 
-    embed.color = 0xE8D90C;
+    embed.color = COLORS.RECEIVE;
 
     return embed;
   }
