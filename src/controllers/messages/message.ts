@@ -33,6 +33,10 @@ export default class Message {
     return this.ref.clientID;
   }
 
+  public isInternal(): boolean {
+    return this.ref.internal;
+  }
+
   public getSenderID(): string {
     return this.ref.sender;
   }

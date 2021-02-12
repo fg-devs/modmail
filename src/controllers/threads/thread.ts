@@ -291,19 +291,20 @@ export default class Thread {
 
       if (msgEdits) {
         embed = Embeds.edits(user, msgEdits);
-        task = channel.send(embed);
-        msgTasks.push(task);
-      } else if (msgAtts) {
-        msgAtts.forEach((att) => {
-          embed = Embeds.attachmentSend(att, user, false);
-          task = channel.send(embed);
-          msgTasks.push(task);
-        });
+      } else if (msg.isInternal()) {
+        embed = Embeds.internalMessage(msg.getContent(), user);
       } else {
-        embed = Embeds.messageSend(msg.getContent(), user);
-        task = channel.send(embed);
-        msgTasks.push(task);
+        embed = Embeds.messageSend(msg.getContent(), user, false);
+        if (msgAtts) {
+          msgAtts.forEach((att) => {
+            embed = Embeds.attachmentSend(att, user, false);
+            task = channel.send(embed);
+            msgTasks.push(task);
+          });
+        }
       }
+      task = channel.send(embed);
+      msgTasks.push(task);
     }
 
     await Promise.all(msgTasks);
