@@ -30,6 +30,10 @@ export default class Category {
     return this.ref.id;
   }
 
+  public isActive(): boolean {
+    return this.ref.isActive;
+  }
+
   public getGuildID(): string {
     return this.ref.guildID;
   }

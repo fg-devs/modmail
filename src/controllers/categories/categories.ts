@@ -1,11 +1,8 @@
 import { Category as PartialCategory } from '@Floor-Gang/modmail-types';
 import {
-  CategoryChannel, DMChannel, Guild, TextChannel, User,
+  CategoryChannel, Guild,
 } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
-import { CategoryResolvable } from '@Floor-Gang/modmail-database';
-import Embeds from '../../util/Embeds';
-import { PROMPT_TIME } from '../../globals';
 import Modmail from '../../Modmail';
 import Category from './category';
 
@@ -17,8 +14,6 @@ export type CatSelector = {
 }
 
 export default class CatController {
-  private activeSelectors: Set<string> = new Set();
-
   private readonly modmail: Modmail;
 
   constructor(modmail: Modmail) {
@@ -37,79 +32,53 @@ export default class CatController {
       guildID: catChan.guild.id,
       name,
       description: desc,
-      emote: emoji,
+      emoji,
       channelID: catChan.id,
     });
 
     return new Category(this.modmail, data);
   }
 
-  public async getByEmoji(
-    emoji: string,
-    isActive = true,
-  ): Promise<Category | null> {
+  public async getByEmoji(emoji: string): Promise<Category | null> {
     const pool = Modmail.getDB();
-    const data = await pool.categories.fetch(
-      CategoryResolvable.emote,
-      emoji,
-    );
+    const data = await pool.categories.fetchByEmoji(emoji);
 
-    if (data === null || data.isActive !== isActive) {
+    if (data === null) {
       return null;
     }
 
     return new Category(this.modmail, data);
   }
 
-  /**
-   * Get category based on what guild the message is in
-   * @param {CommandoMessage} msg
-   * @param {boolean} isActive Whether or not the category must be active
-   */
-  public async getByMessage(
-    msg: CommandoMessage,
-    isActive = true,
-  ): Promise<Category | null> {
+  public async getByMessage(msg: CommandoMessage): Promise<Category | null> {
     if (!msg.guild) {
       return null;
     }
 
     const pool = Modmail.getDB();
-    const data = await pool.categories.fetch(
-      CategoryResolvable.guild,
-      msg.guild.id,
-    );
+    const data = await pool.categories.fetchByGuild(msg.guild.id);
 
-    if (data === null || data.isActive !== isActive) {
+    if (data === null) {
       return null;
     }
 
     return new Category(this.modmail, data);
   }
 
-  public async getByID(
-    catID: string,
-    isActive = true,
-  ): Promise<Category | null> {
+  public async getByID(catID: string): Promise<Category | null> {
     const pool = Modmail.getDB();
-    const data = await pool.categories.fetch(
-      CategoryResolvable.id,
-      catID,
-    );
+    const data = await pool.categories.fetchByID(catID);
 
-    if (data === null || data.isActive !== isActive) {
+    if (data === null) {
       return null;
     }
 
     return new Category(this.modmail, data);
   }
 
-  public async getAll(isActive = true): Promise<Category[]> {
+  public async getAll(onlyActive = true): Promise<Category[]> {
     const pool = Modmail.getDB();
-    const cats = await pool.categories.fetchAll(
-      CategoryResolvable.activity,
-      isActive ? 'true' : 'false',
-    );
+    const cats = await pool.categories.fetchAll(onlyActive);
 
     return cats.map(
       (data: PartialCategory) => new Category(this.modmail, data),
@@ -129,17 +98,5 @@ export default class CatController {
     }
 
     return res;
-  }
-
-  private hasActiveSelector(user: string): boolean {
-    return this.activeSelectors.has(user);
-  }
-
-  private remember(user: string): void {
-    this.activeSelectors.add(user);
-  }
-
-  private forget(user: string): void {
-    this.activeSelectors.delete(user);
   }
 }

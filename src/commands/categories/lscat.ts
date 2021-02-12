@@ -20,7 +20,7 @@ export default class ListCategories extends Command {
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage): Promise<null> {
     const modmail = Modmail.getModmail();
-    const cats = await modmail.categories.getAll(true);
+    const cats = await modmail.categories.getAll(false);
     const res = Embeds.listCategories(cats);
 
     await msg.say(res);

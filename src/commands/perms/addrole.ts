@@ -39,10 +39,10 @@ export default class AddRole extends Command {
     const { roleID } = args;
     const levelStr = args.level.toLowerCase();
     const modmail = Modmail.getModmail();
-    const category = await modmail.categories.getByMessage(msg, true);
+    const category = await modmail.categories.getByMessage(msg);
     const level = AddRole.getLevel(levelStr);
 
-    if (category === null) {
+    if (category === null || !category.isActive()) {
       const res = "This guild doesn't have an active category.";
       LogUtil.cmdWarn(msg, res);
       await msg.say(res);

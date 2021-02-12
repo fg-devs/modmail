@@ -3,7 +3,6 @@ import { Command, CommandoMessage } from 'discord.js-commando';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
 import { Requires } from '../../util/Perms';
-import { CategoryResolvable } from '../../models/types';
 import LogUtil from '../../util/Logging';
 
 type Args = {
@@ -46,12 +45,9 @@ export default class OpenThread extends Command {
     const pool = Modmail.getDB();
     const modmail = Modmail.getModmail();
     const user = await msg.client.users.fetch(userID, true);
-    const category = await pool.categories.fetch(
-      CategoryResolvable.guild,
-      msg.guild.id,
-    );
+    const category = await pool.categories.fetchByGuild(msg.guild.id);
 
-    if (category === null) {
+    if (category === null || !category.isActive) {
       const res = "This guild isn't part of a category.";
       LogUtil.cmdWarn(msg, res);
       await msg.say(res);
