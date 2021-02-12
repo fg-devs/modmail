@@ -241,6 +241,7 @@ export default class Thread {
       category,
       this.ref.isAdminOnly,
       forwarder,
+      true,
     );
 
     if (channel === null) {

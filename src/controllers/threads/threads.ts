@@ -148,7 +148,8 @@ export default class ThreadController extends Controller {
     user: User,
     category: Category,
     isAdminOnly: boolean,
-    forwarder: User | null = null,
+    creator: User | null = null,
+    forwarded = false,
   ): Promise<TextChannel | null> {
     const guild = await category.getGuild();
     const parent = await category.getCategory();
@@ -161,20 +162,19 @@ export default class ThreadController extends Controller {
       throw new Error('The guild for this category is gone.');
     }
 
-    const userDetails = await Embeds.memberDetails(user);
-    const threadDetails = Embeds.newThread(user);
+    const threadDetails = await Embeds.threadDetails(
+      isAdminOnly,
+      user,
+      creator,
+      forwarded,
+    );
     const channel = await guild.channels.create(
       `${user.username}-${user.discriminator}`,
       { type: 'text' },
     );
 
     try {
-      if (forwarder !== null) {
-        const fwEmbed = Embeds.forwardedBy(forwarder);
-        await channel.send(fwEmbed);
-      }
       await channel.setParent(parent);
-      await channel.send(userDetails);
       await channel.send(threadDetails);
       await channel.setTopic(`User ID: ${user.id}`);
 

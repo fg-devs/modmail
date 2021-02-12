@@ -14,53 +14,45 @@ import Modmail from '../Modmail';
  */
 export default class Embeds {
   /**
-   * This is used when a Modmail staff member (mod+) creates a new thread for
-   * a user.
-   * @param {GuildMember} creator Creator of the thread.
-   * @param {GuildMember} target The user being mailed.
-   * @returns {MessageEmbed}
-   */
-  public static newThreadFor(creator: User, target: User): MessageEmbed {
-    const res = Embeds.newThread(creator);
-    res.description = `${creator} created a new thread for ${target}.`;
-
-    return res;
-  }
-
-  /**
-   * When a new thread has spawned.
-   * @param {GuildMember} creator The user that started the thread.
-   * @returns {MessageEmbed}
-   */
-  public static newThread(creator: User): MessageEmbed {
-    return Embeds.getGeneric({
-      color: COLORS.INTERNAL,
-      title: 'New Thread',
-      description: `${creator} created a new thread.`,
-    });
-  }
-
-  /**
    * Details about a member in a message embed. Usually used for a new thread.
+   * @param {boolean} isAdminOnly
    * @param {User} user
+   * @param {User | null} creator
    * @returns {Promise<MessageEmbed>}
    */
-  public static async memberDetails(
+  public static async threadDetails(
+    isAdminOnly: boolean,
     user: User,
+    creator: User | null = null,
+    forwarded = false,
   ): Promise<MessageEmbed> {
     const db = Modmail.getDB().threads;
     const numOfThreads = await db.countUser(user.id);
-    const createdDays = this.getDays(user.createdAt);
-    return Embeds.getGeneric({
+    const embed = Embeds.getGeneric({
       author: {
         name: user.tag,
         icon_url: user.avatarURL() || user.defaultAvatarURL,
       },
-      description: `${user} was created ${createdDays} days ago, `
-        + `with **${numOfThreads}** past threads`,
       color: COLORS.INTERNAL,
-      fields: [],
+      fields: [
+        {
+          inline: true,
+          name: 'Past Threads',
+          value: numOfThreads,
+        },
+      ],
     });
+
+    if (creator !== null) {
+      embed.description = creator.toString();
+      embed.description += forwarded ? ' forwarded' : ' created';
+      embed.description += isAdminOnly ? ' an admin only' : ' a new';
+      embed.description += ` thread for ${user}.`;
+    } else {
+      embed.description = `${user} created ${isAdminOnly ? 'an admin only' : 'a new'} thread.`;
+    }
+
+    return embed;
   }
 
   /**
@@ -390,14 +382,5 @@ export default class Embeds {
       timestamp: new Date(),
       ...data,
     });
-  }
-
-  private static getDays(timestamp: Date | null): number {
-    if (timestamp === null) {
-      return 0;
-    }
-    return Math.ceil(
-      (Math.abs(Date.now() - timestamp.getTime()) / (1000 * 60 * 60 * 24)),
-    );
   }
 }

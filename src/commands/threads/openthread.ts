@@ -75,6 +75,7 @@ export default class OpenThread extends Command {
       user,
       category,
       false,
+      msg.author,
     );
 
     if (channel === null) {
