@@ -30,7 +30,7 @@ export default class WorkerHandler {
   }
 
   public async onMessage(msg: ServerMessage): Promise<void> {
-    const log = this.getLogger(msg.id);
+    const log = WorkerHandler.getLogger(msg.id);
     let res: ServerResponse = {
       data: null,
       id: msg.id,
@@ -59,7 +59,7 @@ export default class WorkerHandler {
         const [userID] = req.args;
         res.data = await this.getUserState(userID);
       } else {
-        throw new Error(`Unknown task "${msg.task}"`);
+        res.data = Error(`Unknown task "${msg.task}"`);
       }
     } catch (e) {
       res = {
@@ -109,12 +109,10 @@ export default class WorkerHandler {
     }
 
     const roleState = await WorkerHandler.getRoleState(member);
-    const state: MemberState = WorkerHandler.parseGuildMember(
+    return WorkerHandler.parseGuildMember(
       member,
       roleState,
     );
-
-    return state;
   }
 
   public async getAllMemberStates(
@@ -149,8 +147,7 @@ export default class WorkerHandler {
     const fetchTasks = await Promise.all(tasks);
     i = 0;
     while (i < fetchTasks.length) {
-      const roleState = fetchTasks[i];
-      states[i].role = roleState;
+      states[i].role = fetchTasks[i];
       i += 1;
     }
 
@@ -194,7 +191,7 @@ export default class WorkerHandler {
     return roleState;
   }
 
-  private getLogger(id: string) {
+  private static getLogger(id: string) {
     return Modmail.getLogger(`(worker-task) ${id}`);
   }
 }

@@ -50,7 +50,7 @@ export default class Mute extends Command {
     if (category === null) {
       const res = 'Please run this command in a guild with an active category.';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
     const till = Time.parse(args.time);
@@ -62,10 +62,10 @@ export default class Mute extends Command {
     );
 
     if (!muted) {
-      msg.say('Already muted.');
+      await msg.say('Already muted.');
       return null;
     }
-    msg.say('Muted.');
+    await msg.say('Muted.');
     return null;
   }
 }

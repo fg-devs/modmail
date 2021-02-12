@@ -29,8 +29,10 @@ export default class Message {
     const dm = await thread.getDMChannel();
 
     try {
-      const msg = dm.messages.fetch(this.ref.clientID || '', true);
-      return msg;
+      return await dm.messages.fetch(
+        this.ref.clientID || '',
+        true,
+      );
     } catch (_) {
       return null;
     }
@@ -41,13 +43,15 @@ export default class Message {
 
     if (thread === null) { return null; }
 
-    const chan = await thread.getThreadChannel();
+    const channel = await thread.getThreadChannel();
 
-    if (chan === null) { return null; }
+    if (channel === null) { return null; }
 
     try {
-      const msg = chan.messages.fetch(this.ref.modmailID, true);
-      return msg;
+      return await channel.messages.fetch(
+        this.ref.modmailID,
+        true,
+      );
     } catch (_) {
       return null;
     }
@@ -82,7 +86,7 @@ export default class Message {
       oldMsg.content,
       false,
     );
-    // edit the thread iteration of the message that was editted
+    // edit the thread iteration of the message that was edited
     await thMessage.edit(embed);
     // store the new edit to the edits table
     await pool.edits.add({

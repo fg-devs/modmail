@@ -26,7 +26,7 @@ export default class Reply extends Command {
     const thread = await modmail.threads.getByChannel(msg.channel.id);
 
     if (thread !== null) {
-      await thread.sendToUser(msg, false);
+      await thread.sendMsg(msg, false);
     } else {
       await msg.reply('This is not an active thread.');
     }

@@ -36,7 +36,6 @@ export default class Thread {
     const dmChannel = await this.getDMChannel();
     const thChannel = await this.getThreadChannel();
 
-
     try {
       await dmChannel.send(dmEmbed);
     } finally {
@@ -129,7 +128,6 @@ export default class Thread {
   /**
    * Send a user's message to an active thread
    * @param {Message} msg The user's message
-   * @param {Thread} thread The active thread
    */
   public async sendToThread(msg: Message): Promise<void> {
     const pool = Modmail.getDB();
@@ -151,7 +149,7 @@ export default class Thread {
     const thMessage = await thChannel.send(thMsgEmbed);
 
     // Modmail message
-    const mmmsg: PartialMessage = {
+    const modmailMsg: PartialMessage = {
       clientID: msg.id,
       content: msg.content,
       edits: [],
@@ -163,7 +161,7 @@ export default class Thread {
       threadID: this.ref.id,
     };
 
-    await pool.messages.add(mmmsg);
+    await pool.messages.add(modmailMsg);
     await attCtrl.handle(msg, thChannel, thMessage.id);
     await msg.react('✅');
   }
@@ -173,77 +171,48 @@ export default class Thread {
     context: string,
     anonymously = false,
   ): Promise<void> {
-    const pool = Modmail.getDB();
-    const dmChannel = await this.getDMChannel();
-    const user = await this.getUser();
+    await this.send(context, msg.member as GuildMember, anonymously);
 
-    if (user === null) { return; }
-
-    const footer = {
-      text: anonymously
-        ? 'Staff'
-        : msg.member?.roles.highest.name || 'Staff',
-    };
-
-    const threadEmbed = anonymously
-      ? Embeds.messageSendAnon(context, msg.author)
-      : Embeds.messageSend(context, msg.author);
-
-    const dmEmbed = anonymously
-      ? Embeds.messageReceivedAnon(context)
-      : Embeds.messageReceived(context, msg.author);
-
-    threadEmbed.footer = footer;
-    dmEmbed.footer = footer;
-
-    const threadMessage = await msg.channel.send(threadEmbed);
-    const dmMessage = await dmChannel.send(dmEmbed);
-
-    await pool.users.create(msg.author.id);
-    await pool.messages.add({
-      clientID: dmMessage.id,
-      content: context,
-      edits: [],
-      files: [],
-      isDeleted: false,
-      internal: false,
-      modmailID: threadMessage.id,
-      sender: msg.author.id,
-      threadID: this.ref.id,
-    });
+    await msg.delete();
   }
 
-  public async sendToUser(msg: CommandoMessage, anonymously = false): Promise<void> {
-    const pool = Modmail.getDB();
+  public async sendMsg(msg: CommandoMessage, anonymously = false): Promise<void> {
     const content = msg.argString || '';
+
+    await this.send(content, msg.member as GuildMember, anonymously);
+
+    await msg.delete();
+  }
+
+  private async send(content: string, sender: GuildMember, anonymously = false) {
     const dmChannel = await this.getDMChannel();
-    const user = await this.getUser();
-
-    if (user === null) {
-      throw new Error(
-        `Couldn't retrieve member for ${this.ref.author.id}, did they leave?`,
-      );
-    }
-
+    const thChannel = await this.getThreadChannel();
+    const pool = Modmail.getDB();
     const footer = {
       text: anonymously
         ? 'Staff'
-        : msg.member?.roles.highest.name || 'Staff',
+        : sender.roles.highest.name || 'Staff',
     };
+
+    if (thChannel === null) {
+      throw new Error("The thread channel doesn't exist anymore.");
+    }
+
     const threadEmbed = anonymously
-      ? Embeds.messageSendAnon(content, msg.author)
-      : Embeds.messageSend(content, msg.author);
+      ? Embeds.messageSendAnon(content, sender.user)
+      : Embeds.messageSend(content, sender.user);
+
     const dmEmbed = anonymously
       ? Embeds.messageReceivedAnon(content)
-      : Embeds.messageReceived(content, msg.author);
+      : Embeds.messageReceived(content, sender.user);
 
     threadEmbed.footer = footer;
     dmEmbed.footer = footer;
 
-    const threadMessage = await msg.channel.send(threadEmbed);
+    const threadMessage = await thChannel.send(threadEmbed);
     const dmMessage = await dmChannel.send(dmEmbed);
 
-    await pool.users.create(msg.author.id);
+    await pool.users.create(sender.id);
     await pool.messages.add({
       clientID: dmMessage.id,
       content,
@@ -252,14 +221,12 @@ export default class Thread {
       isDeleted: false,
       internal: false,
       modmailID: threadMessage.id,
-      sender: msg.author.id,
+      sender: sender.id,
       threadID: this.ref.id,
     });
-
-    await msg.delete();
   }
 
-  private async getUser(): Promise<User> {
+  public async getUser(): Promise<User> {
     return this.modmail.users.fetch(this.ref.author.id);
   }
 }

@@ -6,7 +6,6 @@ type Args = {
   msgID?: string;
 }
 
-// TODO(dylan): This command is ugly af fix someday
 export default class Delete extends Command {
   constructor(client: Modmail) {
     super(client, {
@@ -34,7 +33,7 @@ export default class Delete extends Command {
     if (thread === null) {
       const res = 'Not currently in a thread..';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 

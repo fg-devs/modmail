@@ -40,7 +40,7 @@ export default class SetEmote extends Command {
 
     if (category !== null) {
       await category.setEmoji(args.emoji);
-      msg.say('Updated.');
+      await msg.say('Updated.');
       return null;
     }
 
@@ -49,7 +49,7 @@ export default class SetEmote extends Command {
       `Couldn't set emoji "${args.emoji}" for category ${args.id}`
       + " because it doesn't exist",
     );
-    msg.say("That category doesn't exist.");
+    await msg.say("That category doesn't exist.");
     return null;
   }
 }

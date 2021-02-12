@@ -26,7 +26,7 @@ export default class ListRoles extends Command {
     if (!category) {
       const res = "This guild doesn't have an active category.";
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
@@ -34,7 +34,7 @@ export default class ListRoles extends Command {
     const roles = await pool.permissions.fetchAll(category.getID());
     const res = Embeds.listRoles(category, roles);
 
-    msg.say(res);
+    await msg.say(res);
     return null;
   }
 }

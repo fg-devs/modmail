@@ -6,18 +6,19 @@ import LogUtil from '../util/Logging';
 export default class IssueHandler {
   /**
    * Log command failures
-   * @param {Command} _c Command that failed
+   * @param {Command} cmd Command that failed
    * @param {Error} err Error that ocurred
    * @param {CommandoMessage} msg The user's message that executed the command
+   * @param {any[]} _args Ignored arguments
    */
   public onCommandError(
-    c: Command,
+    cmd: Command,
     err: Error,
     msg: CommandoMessage,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-explicit-any
-    ...args: any[]
+    ..._args: any[]
   ): void {
-    const log = Modmail.getLogger(`(command) ${c.name}`);
+    const log = Modmail.getLogger(`(command) ${cmd.name}`);
     const message = `${msg.author.tag} executed "${msg.command?.name}"
 ${LogUtil.breakDownMsg(msg)}
 ${LogUtil.breakDownErr(err)}`;

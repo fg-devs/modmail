@@ -25,7 +25,7 @@ export type CatSelector = {
 export default class CatController {
   private activeSelectors: Set<string> = new Set();
 
-  private modmail: Modmail;
+  private readonly modmail: Modmail;
 
   constructor(modmail: Modmail) {
     this.modmail = modmail;
@@ -122,12 +122,11 @@ export default class CatController {
    * Start the categorySelector
    * @param {TextChannel | DMChannel} channel
    * @param {User} user
-   * @param {CommandoClient} client
    * @return {Promise<CatSelector>}
    * @throws {Error} If user did the following:
    *  * Provided an invalid emoji
    *  * The user didn't answer.
-   *  * The category selected couldn't be found (unlikey).
+   *  * The category selected couldn't be found (unlikely).
    *  * There are no active categories.
    */
   public async categorySelector(

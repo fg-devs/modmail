@@ -35,12 +35,12 @@ export default class Unmute extends Command {
     if (category === null) {
       const res = 'Please use this command in a guild with an active category.';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
-    category.unmute(args.userID);
-    msg.say('Unmuted.');
+    await category.unmute(args.userID);
+    await msg.say('Unmuted.');
     return null;
   }
 }

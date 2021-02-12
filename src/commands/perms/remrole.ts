@@ -36,7 +36,7 @@ export default class RemoveRole extends Command {
     if (category === null) {
       const res = "This guild doesn't have an active category.";
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
@@ -44,9 +44,9 @@ export default class RemoveRole extends Command {
     const isRemoved = await pool.permissions.remove(roleID);
 
     if (isRemoved) {
-      msg.say('Removed role.');
+      await msg.say('Removed role.');
     } else {
-      msg.say('Nothing was removed, are you sure the correct ID was provided?');
+      await msg.say('Nothing was removed, are you sure the correct ID was provided?');
     }
     return null;
   }

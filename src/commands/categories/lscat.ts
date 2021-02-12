@@ -23,7 +23,7 @@ export default class ListCategories extends Command {
     const cats = await modmail.categories.getAll(true);
     const res = Embeds.listCategories(cats);
 
-    msg.say(res);
+    await msg.say(res);
     return null;
   }
 }

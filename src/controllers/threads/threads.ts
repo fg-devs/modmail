@@ -125,6 +125,7 @@ export default class ThreadController extends Controller {
     let mute: null | MuteStatus = null;
 
     try {
+      // TODO(dylan): Redo the category selector
       selectorRes = await catCtrl.categorySelector(
         msg.channel as DMChannel,
         msg.author,
@@ -147,9 +148,10 @@ export default class ThreadController extends Controller {
       let message = `${msg.author.tag} wasn't allowed to DM a category\n`;
       await msg.reply(err.message);
 
-      if (selectorRes) {
+      if (selectorRes !== null) {
         message += ` * Category: ${selectorRes.name} (${selectorRes.id})\n`;
       }
+
       if (mute) {
         message += ` * Muted till: ${Time.toDate(mute.till)}\n`;
       }
@@ -188,9 +190,9 @@ export default class ThreadController extends Controller {
 
     // setup channel and send details about the user and the thread
     await channel.setParent(sel.category);
-    channel.send(userDetails);
-    channel.send(threadDetails);
-    channel.setTopic(`User ID: ${user.id}`);
+    await channel.send(userDetails);
+    await channel.send(threadDetails);
+    await channel.setTopic(`User ID: ${user.id}`);
 
     // create user if they don't exit
     await pool.users.create(msg.author.id);

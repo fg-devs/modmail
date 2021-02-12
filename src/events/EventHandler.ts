@@ -41,7 +41,7 @@ export default class EventHandler {
    * Called on ready
    */
   public async onReady(): Promise<void> {
-    const log = this.getLogger();
+    const log = EventHandler.getLogger();
     log.info('Bot is ready.');
     this.modmail.user?.setPresence({
       activity: {
@@ -150,7 +150,7 @@ export default class EventHandler {
     return this.queue.get(userID) as Mutex;
   }
 
-  private getLogger() {
+  private static getLogger() {
     return Modmail.getLogger('events');
   }
 }
