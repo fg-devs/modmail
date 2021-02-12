@@ -156,7 +156,17 @@ export default class ThreadController extends Controller {
     const categories = await this.modmail.categories.getAll(true);
     const selection = Embeds.categorySelector(categories);
     const msg = await channel.send(selection);
-    const emojis = categories.map((cat) => cat.getEmoji());
+    const emojis: string[] = [];
+    const tasks: Promise<MessageReaction>[] = [];
+
+    for (let i = 0; i < categories.length; i += 1) {
+      const emoji = categories[i].getEmoji();
+      const task = msg.react(emoji);
+      emojis.push(emoji);
+      tasks.push(task);
+    }
+    await Promise.all(tasks);
+
     const reactions = await msg.awaitReactions(
       (r: MessageReaction, u: User) => (emojis.includes(r.emoji.name) && !u.bot),
       { time: PROMPT_TIME, max: 1 },
