@@ -122,7 +122,7 @@ export default class ThreadController extends Controller {
 
     // setup channel and send details about the user and the thread
     try {
-      const channel = await this.setupChannel(user, category, isAdminOnly);
+      const channel = await ThreadController.setupChannel(user, category, isAdminOnly);
 
       // create user if they don't exit
       await pool.users.create(user.id);
@@ -134,7 +134,7 @@ export default class ThreadController extends Controller {
     return null;
   }
 
-  private async setupChannel(
+  private static async setupChannel(
     user: User,
     category: Category,
     isAdminOnly: boolean,
@@ -211,22 +211,20 @@ export default class ThreadController extends Controller {
   }
 
   private static async isAboutStaff(channel: DMChannel): Promise<boolean> {
-    await channel.send('Is this about a staff member (yes/no)?');
-    const responses = await channel.awaitMessages(
-      (msg: Message, u: User) => {
-        const lower = msg.content.toLowerCase();
-        return (lower.startsWith('y') || lower.startsWith('n'))
-          && !u.bot;
-      },
+    const msg = await channel.send('Is this about a staff member?');
+    await msg.react('👍');
+    await msg.react('👎');
+    const reactions = await msg.awaitReactions(
+      (r: MessageReaction, u: User) => (r.emoji.name === '👍' || r.emoji.name === '👎') && !u.bot,
       { time: PROMPT_TIME, max: 1 },
     );
-    const response = responses.first();
+    const reaction = reactions.first();
 
-    if (response === undefined) {
+    if (reaction === undefined) {
       return false;
     }
-    const lower = response.content.toLowerCase();
-    return lower.startsWith('y');
+
+    return reaction.emoji.name === '👍';
   }
 
   private static async makeAdminOnly(
