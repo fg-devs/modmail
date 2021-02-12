@@ -75,6 +75,6 @@ export default class Mute extends Command {
       return [args.userID.replace(/[^0-9]/g, ''), args.time];
     }
     // [userID, time]
-    return [args.time, args.userID.replace(/[^0-9]/g, '')];
+    return [args.time.replace(/[^0-9]/g, ''), args.userID];
   }
 }
