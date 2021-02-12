@@ -88,9 +88,10 @@ export default class Embeds {
 
     for (let i = 0; i < categories.length; i += 1) {
       const cat = categories[i];
+      const desc = cat.getDescription();
       res.fields.push({
         name: `${cat.getEmoji()} - ${cat.getName()}`,
-        value: cat.getDescription(),
+        value: desc.length > 0 ? desc : '\u2800',
         inline: false,
       });
     }
