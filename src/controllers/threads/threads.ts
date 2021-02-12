@@ -117,7 +117,6 @@ export default class ThreadController extends Controller {
    * @returns {Promise<CatSelector | null>} null if the selection process
    * failed
    */
-  // TODO(dylan):
   private async handleSelector(msg: Message): Promise<CatSelector | null> {
     const catCtrl = this.modmail.categories;
     const pool = Modmail.getDB();
@@ -126,6 +125,7 @@ export default class ThreadController extends Controller {
     let mute: null | MuteStatus = null;
 
     try {
+      // TODO(dylan): Redo the category selector
       selectorRes = await catCtrl.categorySelector(
         msg.channel as DMChannel,
         msg.author,
@@ -148,9 +148,10 @@ export default class ThreadController extends Controller {
       let message = `${msg.author.tag} wasn't allowed to DM a category\n`;
       await msg.reply(err.message);
 
-      if (selectorRes) {
+      if (selectorRes !== null) {
         message += ` * Category: ${selectorRes.name} (${selectorRes.id})\n`;
       }
+
       if (mute) {
         message += ` * Muted till: ${Time.toDate(mute.till)}\n`;
       }
