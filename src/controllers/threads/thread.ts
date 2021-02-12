@@ -289,19 +289,21 @@ export default class Thread {
       let embed;
 
       if (msgEdits) {
-        embed = msg.getClientID() !== null
-          ? Embeds.editsSend(user, msgEdits)
-          : Embeds.editsRecv(user, msgEdits);
+        embed = this.ref.author.id === msg.getSenderID()
+          ? Embeds.editsRecv(user, msgEdits)
+          : Embeds.editsSend(user, msgEdits);
       } else if (msg.isInternal()) {
         embed = Embeds.internalMessage(msg.getContent(), user);
       } else {
-        embed = msg.getClientID() !== null
-          ? Embeds.messageSend(msg.getContent(), user, false)
-          : Embeds.messageRecv(msg.getContent(), user, false);
+        embed = this.ref.author.id === msg.getSenderID()
+          ? Embeds.messageRecv(msg.getContent(), user, false)
+          : Embeds.messageSend(msg.getContent(), user, false);
       }
       if (msgAtts) {
         msgAtts.forEach((att) => {
-          embed = Embeds.attachmentSend(att, user, false);
+          embed = this.ref.author.id === msg.getSenderID()
+            ? Embeds.attachmentRecv(att, user, false)
+            : Embeds.attachmentSend(att, user, false);
           const attTask = channel.send(embed);
           msgTasks.push(attTask);
         });
