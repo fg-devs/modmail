@@ -46,7 +46,6 @@ export default class StandardReplyAnon extends Command {
     }
 
     await thread.sendSR(msg, standardReply.reply, true);
-    await msg.delete();
 
     return null;
   }

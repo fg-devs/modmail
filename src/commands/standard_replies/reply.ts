@@ -46,7 +46,6 @@ export default class StandardReply extends Command {
     }
 
     await thread.sendSR(msg, standardReply.reply, false);
-    await msg.delete();
 
     return null;
   }
