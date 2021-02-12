@@ -106,7 +106,7 @@ export default class Embeds {
   public static messageSend(
     content: string,
     sender: User | GuildMember,
-    anonymously = false,
+    anonymously: boolean,
   ): MessageEmbed {
     const embed = Embeds.getGeneric({
       description: content,
@@ -132,7 +132,9 @@ export default class Embeds {
         iconURL: user.avatarURL() || user.defaultAvatarURL,
       };
     } else {
-      embed.title = 'Staff';
+      embed.author = {
+        name: 'Staff Member',
+      };
     }
 
     return embed;
@@ -250,7 +252,7 @@ export default class Embeds {
 
   public static edits(user: User, edits: Edit[]): MessageEmbed {
     const last = edits[edits.length - 1];
-    const embed = Embeds.messageSend(last.content, user);
+    const embed = Embeds.messageSend(last.content, user, false);
 
     for (let i = 0; i < edits.length; i += 1) {
       const edit = edits[i];
