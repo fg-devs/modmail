@@ -5,7 +5,7 @@ import { Requires } from '../../util/Perms';
 import LogUtil from '../../util/Logging';
 
 type CatArgs = {
-  id: string;
+  emoji: string;
 }
 
 export default class RemoveCategory extends Command {
@@ -19,8 +19,8 @@ export default class RemoveCategory extends Command {
       memberName: 'remcat',
       args: [
         {
-          key: 'id',
-          prompt: 'The category ID to remove',
+          key: 'emoji',
+          prompt: 'The emoji of the category to remove',
           type: 'string',
         },
       ],
@@ -30,8 +30,8 @@ export default class RemoveCategory extends Command {
   @Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: CatArgs): Promise<null> {
     const modmail = Modmail.getModmail();
-    const { id } = args;
-    const category = await modmail.categories.getByID(id);
+    const { emoji } = args;
+    const category = await modmail.categories.getByEmoji(emoji);
 
     if (category !== null) {
       await category.setActive(false);
@@ -39,8 +39,11 @@ export default class RemoveCategory extends Command {
       return null;
     }
 
-    LogUtil.cmdWarn(msg, `Couldn't disable category "${id}" for ${msg.author.id}`);
-    await msg.say(`Couldn't find category "${id}"`);
+    LogUtil.cmdWarn(
+      msg,
+      `Couldn't disable category "${emoji}" for ${msg.author.id}`,
+    );
+    await msg.say(`Couldn't find category "${emoji}"`);
     return null;
   }
 }

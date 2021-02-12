@@ -1,15 +1,9 @@
+import { Category as PartialCategory } from '@Floor-Gang/modmail-types';
 import {
-  Category as PartialCategory,
-} from '@Floor-Gang/modmail-types';
-import {
-  CategoryChannel,
-  DMChannel,
-  Guild,
-  TextChannel,
-  User,
+  CategoryChannel, DMChannel, Guild, TextChannel, User,
 } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
-import { CategoryResolvable } from '../../models/types';
+import { CategoryResolvable } from '@Floor-Gang/modmail-database';
 import Embeds from '../../util/Embeds';
 import { PROMPT_TIME } from '../../globals';
 import Modmail from '../../Modmail';
@@ -46,6 +40,23 @@ export default class CatController {
       emote: emoji,
       channelID: catChan.id,
     });
+
+    return new Category(this.modmail, data);
+  }
+
+  public async getByEmoji(
+    emoji: string,
+    isActive = true,
+  ): Promise<Category | null> {
+    const pool = Modmail.getDB();
+    const data = await pool.categories.fetch(
+      CategoryResolvable.emote,
+      emoji,
+    );
+
+    if (data === null || data.isActive !== isActive) {
+      return null;
+    }
 
     return new Category(this.modmail, data);
   }
@@ -162,7 +173,10 @@ export default class CatController {
 
     const collection = await msg.awaitReactions(
       (_, rUser: User) => rUser.id === user.id,
-      { max: 1, time: PROMPT_TIME },
+      {
+        max: 1,
+        time: PROMPT_TIME,
+      },
     );
     this.forget(user.id);
 
@@ -171,7 +185,7 @@ export default class CatController {
     // The user didn't answer in time
     if (emote === undefined) {
       throw new Error(
-        "You didn't answer in time, please restart the process by sending "
+        'You didn\'t answer in time, please restart the process by sending '
         + 'your message again.',
       );
     }
@@ -189,7 +203,7 @@ export default class CatController {
     );
 
     if (category === null) {
-      throw new Error("Couldn't get category based on emote.");
+      throw new Error('Couldn\'t get category based on emote.');
     }
 
     const categoryChannel = await this.modmail.channels.fetch(
