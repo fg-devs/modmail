@@ -36,11 +36,10 @@ export default class AddRole extends Command {
 
   @PermUtil.Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
-    const { roleID } = args;
-    const levelStr = args.level.toLowerCase();
+    const [roleID, levelStr] = AddRole.fuzzy(args);
     const modmail = Modmail.getModmail();
     const category = await modmail.categories.getByGuild(msg.guild?.id || '');
-    const level = AddRole.getLevel(levelStr);
+    const level = AddRole.getLevel(levelStr.toLowerCase());
 
     if (category === null || !category.isActive()) {
       const res = 'This guild doesn\'t have an active category.';
@@ -50,7 +49,7 @@ export default class AddRole extends Command {
     }
 
     if (level === null) {
-      const res = `"${args.level}" isn't a valid level, try again.`;
+      const res = `"${levelStr}" isn't a valid level, try again.`;
       LogUtil.cmdWarn(msg, res);
       await msg.say(res);
       return null;
@@ -89,4 +88,13 @@ export default class AddRole extends Command {
       return false;
     }
   }
+
+  private static fuzzy(args: Args): [string, string] {
+    if ((/[A-z]/g).test(args.roleID)) {
+      // [roleID, level]
+      return [args.level, args.roleID];
+    }
+    return [args.roleID, args.level];
+  }
 }
+

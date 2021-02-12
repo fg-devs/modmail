@@ -8,7 +8,7 @@ import Time from '../../util/Time';
 type Args = {
   userID: string,
   time: string,
-  reason?: string[],
+  reason: string[],
 }
 
 export default class Mute extends Command {
@@ -35,7 +35,6 @@ export default class Mute extends Command {
           key: 'reason',
           prompt: 'Reason for mute',
           type: 'string',
-          default: '',
           infinite: true,
         },
       ],
@@ -46,6 +45,7 @@ export default class Mute extends Command {
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const modmail = Modmail.getModmail();
     const category = await modmail.categories.getByGuild(msg.guild?.id || '');
+    const [userID, time] = Mute.fuzzy(args);
 
     if (category === null) {
       const res = 'Please run this command in a guild with an active category.';
@@ -53,10 +53,10 @@ export default class Mute extends Command {
       await msg.say(res);
       return null;
     }
-    const till = Time.parse(args.time);
-    const reason = args.reason ? args.reason.join(' ') : undefined;
+    const till = Time.parse(time);
+    const reason = args.reason.length > 0 ? args.reason.join(' ') : undefined;
     const muted = await category.mute(
-      args.userID,
+      userID,
       till,
       reason,
     );
@@ -67,5 +67,14 @@ export default class Mute extends Command {
     }
     await msg.say('Muted.');
     return null;
+  }
+
+  private static fuzzy(args: Args): [string, string] {
+    // check if the time is an ID
+    if ((/[A-z]/g).test(args.time)) {
+      return [args.userID, args.time];
+    }
+    // [userID, time]
+    return [args.time, args.userID];
   }
 }

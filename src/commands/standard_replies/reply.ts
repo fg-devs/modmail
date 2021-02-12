@@ -37,7 +37,7 @@ export default class StandardReply extends Command {
       return null;
     }
 
-    const standardReply = await pool.standardReplies.get(args.name);
+    const standardReply = await pool.standardReplies.fetch(args.name);
     if (standardReply === null) {
       const res = 'Unable to locate that standard reply...';
       LogUtil.cmdWarn(msg, res);
