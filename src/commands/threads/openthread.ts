@@ -91,12 +91,13 @@ export default class OpenThread extends Command {
         return null;
       }
     }
-
+    // TODO(dylan): make sure the user is DM'able in the first place
+    const userDetails = await Embeds.memberDetails(user);
     await channel.setParent(category.channelID);
-    await channel.send(await Embeds.memberDetails(pool.threads, user));
+    await channel.send(userDetails);
     await channel.send(Embeds.newThreadFor(msg.author, user));
     await pool.users.create(user.id);
-    await pool.threads.open(user.id, channel.id, category.id);
+    await pool.threads.open(user.id, channel.id, category.id, false);
 
     await msg.react('✅');
     await new Promise((r) => setTimeout(r, 5000));

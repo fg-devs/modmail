@@ -69,7 +69,7 @@ export default class MessageController extends Controller {
     if (thread !== null) {
       await thread.sendToThread(msg);
     } else {
-      await threads.create(msg);
+      await threads.createFor(msg);
     }
   }
 
