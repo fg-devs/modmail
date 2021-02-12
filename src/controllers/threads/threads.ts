@@ -238,7 +238,7 @@ export default class ThreadController extends Controller {
       {
         deny: ['VIEW_CHANNEL'],
         id: category.getGuildID(),
-      }
+      },
     ];
 
     for (let i = 0; i < roles.length; i += 1) {
