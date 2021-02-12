@@ -1,10 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import { Command, CommandoMessage } from 'discord.js-commando';
-import { Message, TextChannel } from 'discord.js';
+import { TextChannel } from 'discord.js';
 import Modmail from '../../Modmail';
-import Embeds from '../../util/Embeds';
-import { CLOSE_THREAD_DELAY } from '../../globals';
-import LogUtil from '../../util/Logging';
 
 export default class Forward extends Command {
   constructor(client: Modmail) {
@@ -17,9 +14,27 @@ export default class Forward extends Command {
     });
   }
 
-  public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    // TODO(dylan): fix
-    throw new Error('Temporarily broken');
+  public async run(msg: CommandoMessage): Promise<null> {
+    const modmail = Modmail.getModmail();
+    const thread = await modmail.threads.getByChannel(msg.channel.id);
+
+    if (thread === null) {
+      await msg.reply('This isn\'t a thread.');
+      return null;
+    }
+
+    const category = await modmail.threads.getCategory(
+      msg.channel as TextChannel,
+    );
+
+    if (category === null) {
+      await msg.reply('Couldn\'t get that category.');
+      return null;
+    }
+
+    await thread.forward(msg.author, category);
+    await msg.channel.delete();
+
     return null;
   }
 }

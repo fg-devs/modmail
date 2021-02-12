@@ -15,9 +15,10 @@ import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
 import MMMessage from '../messages/message';
 import { CLOSE_THREAD_DELAY } from '../../globals';
+import ThreadController from './threads';
 
 export default class Thread {
-  private modmail: Modmail
+  private modmail: Modmail;
 
   private ref: PartialThread;
 
@@ -195,7 +196,7 @@ export default class Thread {
     };
 
     if (thChannel === null) {
-      throw new Error("The thread channel doesn't exist anymore.");
+      throw new Error('The thread channel doesn\'t exist anymore.');
     }
 
     const threadEmbed = anonymously
@@ -224,6 +225,52 @@ export default class Thread {
       sender: sender.id,
       threadID: this.ref.id,
     });
+  }
+
+  public async forward(forwarder: User, category: Category): Promise<boolean> {
+    const pool = Modmail.getDB();
+    const author = await this.getUser();
+    const channel = await ThreadController.setupChannel(
+      author,
+      category,
+      this.ref.isAdminOnly,
+      forwarder,
+    );
+
+    if (channel === null) {
+      return false;
+    }
+
+    await pool.threads.forward(this.ref.id, category.getID(), channel.id);
+
+    const messages = await pool.messages.fetchAll(this.ref.id);
+    const users = new Map<string, User>();
+    const usrTasks: Promise<User>[] = [];
+    const msgTasks: Promise<Message>[] = [];
+
+    // fetch all users for each message
+    for (let i = 0; i < messages.length; i += 1) {
+      const message = messages[i];
+      const task = this.modmail.users.fetch(message.sender);
+      usrTasks.push(task);
+    }
+
+    (await Promise.all(usrTasks)).forEach((user) => users.set(user.id, user));
+
+    for (let i = 0; i < messages.length; i += 1) {
+      const message = messages[i];
+      const user = users.get(message.sender);
+      if (user) {
+        const embed = message.internal
+          ? Embeds.internalMessage(message.content, user)
+          : Embeds.messageSend(message.content, user);
+        const task = channel.send(embed);
+        msgTasks.push(task);
+      }
+    }
+
+    await Promise.all(msgTasks);
+    return true;
   }
 
   public async getUser(): Promise<User> {

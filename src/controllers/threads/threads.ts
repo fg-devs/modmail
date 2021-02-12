@@ -37,7 +37,7 @@ export default class ThreadController extends Controller {
 
     if (isMaxed) {
       await msg.reply(
-        "This category has met it's max threads, try again later.",
+        'This category has met it\'s max threads, try again later.',
       );
       return;
     }
@@ -46,7 +46,7 @@ export default class ThreadController extends Controller {
 
     // check if they're muted from the category selected
     if (isMuted) {
-      await msg.reply("You're muted from this category.");
+      await msg.reply('You\'re muted from this category.');
       return;
     }
 
@@ -134,10 +134,11 @@ export default class ThreadController extends Controller {
     return null;
   }
 
-  private static async setupChannel(
+  public static async setupChannel(
     user: User,
     category: Category,
     isAdminOnly: boolean,
+    forwarder: User | null = null,
   ): Promise<TextChannel | null> {
     const guild = await category.getGuild();
     const parent = await category.getCategory();
@@ -158,6 +159,10 @@ export default class ThreadController extends Controller {
     );
 
     try {
+      if (forwarder !== null) {
+        const fwEmbed = Embeds.forwardedBy(forwarder);
+        await channel.send(fwEmbed);
+      }
       await channel.setParent(parent);
       await channel.send(userDetails);
       await channel.send(threadDetails);
@@ -174,7 +179,7 @@ export default class ThreadController extends Controller {
     }
   }
 
-  private async getCategory(channel: DMChannel): Promise<Category | null> {
+  public async getCategory(channel: TextChannel | DMChannel): Promise<Category | null> {
     const categories = await this.modmail.categories.getAll(true);
     const selection = Embeds.categorySelector(categories);
     const msg = await channel.send(selection);
@@ -191,7 +196,10 @@ export default class ThreadController extends Controller {
 
     const reactions = await msg.awaitReactions(
       (r: MessageReaction, u: User) => (emojis.includes(r.emoji.name) && !u.bot),
-      { time: PROMPT_TIME, max: 1 },
+      {
+        time: PROMPT_TIME,
+        max: 1,
+      },
     );
     const reaction = reactions.first();
 
@@ -216,7 +224,10 @@ export default class ThreadController extends Controller {
     await msg.react('👎');
     const reactions = await msg.awaitReactions(
       (r: MessageReaction, u: User) => (r.emoji.name === '👍' || r.emoji.name === '👎') && !u.bot,
-      { time: PROMPT_TIME, max: 1 },
+      {
+        time: PROMPT_TIME,
+        max: 1,
+      },
     );
     const reaction = reactions.first();
 

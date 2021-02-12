@@ -257,10 +257,10 @@ export default class Embeds {
    * All embeds share the attributes returned here.
    * @returns {MessageEmbed}
    */
-  public static forwardedBy(author: User, category: string): MessageEmbed {
+  public static forwardedBy(author: User): MessageEmbed {
     return Embeds.getGeneric({
       title: 'Conversation Forwarded',
-      description: `This conversation was forwarded by ${author} from ${category}`,
+      description: `This conversation was forwarded by ${author}`,
       author: {
         name: author.tag,
         icon_url: author.avatarURL() || author.defaultAvatarURL,
