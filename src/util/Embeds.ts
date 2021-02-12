@@ -18,6 +18,7 @@ export default class Embeds {
    * @param {boolean} isAdminOnly
    * @param {User} user
    * @param {User | null} creator
+   * @param {boolean?} forwarded
    * @returns {Promise<MessageEmbed>}
    */
   public static async threadDetails(
@@ -340,7 +341,7 @@ export default class Embeds {
     const res = Embeds.getGeneric({
       title: `Roles of ${cat.getName()} - ${cat.getEmoji()}`,
       description: '',
-      color: 'BLURPLE',
+      color: COLORS.INTERNAL,
     });
 
     for (let i = 0; i < roles.length; i += 1) {
@@ -363,7 +364,7 @@ export default class Embeds {
   public static muted(catName: string, till: number): MessageEmbed {
     return Embeds.getGeneric({
       title: `You're muted from ${catName}`,
-      color: 'RED',
+      color: COLORS.BAD,
       timestamp: Math.floor(till),
       footer: {
         text: 'Until',
