@@ -1,5 +1,5 @@
 import {
-  DMChannel, GuildMember, Message, MessageAttachment, TextChannel, User,
+  DMChannel, GuildMember, Message, TextChannel, User,
 } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
 import {
@@ -16,7 +16,7 @@ import { CLOSE_THREAD_DELAY } from '../../globals';
 import ThreadController from './threads';
 
 export default class Thread {
-  private modmail: Modmail;
+  private readonly modmail: Modmail;
 
   private ref: PartialThread;
 
@@ -162,7 +162,10 @@ export default class Thread {
     };
 
     await pool.messages.add(modmailMsg);
-    await attCtrl.handleDM(msg);
+    await attCtrl.handleDM(
+      new MMMessage(this.modmail, modmailMsg),
+      msg.attachments.values(),
+    );
     await msg.react('✅');
   }
 
@@ -176,37 +179,21 @@ export default class Thread {
     await msg.delete();
   }
 
-  public async recvAttachment(msg: Message, attachment: Attachment): Promise<void> {
-    const thEmbed = Embeds.attachmentRecv(attachment, msg.author, false);
-    const thChannel = await this.getThreadChannel();
-
-    if (thChannel === null) {
-      return;
-    }
-
-    await thChannel.send(thEmbed);
-  }
-
   public async sendMsg(msg: CommandoMessage, anonymously = false): Promise<void> {
     const content = msg.argString || '';
     const attachments = msg.attachments.values();
-    const attTasks: Promise<void>[] = [];
 
-    await this.send(content, msg.member as GuildMember, anonymously);
+    const mmMsg = await this.send(content, msg.member as GuildMember, anonymously);
+    await this.modmail.attachments.handle(mmMsg, attachments, anonymously);
 
-    let attOpt = attachments.next();
-    let task;
-    while (!attOpt.done) {
-      task = this.sendAttachment(msg, attOpt.value, anonymously);
-      attTasks.push(task);
-      attOpt = attachments.next();
-    }
-
-    await Promise.all(attTasks);
     await msg.delete();
   }
 
-  private async send(content: string, sender: GuildMember, anonymously = false) {
+  private async send(
+    content: string,
+    sender: GuildMember,
+    anonymously = false,
+  ): Promise<MMMessage> {
     const dmChannel = await this.getDMChannel();
     const thChannel = await this.getThreadChannel();
     const pool = Modmail.getDB();
@@ -231,7 +218,7 @@ export default class Thread {
     const dmMessage = await dmChannel.send(dmEmbed);
 
     await pool.users.create(sender.id);
-    await pool.messages.add({
+    const mmMsg = {
       clientID: dmMessage.id,
       content,
       edits: [],
@@ -241,40 +228,12 @@ export default class Thread {
       modmailID: threadMessage.id,
       sender: sender.id,
       threadID: this.ref.id,
-    });
-  }
-
-  private async sendAttachment(
-    msg: CommandoMessage,
-    msgAtt: MessageAttachment,
-    anonymously = false,
-  ): Promise<void> {
-    const dmChannel = await this.getDMChannel();
-    const thChannel = await this.getThreadChannel();
-    const modmail = Modmail.getModmail();
-    const attachment = await modmail.attachments.create(msg as Message, msgAtt);
-
-    if (thChannel === null) {
-      throw new Error('The thread channel doesn\'t exist anymore.');
-    }
-
-    const threadEmbed = Embeds.attachmentSend(
-      attachment,
-      msg.member || msg.author,
-      anonymously,
-    );
-    const dmEmbed = Embeds.attachmentRecv(
-      attachment,
-      msg.member || msg.author,
-      anonymously,
-    );
-
-    await thChannel.send(threadEmbed);
-    await dmChannel.send(dmEmbed);
+    };
+    await pool.messages.add(mmMsg);
+    return new MMMessage(this.modmail, mmMsg);
   }
 
   public async forward(forwarder: User, category: Category): Promise<boolean> {
-    const modmail = Modmail.getModmail();
     const pool = Modmail.getDB();
     const author = await this.getUser();
     const channel = await ThreadController.setupChannel(
@@ -290,7 +249,7 @@ export default class Thread {
 
     await pool.threads.forward(this.ref.id, category.getID(), channel.id);
 
-    const messages = await modmail.messages.getAll(this.ref.id);
+    const messages = await this.modmail.messages.getAll(this.ref.id);
     const users = new Map<string, User>();
     const attachments = new Map<string, Attachment[]>();
     const edits = new Map<string, Edit[]>();
@@ -321,7 +280,7 @@ export default class Thread {
 
     for (let i = 0; i < messages.length; i += 1) {
       const msg = messages[i];
-      const user = users.get(msg.getSender());
+      const user = users.get(msg.getSenderID());
       if (user === undefined) {
         continue;
       }

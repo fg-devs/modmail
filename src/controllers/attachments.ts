@@ -3,6 +3,8 @@ import { Message, MessageAttachment } from 'discord.js';
 import { IMAGE_REGEX } from '../globals';
 import Controller from '../models/controller';
 import Modmail from '../Modmail';
+import Embeds from '../util/Embeds';
+import MMMessage from '../controllers/messages/message';
 
 export default class AttachmentController extends Controller {
   constructor(modmail: Modmail) {
@@ -10,15 +12,15 @@ export default class AttachmentController extends Controller {
   }
 
   public async create(
-    msg: Message,
+    msg: MMMessage,
     msgAtt: MessageAttachment,
   ): Promise<Attachment> {
     const pool = Modmail.getDB();
 
     return pool.attachments.create({
-      messageID: msg.id,
+      messageID: msg.getID(),
       name: msgAtt.name || '',
-      sender: msg.author.id,
+      sender: msg.getSenderID(),
       source: msgAtt.url,
       type: AttachmentController.isImage(msgAtt)
         ? FileType.Image
@@ -26,21 +28,82 @@ export default class AttachmentController extends Controller {
     });
   }
 
+  public async handle(
+    msg: MMMessage,
+    messageAttachments: Iterator<MessageAttachment>,
+    anonymously = false,
+  ): Promise<void> {
+    const thread = await msg.getThread();
+
+    if (thread === null) {
+      throw new Error('The thread doesn\'t exist anymore.');
+    }
+
+    const attTasks: Promise<Attachment>[] = [];
+    const sendTasks: Promise<Message>[] = [];
+    const recvTasks: Promise<Message>[] = [];
+    const sender = await msg.getSender();
+
+    let msgAttOpt = messageAttachments.next();
+    while (!msgAttOpt.done) {
+      attTasks.push(this.create(msg, msgAttOpt.value));
+      msgAttOpt = messageAttachments.next();
+    }
+
+    const attachments = await Promise.all(attTasks);
+    const dmChannel = await thread.getDMChannel();
+    const thChannel = await thread.getThreadChannel();
+
+    if (thChannel === null) {
+      throw new Error('The thread channel doesn\'t exist anymore.');
+    }
+
+    for (let i = 0; i < attachments.length; i += 1) {
+      const attachment = attachments[i];
+      const threadEmbed = Embeds.attachmentSend(
+        attachment,
+        sender,
+        anonymously,
+      );
+      const dmEmbed = Embeds.attachmentRecv(
+        attachment,
+        sender,
+        anonymously,
+      );
+
+      recvTasks.push(thChannel.send(threadEmbed));
+      sendTasks.push(dmChannel.send(dmEmbed));
+    }
+
+    await Promise.all(recvTasks);
+    await Promise.all(sendTasks);
+  }
+
   /**
    * Handles attachments sent by a client
    * @param {Message} msg Message sent the user
+   * @param {Iterator<MessageAttachment>} messageAttachments
    * @returns {Promise<void>}
    */
-  public async handleDM(msg: Message): Promise<void> {
-    const thread = await this.modmail.threads.getByAuthor(msg.author.id);
+  public async handleDM(
+    msg: MMMessage,
+    messageAttachments: Iterator<MessageAttachment>,
+  ): Promise<void> {
+    const thread = await msg.getThread();
 
     if (thread === null) {
       return;
     }
 
-    const messageAttachments = msg.attachments.values();
+    const thChannel = await thread.getThreadChannel();
+
+    if (thChannel === null) {
+      throw new Error('The thread channel doesn\'t exist anymore.');
+    }
+
     const attTasks: Promise<Attachment>[] = [];
-    const recvTasks: Promise<void>[] = [];
+    const recvTasks: Promise<Message>[] = [];
+    const user = await msg.getUser();
     let msgAttOpt = messageAttachments.next();
 
     while (!msgAttOpt.done) {
@@ -51,7 +114,13 @@ export default class AttachmentController extends Controller {
     const attachments = await Promise.all(attTasks);
 
     for (let i = 0; i < attachments.length; i += 1) {
-      recvTasks.push(thread.recvAttachment(msg, attachments[i]));
+      const attachment = attachments[i];
+      const threadEmbed = Embeds.attachmentSend(
+        attachment,
+        user,
+      );
+
+      recvTasks.push(thChannel.send(threadEmbed));
     }
 
     await Promise.all(recvTasks);

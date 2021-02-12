@@ -4,6 +4,7 @@ import {
   Message as PartialMessage,
 } from '@Floor-Gang/modmail-types';
 import {
+  GuildMember,
   Message as DMessage,
   PartialMessage as PartialDMessage, User,
 } from 'discord.js';
@@ -32,8 +33,21 @@ export default class Message {
     return this.ref.clientID;
   }
 
-  public getSender(): string {
+  public getSenderID(): string {
     return this.ref.sender;
+  }
+
+  public async getSender(): Promise<GuildMember | User> {
+    const thread = await this.getThread();
+    if (thread === null) {
+      return this.getUser();
+    }
+
+    const member = await thread.getMember();
+    if (member !== null) {
+      return member;
+    }
+    return this.getUser();
   }
 
   public getContent(): string {
