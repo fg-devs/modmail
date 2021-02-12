@@ -209,7 +209,7 @@ export default class Thread {
 
     const threadEmbed = Embeds.messageSend(content, sender, anonymously);
 
-    const dmEmbed = Embeds.messageRecv(content, sender, anonymously);
+    const dmEmbed = Embeds.messageSend(content, sender, anonymously);
 
     threadEmbed.footer = footer;
     dmEmbed.footer = footer;
