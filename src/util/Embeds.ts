@@ -112,23 +112,27 @@ export default class Embeds {
       description: content,
       color: 0x7CFC00,
     });
+    const user = sender instanceof User
+      ? sender
+      : sender.user;
 
     if (sender instanceof GuildMember) {
-      embed.author = {
-        name: sender.user.tag,
-        iconURL: sender.user.avatarURL() || sender.user.defaultAvatarURL,
-      };
       embed.footer = {
         text: anonymously
           ? 'Staff'
           : sender.roles.highest.name || 'Staff',
       };
     } else {
-      embed.author = {
-        name: sender.tag,
-        iconURL: sender.avatarURL() || sender.defaultAvatarURL,
-      };
       embed.footer = { text: 'Staff' };
+    }
+
+    if (!anonymously) {
+      embed.author = {
+        name: user.tag,
+        iconURL: user.avatarURL() || user.defaultAvatarURL,
+      };
+    } else {
+      embed.title = 'Staff';
     }
 
     return embed;
