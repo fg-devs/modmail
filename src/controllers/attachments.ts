@@ -1,4 +1,4 @@
-import { FileType } from '@Floor-Gang/modmail-types';
+import { Attachment, FileType } from '@Floor-Gang/modmail-types';
 import { Message, MessageAttachment, TextChannel } from 'discord.js';
 import { IMAGE_REGEX } from '../globals';
 import Controller from '../models/controller';
@@ -61,9 +61,17 @@ export default class AttachmentController extends Controller {
     msg: Message,
     attachment: MessageAttachment,
   ): Promise<Message> {
+    const att: Attachment = {
+      source: attachment.url,
+      messageID: msg.id,
+      type: FileType.Image,
+      sender: msg.author.id,
+      name: attachment.name || '',
+      id: attachment.id,
+    };
     const embed = isImage
-      ? Embeds.messageAttachmentImage(attachment, msg.author)
-      : Embeds.messageAttachment(attachment, msg.author);
+      ? Embeds.messageAttachmentImage(att, msg.author)
+      : Embeds.messageAttachment(att, msg.author);
 
     return channel.send(embed);
   }
@@ -73,7 +81,7 @@ export default class AttachmentController extends Controller {
    * @param {boolean} isImage
    * @param {string} id The message ID of the embed that was sent in the embed
    * by Modmail.
-   * @param {msg} msg Message from the user
+   * @param {Message} msg Message from the user
    * @param {MessageAttachment} attachment Attachment sent by user
    * @returns {Promise<void>}
    */
