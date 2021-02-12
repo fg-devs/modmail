@@ -207,7 +207,7 @@ export default class Thread {
       throw new Error('The thread channel doesn\'t exist anymore.');
     }
 
-    const threadEmbed = Embeds.messageSend(content, sender, anonymously);
+    const threadEmbed = Embeds.messageSend(content, sender, false);
 
     const dmEmbed = Embeds.messageSend(content, sender, anonymously);
 

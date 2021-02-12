@@ -63,7 +63,7 @@ export default class AttachmentController extends Controller {
       const threadEmbed = Embeds.attachmentSend(
         attachment,
         sender,
-        anonymously,
+        false,
       );
       const dmEmbed = Embeds.attachmentSend(
         attachment,
