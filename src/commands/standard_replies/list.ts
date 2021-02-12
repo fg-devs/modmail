@@ -31,7 +31,7 @@ export default class StandardReplyCreate extends Command {
       files: [
         {
           name: 'Standard Replies.txt',
-          buffer: Buffer.from(res),
+          attachment: res,
         },
       ],
     });
