@@ -8,6 +8,8 @@ export const CLOSE_THREAD_DELAY = 10000;
 
 export const IMAGE_REGEX = /\.|jpe?g|tiff?|png|gif|webp|bmp$/i;
 
+export const ADMIN_INDICATOR_PREFIX = '⭐┃';
+
 export const MAX_THREADS = 30;
 
 export const COLORS = {

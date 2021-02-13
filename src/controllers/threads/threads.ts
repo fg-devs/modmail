@@ -11,7 +11,7 @@ import Thread from './thread';
 import Controller from '../../models/controller';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
-import { PROMPT_TIME } from '../../globals';
+import { ADMIN_INDICATOR_PREFIX, PROMPT_TIME } from '../../globals';
 import Category from '../categories/category';
 
 export default class ThreadController extends Controller {
@@ -168,8 +168,10 @@ export default class ThreadController extends Controller {
       creator,
       forwarded,
     );
+    const channelName = `${isAdminOnly ? ADMIN_INDICATOR_PREFIX : ''}`
+      + `${user.username}-${user.discriminator}`;
     const channel = await guild.channels.create(
-      `${user.username}-${user.discriminator}`,
+      channelName,
       { type: 'text' },
     );
 
