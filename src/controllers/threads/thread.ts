@@ -183,6 +183,11 @@ export default class Thread {
     const content = msg.argString || '';
     const attachments = msg.attachments.values();
 
+    if (content.length === 0 && msg.attachments.size === 0) {
+      await msg.reply('Please provide a body or attachments');
+      return;
+    }
+
     const mmMsg = await this.send(content, msg.member as GuildMember, anonymously);
     await this.modmail.attachments.handle(mmMsg, attachments, anonymously);
 

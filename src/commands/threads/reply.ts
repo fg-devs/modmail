@@ -17,6 +17,7 @@ export default class Reply extends Command {
           prompt: 'The message you want to send',
           type: 'string',
           infinite: true,
+          default: [],
         },
       ],
     });
