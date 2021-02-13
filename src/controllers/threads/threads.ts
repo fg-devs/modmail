@@ -252,11 +252,16 @@ export default class ThreadController extends Controller {
     category: Category,
     channel: TextChannel,
   ): Promise<void> {
+    const client = Modmail.getModmail();
     const roles = await category.getRoles();
     const perms: OverwriteResolvable[] = [
       {
         deny: ['VIEW_CHANNEL'],
         id: category.getGuildID(),
+      },
+      {
+        id: client.user ? client.user.id : '',
+        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
       },
     ];
 
