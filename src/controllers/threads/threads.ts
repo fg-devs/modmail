@@ -230,7 +230,9 @@ export default class ThreadController extends Controller {
     return null;
   }
 
-  private static async isAboutStaff(channel: DMChannel): Promise<boolean> {
+  public static async isAboutStaff(
+    channel: TextChannel | DMChannel,
+  ): Promise<boolean> {
     const msg = await channel.send('Is this about a staff member?');
     await msg.react('👍');
     await msg.react('👎');

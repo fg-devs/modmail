@@ -233,13 +233,17 @@ export default class Thread {
     return new MMMessage(this.modmail, mmMsg);
   }
 
-  public async forward(forwarder: User, category: Category): Promise<boolean> {
+  public async forward(
+    forwarder: User,
+    isAdminOnly: boolean,
+    category: Category,
+  ): Promise<boolean> {
     const pool = Modmail.getDB();
     const author = await this.getUser();
     const channel = await ThreadController.setupChannel(
       author,
       category,
-      this.ref.isAdminOnly,
+      isAdminOnly,
       forwarder,
       true,
     );
