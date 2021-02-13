@@ -1,6 +1,7 @@
-import { Command, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@Floor-Gang/modmail-types';
 import { MessageAttachment } from 'discord.js';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 import * as PermsUtil from '../../util/Perms';
 

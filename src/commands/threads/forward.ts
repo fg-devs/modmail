@@ -1,6 +1,6 @@
-/* eslint-disable no-await-in-loop */
-import { Command, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
 import { TextChannel } from 'discord.js';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 
 export default class Forward extends Command {
