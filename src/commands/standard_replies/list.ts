@@ -1,8 +1,8 @@
 import { Command, CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@Floor-Gang/modmail-types';
+import { MessageAttachment } from 'discord.js';
 import Modmail from '../../Modmail';
 import * as PermsUtil from '../../util/Perms';
-import { MessageAttachment } from 'discord.js';
 
 export default class StandardReplyCreate extends Command {
   constructor(client: Modmail) {
