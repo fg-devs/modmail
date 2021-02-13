@@ -1,6 +1,6 @@
 import { DatabaseManager } from '@Floor-Gang/modmail-database';
 import { parentPort } from 'worker_threads';
-import { CommandoClient, CommandoMessage, Inhibition } from 'discord.js-commando';
+import { CommandoClient, CommandoMessage } from 'discord.js-commando';
 import path from 'path';
 import { Logger, getLogger } from 'log4js';
 import { CONFIG } from './globals';
@@ -127,7 +127,7 @@ export default class Modmail extends CommandoClient {
     }
   }
 
-  private inhibiter(msg: CommandoMessage): boolean | string {
+  private inhibiter(msg: CommandoMessage): false | string {
     const passes = msg.content.startsWith(this.commandPrefix)
       && msg.guild !== null;
 
