@@ -1,11 +1,11 @@
+import { DatabaseManager } from '@Floor-Gang/modmail-database';
 import { parentPort } from 'worker_threads';
-import { CommandoClient } from 'discord.js-commando';
+import { CommandoClient, CommandoMessage } from 'discord.js-commando';
 import path from 'path';
 import { Logger, getLogger } from 'log4js';
 import { CONFIG } from './globals';
 import EventHandler from './events/EventHandler';
 import IssueHandler from './events/IssueHandler';
-import DatabaseManager from './database/database';
 import CatController from './controllers/categories/categories';
 import ThreadController from './controllers/threads/threads';
 import MessageController from './controllers/messages/messages';
@@ -41,6 +41,7 @@ export default class Modmail extends CommandoClient {
     Modmail.db = null;
     this.events = new EventHandler(this);
     this.registerEvents();
+    this.dispatcher.addInhibitor(this.inhibiter.bind(this));
     this.registry
       .registerDefaultTypes()
       .registerDefaultGroups()
@@ -68,7 +69,7 @@ export default class Modmail extends CommandoClient {
    * @returns {Promise<void>}
    */
   public async start(): Promise<void> {
-    Modmail.db = await DatabaseManager.getDB(this);
+    Modmail.db = await DatabaseManager.getDB(CONFIG.database);
     await this.login(CONFIG.bot.token);
   }
 
@@ -124,5 +125,12 @@ export default class Modmail extends CommandoClient {
 
       parentPort.on('message', work.onMessage.bind(work));
     }
+  }
+
+  private inhibiter(msg: CommandoMessage): false | string {
+    const passes = msg.content.startsWith(this.commandPrefix)
+      && msg.guild !== null;
+
+    return passes ? false : '';
   }
 }

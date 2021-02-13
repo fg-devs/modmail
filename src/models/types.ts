@@ -1,5 +1,5 @@
 /* eslint-disable no-shadow */
-import { FileType } from 'modmail-types';
+import { FileType } from '@Floor-Gang/modmail-types';
 
 /**
  * CreateCategoryOpt is used by ICategoryManager.create()

@@ -1,11 +1,13 @@
 import { TextChannel } from 'discord.js';
-import { Command, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 import LogUtil from '../../util/Logging';
 
 type CatArgs = {
   name: string;
   emoji: string;
+  description: string[];
 }
 
 export default class AddCategory extends Command {
@@ -29,12 +31,21 @@ export default class AddCategory extends Command {
           prompt: 'The category emoji',
           type: 'string',
         },
+        {
+          key: 'description',
+          prompt: 'The category description',
+          type: 'string',
+          infinite: true,
+        },
       ],
     });
   }
 
   public async run(msg: CommandoMessage, args: CatArgs): Promise<null> {
     const { name, emoji } = args;
+    const desc = args.description.length === 0
+      ? ''
+      : args.description.join(' ');
     const modmail = Modmail.getModmail();
 
     if (!(msg.channel instanceof TextChannel)) {
@@ -45,17 +56,24 @@ export default class AddCategory extends Command {
     if (!parent) {
       const res = "This channel isn't in a category.";
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
     try {
-      await modmail.categories.create(name, emoji, parent);
-      msg.say('Category added.');
+      await modmail.categories.create(parent, emoji, name, desc);
+      await msg.say('Category added.');
     } catch (e) {
-      const res = 'Something internal went wrong.';
+      let res;
+      if (e.message.includes('channel_id') || e.message.includes('guild_id')) {
+        res = 'This guild already has a category';
+      } else if (e.message.includes('emoji')) {
+        res = 'This emoji is already being used.';
+      } else {
+        res = 'Something internal went wrong.';
+      }
       LogUtil.cmdError(msg, e, res);
-      msg.say(res);
+      await msg.say(res);
     }
 
     return null;

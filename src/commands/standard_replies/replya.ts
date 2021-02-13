@@ -1,4 +1,5 @@
-import { Command, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 import LogUtil from '../../util/Logging';
 
@@ -33,20 +34,19 @@ export default class StandardReplyAnon extends Command {
     if (thread === null) {
       const res = 'Not currently in a modmail thread';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
-    const standardReply = await pool.standardReplies.get(args.name);
+    const standardReply = await pool.standardReplies.fetch(args.name);
     if (standardReply === null) {
       const res = 'Unable to locate that standard reply...';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
     await thread.sendSR(msg, standardReply.reply, true);
-    await msg.delete();
 
     return null;
   }

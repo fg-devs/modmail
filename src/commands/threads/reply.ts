@@ -1,4 +1,5 @@
-import { Command, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 
 export default class Reply extends Command {
@@ -26,7 +27,7 @@ export default class Reply extends Command {
     const thread = await modmail.threads.getByChannel(msg.channel.id);
 
     if (thread !== null) {
-      await thread.sendToUser(msg, false);
+      await thread.sendMsg(msg, false);
     } else {
       await msg.reply('This is not an active thread.');
     }

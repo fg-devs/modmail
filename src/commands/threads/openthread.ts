@@ -1,10 +1,11 @@
-import { RoleLevel } from 'modmail-types';
-import { Command, CommandoMessage } from 'discord.js-commando';
+import { RoleLevel } from '@Floor-Gang/modmail-types';
+import { CommandoMessage } from 'discord.js-commando';
+import { Requires } from '../../util/Perms';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
-import { Requires } from '../../util/Perms';
-import { CategoryResolvable } from '../../models/types';
 import LogUtil from '../../util/Logging';
+import ThreadController from '../../controllers/threads/threads';
 
 type Args = {
   userID: string;
@@ -38,7 +39,7 @@ export default class OpenThread extends Command {
     }
 
     if (optUserID === null || optUserID.length === 0) {
-      msg.say('Please mention a user or provide an ID');
+      await msg.say('Please mention a user or provide an ID');
       return null;
     }
 
@@ -46,22 +47,19 @@ export default class OpenThread extends Command {
     const pool = Modmail.getDB();
     const modmail = Modmail.getModmail();
     const user = await msg.client.users.fetch(userID, true);
-    const category = await pool.categories.fetch(
-      CategoryResolvable.guild,
-      msg.guild.id,
-    );
+    const category = await modmail.categories.getByGuild(msg.guild.id);
 
-    if (category === null) {
-      const res = "This guild isn't part of a category.";
+    if (category === null || !category.isActive) {
+      const res = 'This guild isn\'t part of a category.';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
     if (user === null) {
       const res = 'Failed to get that member, is it the correct ID?';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
@@ -70,37 +68,41 @@ export default class OpenThread extends Command {
     if (thread !== null) {
       const res = 'This user already has a thread open';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
-    const channel = await msg.guild.channels.create(
-      `${user.username}-${user.discriminator}`,
-      {
-        type: 'text',
-      },
+    const channel = await ThreadController.setupChannel(
+      user,
+      category,
+      false,
+      msg.author,
     );
 
-    if (user.dmChannel === undefined) {
-      try {
-        await user.createDM();
-      } catch (e) {
-        const res = 'Failed to create DM with this user.';
-        LogUtil.cmdWarn(msg, res);
-        msg.say(res);
-        return null;
-      }
+    if (channel === null) {
+      await msg.reply('Failed to create a channel for this user.');
+      return null;
     }
 
-    await channel.setParent(category.channelID);
-    await channel.send(await Embeds.memberDetails(pool.threads, user));
-    await channel.send(Embeds.newThreadFor(msg.author, user));
-    await pool.users.create(user.id);
-    await pool.threads.open(user.id, channel.id, category.id);
+    try {
+      const notice = Embeds.threadNotice(category);
+      const dms = await user.createDM();
+      await dms.send(notice);
+      await pool.users.create(user.id);
+      await pool.threads.open(user.id, channel.id, category.getID(), false);
 
-    await msg.react('✅');
-    await new Promise((r) => setTimeout(r, 5000));
-    await msg.delete();
+      await msg.react('✅');
+    } catch (e) {
+      let res;
+      if (e.message.includes('Cannot send messages to this user')) {
+        res = 'This user has their DM\'s off';
+      } else {
+        res = 'Something internal went wrong';
+      }
+      await msg.reply(res);
+      LogUtil.cmdError(msg, e, res);
+      await channel.delete();
+    }
 
     return null;
   }

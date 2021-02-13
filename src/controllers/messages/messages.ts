@@ -1,12 +1,20 @@
-import { Thread } from 'modmail-types';
+import { Thread } from '@Floor-Gang/modmail-types';
 import { Message, TextChannel } from 'discord.js';
 import MMMessage from './message';
 import Controller from '../../models/controller';
 import Modmail from '../../Modmail';
+import Embeds from '../../util/Embeds';
 
 export default class MessageController extends Controller {
   constructor(modmail: Modmail) {
     super(modmail, 'messages');
+  }
+
+  public async getAll(threadID: string): Promise<MMMessage[]> {
+    const pool = Modmail.getDB();
+    const data = await pool.messages.fetchAll(threadID);
+
+    return data.map((msg) => new MMMessage(this.modmail, msg));
   }
 
   public async getLastFrom(
@@ -64,12 +72,15 @@ export default class MessageController extends Controller {
   public async handleDM(msg: Message): Promise<void> {
     const { threads } = this.modmail;
 
-    const thread = await threads.getByAuthor(msg.author.id);
+    let thread = await threads.getByAuthor(msg.author.id);
 
     if (thread !== null) {
-      await thread.sendToThread(msg);
+      await thread.recvMsg(msg);
     } else {
-      await threads.create(msg);
+      thread = await threads.createFor(msg);
+      if (thread !== null) {
+        await thread.recvMsg(msg);
+      }
     }
   }
 
@@ -157,20 +168,12 @@ export default class MessageController extends Controller {
       return;
     }
 
-    const embed = thMessage.embeds[0];
-    embed.description = newVersion.content;
-    embed.addField(
-      `Version ${embed.fields.length + 1}: `,
-      oldVersion.content,
-      false,
-    );
-    // edit the thread iteration of the message that was editted
-    await thMessage.edit(embed);
     // store the new edit to the edits table
-    await pool.edits.add({
-      content: newVersion.content,
-      message: thMessage.id,
-      version: 0,
-    });
+    await pool.edits.add(newVersion.content, thMessage.id);
+
+    const edits = await pool.edits.fetch(thMessage.id);
+    const embed = Embeds.editsRecv(newVersion.author, edits);
+    // edit the thread iteration of the message that was edited
+    await thMessage.edit(embed);
   }
 }

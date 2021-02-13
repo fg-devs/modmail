@@ -1,5 +1,6 @@
-import { RoleLevel } from 'modmail-types';
-import { Command, CommandoMessage } from 'discord.js-commando';
+import { RoleLevel } from '@Floor-Gang/modmail-types';
+import { CommandoMessage } from 'discord.js-commando';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
 import { Requires } from '../../util/Perms';
@@ -20,10 +21,10 @@ export default class ListCategories extends Command {
   @Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage): Promise<null> {
     const modmail = Modmail.getModmail();
-    const cats = await modmail.categories.getAll(true);
+    const cats = await modmail.categories.getAll(false);
     const res = Embeds.listCategories(cats);
 
-    msg.say(res);
+    await msg.say(res);
     return null;
   }
 }

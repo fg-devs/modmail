@@ -1,12 +1,16 @@
 import {
+  Attachment,
+  Edit,
   Message as PartialMessage,
-} from 'modmail-types';
+} from '@Floor-Gang/modmail-types';
 import {
+  GuildMember,
   Message as DMessage,
-  PartialMessage as PartialDMessage,
+  PartialMessage as PartialDMessage, User,
 } from 'discord.js';
 import Modmail from '../../Modmail';
 import Thread from '../threads/thread';
+import Embeds from '../../util/Embeds';
 
 export default class Message {
   private readonly modmail: Modmail;
@@ -21,6 +25,39 @@ export default class Message {
     this.thread = null;
   }
 
+  public getID(): string {
+    return this.ref.modmailID;
+  }
+
+  public getClientID(): string | null {
+    return this.ref.clientID;
+  }
+
+  public isInternal(): boolean {
+    return this.ref.internal;
+  }
+
+  public getSenderID(): string {
+    return this.ref.sender;
+  }
+
+  public async getSender(): Promise<GuildMember | User> {
+    const thread = await this.getThread();
+    if (thread === null) {
+      return this.getUser();
+    }
+
+    const member = await thread.getMember();
+    if (member !== null) {
+      return member;
+    }
+    return this.getUser();
+  }
+
+  public getContent(): string {
+    return this.ref.content;
+  }
+
   public async getClientMessage(): Promise<DMessage | null> {
     const thread = await this.getThread();
 
@@ -29,8 +66,10 @@ export default class Message {
     const dm = await thread.getDMChannel();
 
     try {
-      const msg = dm.messages.fetch(this.ref.clientID || '', true);
-      return msg;
+      return await dm.messages.fetch(
+        this.ref.clientID || '',
+        true,
+      );
     } catch (_) {
       return null;
     }
@@ -41,16 +80,34 @@ export default class Message {
 
     if (thread === null) { return null; }
 
-    const chan = await thread.getThreadChannel();
+    const channel = await thread.getThreadChannel();
 
-    if (chan === null) { return null; }
+    if (channel === null) { return null; }
 
     try {
-      const msg = chan.messages.fetch(this.ref.modmailID, true);
-      return msg;
+      return await channel.messages.fetch(
+        this.ref.modmailID,
+        true,
+      );
     } catch (_) {
       return null;
     }
+  }
+
+  public async getAttachments(): Promise<Attachment[]> {
+    const pool = Modmail.getDB();
+
+    return pool.attachments.fetch(this.ref.modmailID);
+  }
+
+  public async getEdits(): Promise<Edit[]> {
+    const pool = Modmail.getDB();
+
+    return pool.edits.fetch(this.ref.modmailID);
+  }
+
+  public async getUser(): Promise<User> {
+    return this.modmail.users.fetch(this.ref.sender);
   }
 
   public async editClient(
@@ -75,38 +132,29 @@ export default class Message {
 
     if (thMessage === undefined) { return; }
 
-    const embed = thMessage.embeds[0];
-    embed.description = newMsg.content;
-    embed.addField(
-      `Version ${embed.fields.length + 1}: `,
-      oldMsg.content,
-      false,
-    );
-    // edit the thread iteration of the message that was editted
-    await thMessage.edit(embed);
     // store the new edit to the edits table
-    await pool.edits.add({
-      content: newMsg.content,
-      message: thMessage.id,
-      version: 0,
-    });
+    await pool.edits.add(newMsg.content, thMessage.id);
+    const edits = await pool.edits.fetch(thMessage.id);
+    const embed = Embeds.editsRecv(newMsg.author, edits);
+    // edit the thread iteration of the message that was edited
+    await thMessage.edit(embed);
   }
 
   public async edit(newContent: string): Promise<void> {
     const pool = Modmail.getDB();
-    const threadMessage = await this.getModmailMessage();
+    const thMessage = await this.getModmailMessage();
     const clientMessage = await this.getClientMessage();
 
-    if (threadMessage !== null) {
-      const threadEmbed = threadMessage.embeds[0];
+    if (thMessage !== null) {
+      const threadEmbed = thMessage.embeds[0];
       threadEmbed.description = newContent;
 
-      await threadMessage.edit(threadEmbed);
-      await pool.edits.add({
-        content: newContent,
-        message: threadMessage.id,
-        version: 0,
-      });
+      // store the new edit to the edits table
+      await pool.edits.add(newContent, thMessage.id);
+      const edits = await pool.edits.fetch(thMessage.id);
+      const embed = Embeds.editsSend(thMessage.author, edits);
+      // edit the thread iteration of the message that was edited
+      await thMessage.edit(embed);
     }
 
     if (clientMessage !== null) {

@@ -1,7 +1,6 @@
-import { RoleLevel } from 'modmail-types';
+import { RoleLevel } from '@Floor-Gang/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { CONFIG } from '../globals';
-import { CategoryResolvable } from '../models/types';
 import Modmail from '../Modmail';
 
 /**
@@ -15,10 +14,7 @@ async function checkRole(msg: CommandoMessage): Promise<RoleLevel | null> {
     return null;
   }
   const pool = await Modmail.getDB();
-  const category = await pool.categories.fetch(
-    CategoryResolvable.guild,
-    msg.guild.id,
-  );
+  const category = await pool.categories.fetchByGuild(msg.guild.id);
 
   if (category === null) {
     return null;

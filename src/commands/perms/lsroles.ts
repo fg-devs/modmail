@@ -1,5 +1,6 @@
-import { Command, CommandoMessage } from 'discord.js-commando';
-import { RoleLevel } from 'modmail-types';
+import { CommandoMessage } from 'discord.js-commando';
+import { RoleLevel } from '@Floor-Gang/modmail-types';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
 import LogUtil from '../../util/Logging';
@@ -21,12 +22,12 @@ export default class ListRoles extends Command {
   @PermUtil.Requires(RoleLevel.Mod)
   public async run(msg: CommandoMessage): Promise<null> {
     const modmail = Modmail.getModmail();
-    const category = await modmail.categories.getByMessage(msg, true);
+    const category = await modmail.categories.getByGuild(msg.guild?.id || '');
 
-    if (!category) {
-      const res = "This guild doesn't have an active category.";
+    if (!category || !category.isActive()) {
+      const res = 'This guild doesn\'t have an active category.';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
@@ -34,7 +35,7 @@ export default class ListRoles extends Command {
     const roles = await pool.permissions.fetchAll(category.getID());
     const res = Embeds.listRoles(category, roles);
 
-    msg.say(res);
+    await msg.say(res);
     return null;
   }
 }

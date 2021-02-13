@@ -1,4 +1,5 @@
-import { Command, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 
 type Args = {
@@ -28,7 +29,7 @@ export default class Edit extends Command {
     const modmail = Modmail.getModmail();
     const thread = await modmail.threads.getByChannel(msg.channel.id);
     if (thread === null) {
-      msg.say('Not currently in a thread..');
+      await msg.say('Not currently in a thread..');
       return null;
     }
     const thMsg = await thread.getLastMessage(msg.author.id);

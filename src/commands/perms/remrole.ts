@@ -1,5 +1,6 @@
-import { Command, CommandoMessage } from 'discord.js-commando';
-import { RoleLevel } from 'modmail-types';
+import { CommandoMessage } from 'discord.js-commando';
+import { RoleLevel } from '@Floor-Gang/modmail-types';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 import LogUtil from '../../util/Logging';
 import { Requires } from '../../util/Perms';
@@ -31,12 +32,12 @@ export default class RemoveRole extends Command {
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const { roleID } = args;
     const modmail = Modmail.getModmail();
-    const category = await modmail.categories.getByMessage(msg, true);
+    const category = await modmail.categories.getByGuild(msg.guild?.id || '');
 
-    if (category === null) {
-      const res = "This guild doesn't have an active category.";
+    if (category === null || !category.isActive()) {
+      const res = 'This guild doesn\'t have an active category.';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 
@@ -44,9 +45,9 @@ export default class RemoveRole extends Command {
     const isRemoved = await pool.permissions.remove(roleID);
 
     if (isRemoved) {
-      msg.say('Removed role.');
+      await msg.say('Removed role.');
     } else {
-      msg.say('Nothing was removed, are you sure the correct ID was provided?');
+      await msg.say('Nothing was removed, are you sure the correct ID was provided?');
     }
     return null;
   }

@@ -1,4 +1,5 @@
-import { Command, CommandoMessage } from 'discord.js-commando';
+import { CommandoMessage } from 'discord.js-commando';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
 import LogUtil from '../../util/Logging';
 
@@ -21,7 +22,7 @@ export default class CloseThread extends Command {
     if (thread === null) {
       const res = 'Not currently in a thread';
       LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.say(res);
       return null;
     }
 

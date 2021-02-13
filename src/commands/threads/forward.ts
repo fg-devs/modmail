@@ -1,10 +1,7 @@
-/* eslint-disable no-await-in-loop */
-import { Command, CommandoMessage } from 'discord.js-commando';
-import { Message, TextChannel } from 'discord.js';
+import { CommandoMessage } from 'discord.js-commando';
+import { TextChannel } from 'discord.js';
+import Command from '../../models/command';
 import Modmail from '../../Modmail';
-import Embeds from '../../util/Embeds';
-import { CLOSE_THREAD_DELAY } from '../../globals';
-import LogUtil from '../../util/Logging';
 
 export default class Forward extends Command {
   constructor(client: Modmail) {
@@ -17,56 +14,26 @@ export default class Forward extends Command {
     });
   }
 
-  public async run(msg: CommandoMessage): Promise<Message | Message[] | null> {
-    const pool = Modmail.getDB();
+  public async run(msg: CommandoMessage): Promise<null> {
     const modmail = Modmail.getModmail();
-    const selectorRes = await modmail.categories.categorySelector(
-      msg.channel as TextChannel,
-      msg.author,
-    );
+    const thread = await modmail.threads.getByChannel(msg.channel.id);
 
-    const thread = await pool.threads.getByChannel(msg.channel.id);
     if (thread === null) {
-      const res = 'Currently not in a thread';
-      LogUtil.cmdWarn(msg, res);
-      msg.say(res);
+      await msg.reply('This isn\'t a thread.');
       return null;
     }
 
-    const user = await this.client.users.fetch(thread.author.id, true, true);
-    const pastMessages = await pool.messages.getPastMessages(thread.id);
-
-    const newChannel = await selectorRes.guild.channels.create(
-      `${user.username}-${user.discriminator}`,
-      {
-        type: 'text',
-      },
+    const category = await modmail.threads.getCategory(
+      msg.channel as TextChannel,
     );
-    await newChannel.setParent(selectorRes.category);
-    await pool.threads.updateThread(thread.id, newChannel.id, selectorRes.id);
-    await newChannel.send(Embeds.forwardedBy(msg.author, selectorRes.name));
 
-    for (let i = 0; i < pastMessages.length; i += 1) {
-      const message = pastMessages[i];
-      let embed;
-      const author = await this.client.users.fetch(message.sender, true, true);
-      if (message.internal) {
-        embed = Embeds.internalMessage(message.content, author);
-      } else if (message.sender === thread.author.id) {
-        embed = Embeds.messageReceived(message.content, author);
-      } else {
-        embed = Embeds.messageSend(message.content, author);
-      }
-
-      const newMessage = await newChannel.send(embed);
-      await pool.messages.update(message.modmailID, newMessage.id);
+    if (category === null) {
+      await msg.reply('Couldn\'t get that category.');
+      return null;
     }
 
-    const successEmbed = Embeds.successfulForward();
-    await msg.channel.send(successEmbed);
-
-    await new Promise((r) => setTimeout(r, CLOSE_THREAD_DELAY));
-    await msg.channel.delete('Thread forwarded');
+    await thread.forward(msg.author, category);
+    await msg.channel.delete();
 
     return null;
   }

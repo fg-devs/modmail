@@ -15,7 +15,7 @@ export default class DBConfig extends Conf {
 
   public readonly port: number;
 
-  public readonly username: string;
+  public readonly user: string;
 
   public readonly password: string;
 
@@ -27,7 +27,7 @@ export default class DBConfig extends Conf {
     super('database');
     this.host = 'localhost';
     this.port = 5432;
-    this.username = 'modmail';
+    this.user = 'modmail';
     this.password = '1234';
     this.database = 'postgres';
     this.schema = 'modmail';
