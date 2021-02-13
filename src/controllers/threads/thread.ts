@@ -58,7 +58,9 @@ export default class Thread {
     );
   }
 
-  public async getMember(): Promise<GuildMember | null> {
+  public async getMember(
+    userID: string | null = null,
+  ): Promise<GuildMember | null> {
     const category = await this.getCategory();
 
     if (category === null) { return null; }
@@ -69,7 +71,7 @@ export default class Thread {
         true,
       );
 
-      return guild.member(this.ref.author.id);
+      return guild.member(userID || this.ref.author.id);
     } catch (_) {
       return null;
     }

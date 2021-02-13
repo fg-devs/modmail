@@ -47,7 +47,7 @@ export default class Message {
       return this.getUser();
     }
 
-    const member = await thread.getMember();
+    const member = await thread.getMember(this.getSenderID());
     if (member !== null) {
       return member;
     }
