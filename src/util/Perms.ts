@@ -14,7 +14,7 @@ async function checkRole(msg: CommandoMessage): Promise<RoleLevel | null> {
     return null;
   }
   const pool = await Modmail.getDB();
-  const category = await pool.categories.fetchByID(msg.guild.id);
+  const category = await pool.categories.fetchByGuild(msg.guild.id);
 
   if (category === null) {
     return null;
