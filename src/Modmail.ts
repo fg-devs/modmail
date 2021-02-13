@@ -1,6 +1,6 @@
 import { DatabaseManager } from '@Floor-Gang/modmail-database';
 import { parentPort } from 'worker_threads';
-import { CommandoClient } from 'discord.js-commando';
+import { CommandoClient, CommandoMessage } from 'discord.js-commando';
 import path from 'path';
 import { Logger, getLogger } from 'log4js';
 import { CONFIG } from './globals';
@@ -41,6 +41,7 @@ export default class Modmail extends CommandoClient {
     Modmail.db = null;
     this.events = new EventHandler(this);
     this.registerEvents();
+    this.dispatcher.addInhibitor(this.inhibiter.bind(this));
     this.registry
       .registerDefaultTypes()
       .registerDefaultGroups()
@@ -124,5 +125,10 @@ export default class Modmail extends CommandoClient {
 
       parentPort.on('message', work.onMessage.bind(work));
     }
+  }
+
+  private inhibiter(msg: CommandoMessage): boolean {
+    return msg.content.startsWith(this.commandPrefix)
+      && msg.guild !== null;
   }
 }
