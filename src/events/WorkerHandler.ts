@@ -56,8 +56,8 @@ export default class WorkerHandler {
         res.data = await this.getAllMemberStates(guildID, after, limit);
       } else if (msg.task === WORKER_CALLS.getUserState) {
         const req = msg as GetUserStateReq;
-        const [userID] = req.args;
-        res.data = await this.getUserState(userID);
+        const [userID, cacheOnly] = req.args;
+        res.data = await this.getUserState(userID, cacheOnly);
       } else {
         res.data = Error(`Unknown task "${msg.task}"`);
       }
@@ -87,8 +87,19 @@ export default class WorkerHandler {
     return member.roles.cache.map((r) => r.id);
   }
 
-  public async getUserState(userID: string): Promise<UserState> {
-    const user = await this.modmail.users.fetch(userID, true);
+  public async getUserState(
+    userID: string,
+    cacheOnly: boolean,
+  ): Promise<UserState> {
+    let user;
+    if (cacheOnly) {
+      user = this.modmail.users.cache.get(userID);
+      if (user) {
+        return WorkerHandler.parseUser(user);
+      }
+      throw new Error('User is not in cache.');
+    }
+    user = await this.modmail.users.fetch(userID, true);
 
     if (user === null) {
       throw new Error("That user doesn't in this guild.");
