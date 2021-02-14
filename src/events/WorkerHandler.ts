@@ -246,6 +246,7 @@ export default class WorkerHandler {
 
   private static parseChannel(channel: GuildChannel): ChannelState {
     return {
+      name: channel.name,
       guildID: channel.guild.id,
       id: channel.id,
       isDeleted: channel.deleted,
