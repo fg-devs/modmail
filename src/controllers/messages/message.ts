@@ -143,6 +143,7 @@ export default class Message {
   public async edit(newContent: string): Promise<void> {
     const pool = Modmail.getDB();
     const thMessage = await this.getModmailMessage();
+    const author = await this.getUser();
     const clientMessage = await this.getClientMessage();
 
     if (thMessage !== null) {
@@ -152,7 +153,7 @@ export default class Message {
       // store the new edit to the edits table
       await pool.edits.add(newContent, thMessage.id);
       const edits = await pool.edits.fetch(thMessage.id);
-      const embed = Embeds.editsSend(thMessage.author, edits);
+      const embed = Embeds.editsSend(author, edits);
       // edit the thread iteration of the message that was edited
       await thMessage.edit(embed);
     }
