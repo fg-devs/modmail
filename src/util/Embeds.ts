@@ -1,8 +1,16 @@
 import {
-  Attachment, Edit, FileType, Role, RoleLevel,
+  Attachment,
+  Edit,
+  FileType,
+  Role,
+  RoleLevel,
 } from '@Floor-Gang/modmail-types';
 import {
-  GuildMember, MessageEmbed, MessageEmbedOptions, User,
+  GuildMember,
+  MessageEmbed,
+  MessageEmbedOptions,
+  User,
+  Role as DRole,
 } from 'discord.js';
 import { CLOSE_THREAD_DELAY, COLORS } from '../globals';
 import Category from '../controllers/categories/category';
@@ -196,6 +204,27 @@ export default class Embeds {
         name: member.user.tag,
       },
     });
+  }
+
+  public static memberRoleAdd(member: GuildMember, role: DRole): MessageEmbed {
+    return Embeds.getGeneric({
+      title: `${member.guild.name}`,
+      description: `${member} got the "${role}" role.`,
+      author: {
+        icon_url: member.user.avatarURL() || member.user.defaultAvatarURL,
+        name: member.user.tag,
+      },
+    });
+  }
+
+  public static memberRoleRemove(
+    member: GuildMember,
+    role: DRole,
+  ): MessageEmbed {
+    const embed = Embeds.memberRoleAdd(member, role);
+    embed.description = `${member} lost the "${role}" role.`;
+
+    return embed;
   }
 
   /**
