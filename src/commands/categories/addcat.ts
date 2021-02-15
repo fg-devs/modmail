@@ -23,17 +23,17 @@ export default class AddCategory extends Command {
       args: [
         {
           key: 'name',
-          prompt: 'The category name',
+          prompt: 'What\'s the category name?',
           type: 'string',
         },
         {
           key: 'emoji',
-          prompt: 'The category emoji',
+          prompt: 'What\'s the category emoji?',
           type: 'string',
         },
         {
           key: 'description',
-          prompt: 'The category description',
+          prompt: 'What\'s the description of the category?',
           type: 'string',
           infinite: true,
         },

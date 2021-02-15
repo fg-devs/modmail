@@ -21,7 +21,7 @@ export default class RemoveRole extends Command {
       args: [
         {
           key: 'roleID',
-          prompt: 'The ID of the role to add',
+          prompt: 'What\'s the ID of the role that you want to remove',
           type: 'string',
         },
       ],

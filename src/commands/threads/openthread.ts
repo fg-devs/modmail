@@ -23,7 +23,7 @@ export default class OpenThread extends Command {
       args: [
         {
           key: 'userID',
-          prompt: 'User that will be contacted',
+          prompt: 'What\'s the ID of the user you want to contact?',
           type: 'string',
         },
       ],

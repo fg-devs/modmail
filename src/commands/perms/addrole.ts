@@ -23,12 +23,12 @@ export default class AddRole extends Command {
       args: [
         {
           key: 'roleID',
-          prompt: 'The ID of the role to add',
+          prompt: 'What\'s the role ID of the role to add',
           type: 'string',
         },
         {
           key: 'level',
-          prompt: 'Mod or Admin',
+          prompt: 'Are they an "admin" or "mod"?',
           type: 'string',
         },
       ],

@@ -21,7 +21,7 @@ export default class Unmute extends Command {
       args: [
         {
           key: 'userID',
-          prompt: 'The user ID to unmute',
+          prompt: 'What\'s the ID of the user you want to unmute?',
           type: 'string',
         },
       ],
