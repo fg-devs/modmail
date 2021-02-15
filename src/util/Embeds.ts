@@ -199,6 +199,7 @@ export default class Embeds {
     return Embeds.getGeneric({
       title: 'User joined the server',
       description: `${member} joined the server`,
+      color: COLORS.INTERNAL,
       author: {
         icon_url: member.user.avatarURL() || member.user.defaultAvatarURL,
         name: member.user.tag,
@@ -210,6 +211,7 @@ export default class Embeds {
     return Embeds.getGeneric({
       title: `${member.guild.name}`,
       description: `${member} got the "${role.name}" role.`,
+      color: COLORS.INTERNAL,
       author: {
         icon_url: member.user.avatarURL() || member.user.defaultAvatarURL,
         name: member.user.tag,
@@ -235,6 +237,7 @@ export default class Embeds {
     return Embeds.getGeneric({
       title: 'User left the server',
       description: `${user} left the server`,
+      color: COLORS.INTERNAL,
       author: {
         icon_url: user.avatarURL() || user.defaultAvatarURL,
         name: user.tag,
