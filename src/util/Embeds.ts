@@ -209,7 +209,7 @@ export default class Embeds {
   public static memberRoleAdd(member: GuildMember, role: DRole): MessageEmbed {
     return Embeds.getGeneric({
       title: `${member.guild.name}`,
-      description: `${member} got the "${role}" role.`,
+      description: `${member} got the "${role.name}" role.`,
       author: {
         icon_url: member.user.avatarURL() || member.user.defaultAvatarURL,
         name: member.user.tag,
@@ -222,7 +222,7 @@ export default class Embeds {
     role: DRole,
   ): MessageEmbed {
     const embed = Embeds.memberRoleAdd(member, role);
-    embed.description = `${member} lost the "${role}" role.`;
+    embed.description = `${member} lost the "${role.name}" role.`;
 
     return embed;
   }
