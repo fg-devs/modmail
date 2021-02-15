@@ -136,6 +136,7 @@ export default class Message {
     await pool.edits.add(newMsg.content, thMessage.id);
     const edits = await pool.edits.fetch(thMessage.id);
     const embed = Embeds.editsRecv(newMsg.author, edits);
+    embed.description = this.ref.content;
     // edit the thread iteration of the message that was edited
     await thMessage.edit(embed);
   }
@@ -154,6 +155,7 @@ export default class Message {
       await pool.edits.add(newContent, thMessage.id);
       const edits = await pool.edits.fetch(thMessage.id);
       const embed = Embeds.editsSend(author, edits);
+      embed.description = this.ref.content;
       // edit the thread iteration of the message that was edited
       await thMessage.edit(embed);
     }
