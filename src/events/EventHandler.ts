@@ -96,6 +96,11 @@ export default class EventHandler {
       ? await newMsgOpt.fetch()
       : newMsgOpt as Message;
 
+    // Ignore URL previews
+    if (oldMsg.content === newMsgOpt.content) {
+      return;
+    }
+
     if (newMsg.channel instanceof DMChannel && !newMsg.author.bot) {
       const msgCtrl = this.modmail.messages;
       const thMsg = await msgCtrl.getByID(oldMsg.id);
