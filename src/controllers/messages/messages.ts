@@ -150,6 +150,11 @@ export default class MessageController extends Controller {
     let thChannel;
     let thMessage;
 
+    // Ignore URL previews
+    if (oldVersion.content === newVersion.content) {
+      return;
+    }
+
     try {
       // get thread channel
       const thChan = await this.modmail.channels.fetch(thread.channel);
