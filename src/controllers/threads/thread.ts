@@ -182,7 +182,7 @@ export default class Thread {
       await msg.delete();
     } catch (e) {
       let res;
-      if (e.message.includes('DiscordAPIError')) {
+      if (e.message.includes('Cannot send messages to this user')) {
         res = 'This user closed their DM\'s.';
       } else {
         res = 'An internal error occurred.';
@@ -212,7 +212,7 @@ export default class Thread {
       await msg.delete();
     } catch (e) {
       let res;
-      if (e.message.includes('DiscordAPIError')) {
+      if (e.message.includes('Cannot send messages to this user')) {
         res = 'This user closed their DM\'s.';
       } else {
         res = 'An internal error occurred.';
@@ -247,8 +247,8 @@ export default class Thread {
     threadEmbed.footer = footer;
     dmEmbed.footer = footer;
 
-    const threadMessage = await thChannel.send(threadEmbed);
     const dmMessage = await dmChannel.send(dmEmbed);
+    const threadMessage = await thChannel.send(threadEmbed);
 
     await pool.users.create(sender.id);
     const mmMsg = {
