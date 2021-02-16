@@ -14,6 +14,7 @@ import Embeds from '../../util/Embeds';
 import MMMessage from '../messages/message';
 import { CLOSE_THREAD_DELAY } from '../../globals';
 import ThreadController from './threads';
+import LogUtil from '../../util/Logging';
 
 export default class Thread {
   private readonly modmail: Modmail;
@@ -176,9 +177,19 @@ export default class Thread {
     context: string,
     anonymously = false,
   ): Promise<void> {
-    await this.send(context, msg.member as GuildMember, anonymously);
-
-    await msg.delete();
+    try {
+      await this.send(context, msg.member as GuildMember, anonymously);
+      await msg.delete();
+    } catch (e) {
+      let res;
+      if (e.message.includes('DiscordAPIError')) {
+        res = 'This user closed their DM\'s.';
+      } else {
+        res = 'An internal error occurred.';
+      }
+      LogUtil.cmdError(msg, e, res);
+      await msg.say(res);
+    }
   }
 
   public async sendMsg(msg: CommandoMessage, anonymously: boolean): Promise<void> {
@@ -190,10 +201,25 @@ export default class Thread {
       return;
     }
 
-    const mmMsg = await this.send(content, msg.member as GuildMember, anonymously);
-    await this.modmail.attachments.handle(mmMsg, attachments, anonymously);
+    try {
+      const mmMsg = await this.send(
+        content,
+        msg.member as GuildMember,
+        anonymously,
+      );
+      await this.modmail.attachments.handle(mmMsg, attachments, anonymously);
 
-    await msg.delete();
+      await msg.delete();
+    } catch (e) {
+      let res;
+      if (e.message.includes('DiscordAPIError')) {
+        res = 'This user closed their DM\'s.';
+      } else {
+        res = 'An internal error occurred.';
+      }
+      LogUtil.cmdError(msg, e, res);
+      await msg.say(res);
+    }
   }
 
   private async send(
