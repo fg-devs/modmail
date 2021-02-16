@@ -230,11 +230,12 @@ export default class Embeds {
   public static linkWarning(context: Set<string>): MessageEmbed {
     const links = context.values();
     let res = 'This message has links, be sure to double'
-     + ' check the domains properly and that it\'s not a redirect.\n';
+     + ' check the domains properly and that it\'s not a redirect.'
+     + '\n\n**Domains Referenced**\n';
     let linkOpt = links.next();
     while (!linkOpt.done) {
       const link = new URL(linkOpt.value);
-      res += ` * **${link.host}**\n`;
+      res += ` • **${link.host}**\n`;
       linkOpt = links.next();
     }
 
