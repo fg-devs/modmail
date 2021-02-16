@@ -227,6 +227,20 @@ export default class Embeds {
     });
   }
 
+  public static linkWarning(context: Set<string>): MessageEmbed {
+    const links = context.values();
+    let res = 'This message has links, be sure to double'
+     + ' check the domains properly and that it\'s not a redirect.\n';
+    let linkOpt = links.next();
+    while (!linkOpt.done) {
+      const link = new URL(linkOpt.value);
+      res += ` * **${link.host}**\n`;
+      linkOpt = links.next();
+    }
+
+    return Embeds.warning(res);
+  }
+
   public static memberRoleRemove(
     member: GuildMember,
     role: DRole,

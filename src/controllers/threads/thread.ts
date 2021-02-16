@@ -153,11 +153,9 @@ export default class Thread {
     const thMessage = await thChannel.send(thMsgEmbed);
 
     // Handle link warning
-    const urls = getUrls(msg.content);
-    if (urls.size > 0) {
-      const embed = Embeds.warning(
-        'This message has links, be sure to double check the domains properly.',
-      );
+    const links = getUrls(msg.content);
+    if (links.size > 0) {
+      const embed = Embeds.linkWarning(links);
       await thChannel.send(embed);
     }
 
