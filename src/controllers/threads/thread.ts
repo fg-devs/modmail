@@ -8,6 +8,7 @@ import {
   Message as PartialMessage,
   Thread as PartialThread,
 } from '@Floor-Gang/modmail-types';
+import getUrls from 'get-urls';
 import Category from '../categories/category';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
@@ -150,6 +151,15 @@ export default class Thread {
     }
 
     const thMessage = await thChannel.send(thMsgEmbed);
+
+    // Handle link warning
+    const urls = getUrls(msg.content);
+    if (urls.size > 0) {
+      const embed = Embeds.warning(
+        'This message has links, be sure to double check the domains properly.',
+      );
+      await thChannel.send(embed);
+    }
 
     // Modmail message
     const modmailMsg: PartialMessage = {

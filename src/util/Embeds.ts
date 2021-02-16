@@ -219,6 +219,14 @@ export default class Embeds {
     });
   }
 
+  public static warning(context: string): MessageEmbed {
+    return Embeds.getGeneric({
+      title: '⚠ Warning ⚠',
+      description: context,
+      color: COLORS.WARNING,
+    });
+  }
+
   public static memberRoleRemove(
     member: GuildMember,
     role: DRole,
