@@ -44,9 +44,6 @@ export default class Embeds {
         name: user.tag,
         icon_url: user.avatarURL() || user.defaultAvatarURL,
       },
-      description: '[Click here]'
-        + `(https://${CONFIG.domain}/category/${catID}/${user.id}/history)`
-        + ' for the user\'s thread history.',
       color: COLORS.INTERNAL,
       fields: [
         {
@@ -65,6 +62,10 @@ export default class Embeds {
     } else {
       embed.description = `${user} created ${isAdminOnly ? 'an admin only' : 'a new'} thread.`;
     }
+    embed.description += '\n\n'
+      + '[Click here]'
+      + `(https://${CONFIG.domain}/category/${catID}/${user.id}/history)`
+      + ' for the user\'s thread history.';
 
     return embed;
   }
