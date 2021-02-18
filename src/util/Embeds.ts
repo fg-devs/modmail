@@ -64,7 +64,7 @@ export default class Embeds {
     }
     embed.description += '\n\n'
       + '[Click here]'
-      + `(https://${CONFIG.domain}/category/${catID}/${user.id}/history)`
+      + `(https://${CONFIG.domain}/category/${catID}/users/${user.id}/history)`
       + ' for the user\'s thread history.';
 
     return embed;
