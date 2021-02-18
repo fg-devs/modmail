@@ -15,6 +15,8 @@ import validate from './validate';
 export default class Config extends Conf {
     public readonly bot: BotConfig;
 
+    public readonly domain: string;
+
     public readonly database: DBConfig;
 
     public readonly logLevel: string;
@@ -24,6 +26,7 @@ export default class Config extends Conf {
     constructor() {
       super('config');
       this.logLevel = 'debug';
+      this.domain = '';
       this.database = new DBConfig();
       this.bot = new BotConfig();
     }

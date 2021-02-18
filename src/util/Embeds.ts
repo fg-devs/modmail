@@ -12,7 +12,7 @@ import {
   User,
   Role as DRole,
 } from 'discord.js';
-import { CLOSE_THREAD_DELAY, COLORS } from '../globals';
+import { CLOSE_THREAD_DELAY, COLORS, CONFIG } from '../globals';
 import Category from '../controllers/categories/category';
 import Modmail from '../Modmail';
 
@@ -23,6 +23,7 @@ import Modmail from '../Modmail';
 export default class Embeds {
   /**
    * Details about a member in a message embed. Usually used for a new thread.
+   * @param {string} catID The category this is in
    * @param {boolean} isAdminOnly
    * @param {User} user
    * @param {User | null} creator
@@ -30,6 +31,7 @@ export default class Embeds {
    * @returns {Promise<MessageEmbed>}
    */
   public static async threadDetails(
+    catID: string,
     isAdminOnly: boolean,
     user: User,
     creator: User | null = null,
@@ -42,6 +44,9 @@ export default class Embeds {
         name: user.tag,
         icon_url: user.avatarURL() || user.defaultAvatarURL,
       },
+      description: '[Click here]'
+        + `(https://${CONFIG.domain}/category/${catID}/${user.id}/history)`
+        + ' for the user\'s thread history.',
       color: COLORS.INTERNAL,
       fields: [
         {
@@ -230,8 +235,8 @@ export default class Embeds {
   public static linkWarning(context: Set<string>): MessageEmbed {
     const links = context.values();
     let res = 'This message has links, be sure to double'
-     + ' check the domains properly and that it\'s not a redirect.'
-     + '\n\n**Domains Referenced**\n';
+      + ' check the domains properly and that it\'s not a redirect.'
+      + '\n\n**Domains Referenced**\n';
     let linkOpt = links.next();
     while (!linkOpt.done) {
       const link = new URL(linkOpt.value);

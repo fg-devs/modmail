@@ -163,6 +163,7 @@ export default class ThreadController extends Controller {
     }
 
     const threadDetails = await Embeds.threadDetails(
+      category.getID(),
       isAdminOnly,
       user,
       creator,
