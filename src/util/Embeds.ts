@@ -119,7 +119,9 @@ export default class Embeds {
         roleOpt = roles.next();
       }
 
-      newEmbed.fields.push(field);
+      if (field.value.length > 0) {
+        newEmbed.fields.push(field);
+      }
     }
 
     return newEmbed;
