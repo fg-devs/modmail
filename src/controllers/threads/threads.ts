@@ -163,7 +163,7 @@ export default class ThreadController extends Controller {
       throw new Error('The guild for this category is gone.');
     }
 
-    let threadDetails = await Embeds.threadDetails(
+    let threadDetails = Embeds.threadDetails(
       isAdminOnly,
       user,
       creator,

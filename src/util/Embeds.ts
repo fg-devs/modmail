@@ -29,27 +29,19 @@ export default class Embeds {
    * @param {boolean?} forwarded
    * @returns {Promise<MessageEmbed>}
    */
-  public static async threadDetails(
+  public static threadDetails(
     isAdminOnly: boolean,
     user: User,
     creator: User | null = null,
     forwarded = false,
-  ): Promise<MessageEmbed> {
-    const db = Modmail.getDB().threads;
-    const numOfThreads = await db.countUser(user.id);
+  ): MessageEmbed {
     const embed = Embeds.getGeneric({
       author: {
         name: user.tag,
         icon_url: user.avatarURL() || user.defaultAvatarURL,
       },
       color: COLORS.INTERNAL,
-      fields: [
-        {
-          inline: true,
-          name: 'Past Threads',
-          value: numOfThreads,
-        },
-      ],
+      fields: [],
     });
 
     if (creator !== null) {
