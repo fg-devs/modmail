@@ -110,18 +110,20 @@ export default class Embeds {
 
       const roles = member.roles.cache.sort((rA, rB) => {
         if (rA.position > rB.position) {
-          return 1;
+          return -1;
         }
         if (rA.position === rB.position) {
           return 0;
         }
-        return -1;
+        return 1;
       }).values();
       let roleOpt = roles.next();
 
       while (!roleOpt.done) {
         const role = roleOpt.value;
-        field.value += `• ${role.name}\n`;
+        if (role.id !== role.guild.id) {
+          field.value += `• ${role.name}\n`;
+        }
         roleOpt = roles.next();
       }
 
