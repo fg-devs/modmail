@@ -202,8 +202,11 @@ export default class ThreadController extends Controller {
     }
   }
 
-  public async getCategory(channel: TextChannel | DMChannel): Promise<Category | null> {
-    const categories = await this.modmail.categories.getAll(true);
+  public async getCategory(
+    channel: TextChannel | DMChannel,
+    privateCats = false,
+  ): Promise<Category | null> {
+    const categories = await this.modmail.categories.getAll(true, privateCats);
     const selection = Embeds.categorySelector(categories);
     const msg = await channel.send(selection);
     const emojis: string[] = [];

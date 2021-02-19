@@ -71,13 +71,19 @@ export default class CatController {
     return new Category(this.modmail, data);
   }
 
-  public async getAll(onlyActive = true): Promise<Category[]> {
+  public async getAll(
+    onlyActive = true,
+    privateCats = false,
+  ): Promise<Category[]> {
     const pool = Modmail.getDB();
     const cats = await pool.categories.fetchAll(onlyActive);
 
     return cats.map(
       (data: PartialCategory) => new Category(this.modmail, data),
-    );
+    ).filter((cat) => {
+      const isPriv = cat.isPrivate();
+      return privateCats || (!privateCats && !isPriv);
+    });
   }
 
   /**

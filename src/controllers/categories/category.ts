@@ -18,6 +18,10 @@ export default class Category {
     this.ref = data;
   }
 
+  public isPrivate(): boolean {
+    return this.ref.isPrivate;
+  }
+
   public getName(): string {
     return this.ref.name;
   }

@@ -26,7 +26,7 @@ export default class Forward extends Command {
       return null;
     }
 
-    const category = await modmail.threads.getCategory(channel);
+    const category = await modmail.threads.getCategory(channel, true);
 
     if (category === null) {
       await msg.reply('Couldn\'t get that category.');
