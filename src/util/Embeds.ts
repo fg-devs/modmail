@@ -154,11 +154,21 @@ export default class Embeds {
     for (let i = 0; i < categories.length; i += 1) {
       const cat = categories[i];
       const desc = cat.getDescription();
-      res.fields.push({
+      const field: EmbedField = {
         name: `${cat.getEmoji()} - ${cat.getName()}`,
         value: desc.length > 0 ? desc : '\u2800',
         inline: false,
-      });
+      };
+
+      if (cat.isPrivate()) {
+        field.name += ' **[private]**';
+      }
+
+      if (!cat.isActive()) {
+        field.name += ' **[deactivated]**';
+      }
+
+      res.fields.push(field);
     }
 
     return res;
