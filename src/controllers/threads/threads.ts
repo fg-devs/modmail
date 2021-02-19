@@ -29,6 +29,10 @@ export default class ThreadController extends Controller {
     const category = await this.getCategory(dms);
 
     if (category === null) {
+      await msg.reply(
+        'There aren\'t any categories at this time,'
+        + ' or you didn\'t respond properly',
+      );
       return null;
     }
 
@@ -202,8 +206,19 @@ export default class ThreadController extends Controller {
     }
   }
 
-  public async getCategory(channel: TextChannel | DMChannel): Promise<Category | null> {
-    const categories = await this.modmail.categories.getAll(true);
+  public async getCategory(
+    channel: TextChannel | DMChannel,
+    privateCats = false,
+  ): Promise<Category | null> {
+    const categories = await this.modmail.categories.getAll(true, privateCats);
+
+    if (categories.length === 1) {
+      return categories[0];
+    }
+    if (categories.length === 0) {
+      return null;
+    }
+
     const selection = Embeds.categorySelector(categories);
     const msg = await channel.send(selection);
     const emojis: string[] = [];

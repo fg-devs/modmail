@@ -7,6 +7,7 @@ import LogUtil from '../../util/Logging';
 type CatArgs = {
   name: string;
   emoji: string;
+  isPrivate: string;
   description: string[];
 }
 
@@ -32,6 +33,11 @@ export default class AddCategory extends Command {
           type: 'string',
         },
         {
+          key: 'isPrivate',
+          prompt: 'Is this category private (yes/no)?',
+          type: 'string',
+        },
+        {
           key: 'description',
           prompt: 'What\'s the description of the category?',
           type: 'string',
@@ -43,6 +49,7 @@ export default class AddCategory extends Command {
 
   public async run(msg: CommandoMessage, args: CatArgs): Promise<null> {
     const { name, emoji } = args;
+    const isPrivate = args.isPrivate.toLowerCase().startsWith('y');
     const desc = args.description.length === 0
       ? ''
       : args.description.join(' ');
@@ -61,7 +68,7 @@ export default class AddCategory extends Command {
     }
 
     try {
-      await modmail.categories.create(parent, emoji, name, desc);
+      await modmail.categories.create(parent, emoji, name, isPrivate, desc);
       await msg.say('Category added.');
     } catch (e) {
       let res;

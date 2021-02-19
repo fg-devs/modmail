@@ -18,8 +18,17 @@ export default class Category {
     this.ref = data;
   }
 
+  public isPrivate(): boolean {
+    return this.ref.isPrivate;
+  }
+
   public getName(): string {
     return this.ref.name;
+  }
+
+  public async setPrivate(isPrivate: boolean): Promise<boolean> {
+    const pool = Modmail.getDB();
+    return pool.categories.setPrivate(this.ref.id, isPrivate);
   }
 
   public getEmoji(): string {
