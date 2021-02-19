@@ -56,16 +56,20 @@ export default class Embeds {
     return embed;
   }
 
-  public static addHistory(
+  public static async addHistory(
     embed: MessageEmbed,
     catID: string,
     userID: string,
-  ): MessageEmbed {
+  ): Promise<MessageEmbed> {
+    const modmail = Modmail.getDB();
     const newEmbed = embed;
+    const thCount = await modmail.threads.countUser(userID);
     newEmbed.description += '\n\n'
       + '[Click here]'
-      + `(https://${CONFIG.domain}/category/${catID}/users/${userID}/history)`
-      + ' for the user\'s thread history.';
+      + `(https://${CONFIG.domain}/category/${catID}/users/${userID}/history)`;
+    newEmbed.description += thCount > 0
+      ? `to see this user's ${thCount} past threads`
+      : 'to see past threads, this user doesn\'t have any yet.';
     return newEmbed;
   }
 

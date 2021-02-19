@@ -173,7 +173,7 @@ export default class ThreadController extends Controller {
       creator,
       forwarded,
     );
-    threadDetails = Embeds.addHistory(
+    threadDetails = await Embeds.addHistory(
       threadDetails,
       category.getID(),
       user.id,
