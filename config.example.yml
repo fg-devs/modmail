@@ -1,4 +1,5 @@
 logLevel: 'debug'
+domain: ''
 bot:
   token: 'TOKEN'
   prefix: '!'
@@ -9,4 +10,3 @@ database:
   user: 'modmail'
   password: '1234'
   database: 'postgres'
-  schema: 'modmail'

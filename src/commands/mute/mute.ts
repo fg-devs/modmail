@@ -24,7 +24,7 @@ export default class Mute extends Command {
       args: [
         {
           key: 'userID',
-          prompt: 'The user ID to mute',
+          prompt: 'What\'s the ID of the user that you want to mute?',
           type: 'string',
         },
         {
@@ -34,7 +34,7 @@ export default class Mute extends Command {
         },
         {
           key: 'reason',
-          prompt: 'Reason for mute',
+          prompt: 'What\'s the reason for the mute?',
           type: 'string',
           infinite: true,
         },
@@ -66,7 +66,11 @@ export default class Mute extends Command {
       await msg.say('Already muted.');
       return null;
     }
-    await msg.say('Muted.');
+
+    await msg.say(
+      'This user is muted, they can still talk in threads, but they won\'t be'
+      + 'able to talk in this category.',
+    );
     return null;
   }
 

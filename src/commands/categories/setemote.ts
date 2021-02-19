@@ -22,12 +22,12 @@ export default class SetEmote extends Command {
       args: [
         {
           key: 'id',
-          prompt: 'The category ID to update',
+          prompt: 'What\'s category ID that you want to update?',
           type: 'string',
         },
         {
           key: 'emoji',
-          prompt: 'The new emoji',
+          prompt: 'What\'s the new emoji?',
           type: 'string',
         },
       ],

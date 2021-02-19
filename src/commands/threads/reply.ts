@@ -14,7 +14,7 @@ export default class Reply extends Command {
       args: [
         {
           key: 'content',
-          prompt: 'The message you want to send',
+          prompt: 'What\'s the message you want to send?',
           type: 'string',
           infinite: true,
           default: [],

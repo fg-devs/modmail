@@ -21,7 +21,7 @@ export default class RemoveCategory extends Command {
       args: [
         {
           key: 'emoji',
-          prompt: 'The emoji of the category to remove',
+          prompt: 'What\'s the emoji of the category to remove?',
           type: 'string',
         },
       ],

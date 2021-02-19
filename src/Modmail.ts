@@ -116,7 +116,8 @@ export default class Modmail extends CommandoClient {
       .on('messageUpdate', this.events.onMessageEdit.bind(this.events));
 
     this.on('guildMemberAdd', this.events.onMemberJoin.bind(this.events))
-      .on('guildMemberRemove', this.events.onMemberLeave.bind(this.events));
+      .on('guildMemberRemove', this.events.onMemberLeave.bind(this.events))
+      .on('guildMemberUpdate', this.events.onMemberUpdate.bind(this.events));
 
     this.once('ready', this.events.onReady.bind(this.events));
 

@@ -17,4 +17,5 @@ export const COLORS = {
   RECEIVE: 0xfed69a,
   INTERNAL: 0xADD8E6,
   BAD: 'RED',
+  WARNING: 'YELLOW',
 };

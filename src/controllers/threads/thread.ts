@@ -8,12 +8,14 @@ import {
   Message as PartialMessage,
   Thread as PartialThread,
 } from '@Floor-Gang/modmail-types';
+import getUrls from 'get-urls';
 import Category from '../categories/category';
 import Modmail from '../../Modmail';
 import Embeds from '../../util/Embeds';
 import MMMessage from '../messages/message';
 import { CLOSE_THREAD_DELAY } from '../../globals';
 import ThreadController from './threads';
+import LogUtil from '../../util/Logging';
 
 export default class Thread {
   private readonly modmail: Modmail;
@@ -150,6 +152,13 @@ export default class Thread {
 
     const thMessage = await thChannel.send(thMsgEmbed);
 
+    // Handle link warning
+    const links = getUrls(msg.content);
+    if (links.size > 0) {
+      const embed = Embeds.linkWarning(links);
+      await thChannel.send(embed);
+    }
+
     // Modmail message
     const modmailMsg: PartialMessage = {
       clientID: msg.id,
@@ -176,9 +185,19 @@ export default class Thread {
     context: string,
     anonymously = false,
   ): Promise<void> {
-    await this.send(context, msg.member as GuildMember, anonymously);
-
-    await msg.delete();
+    try {
+      await this.send(context, msg.member as GuildMember, anonymously);
+      await msg.delete();
+    } catch (e) {
+      let res;
+      if (e.message.includes('Cannot send messages to this user')) {
+        res = 'This user closed their DM\'s.';
+      } else {
+        res = 'An internal error occurred.';
+      }
+      LogUtil.cmdError(msg, e, res);
+      await msg.say(res);
+    }
   }
 
   public async sendMsg(msg: CommandoMessage, anonymously: boolean): Promise<void> {
@@ -190,10 +209,25 @@ export default class Thread {
       return;
     }
 
-    const mmMsg = await this.send(content, msg.member as GuildMember, anonymously);
-    await this.modmail.attachments.handle(mmMsg, attachments, anonymously);
+    try {
+      const mmMsg = await this.send(
+        content,
+        msg.member as GuildMember,
+        anonymously,
+      );
+      await this.modmail.attachments.handle(mmMsg, attachments, anonymously);
 
-    await msg.delete();
+      await msg.delete();
+    } catch (e) {
+      let res;
+      if (e.message.includes('Cannot send messages to this user')) {
+        res = 'This user closed their DM\'s.';
+      } else {
+        res = 'An internal error occurred.';
+      }
+      LogUtil.cmdError(msg, e, res);
+      await msg.say(res);
+    }
   }
 
   private async send(
@@ -221,8 +255,8 @@ export default class Thread {
     threadEmbed.footer = footer;
     dmEmbed.footer = footer;
 
-    const threadMessage = await thChannel.send(threadEmbed);
     const dmMessage = await dmChannel.send(dmEmbed);
+    const threadMessage = await thChannel.send(threadEmbed);
 
     await pool.users.create(sender.id);
     const mmMsg = {

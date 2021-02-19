@@ -19,7 +19,7 @@ export default class Delete extends Command {
       args: [
         {
           key: 'messageID',
-          prompt: 'The message to delete',
+          prompt: 'The ID of the message to delete',
           type: 'string',
           default: '',
         },

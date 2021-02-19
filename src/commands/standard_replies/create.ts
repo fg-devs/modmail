@@ -24,12 +24,12 @@ export default class StandardReplyCreate extends Command {
         {
           key: 'name',
           type: 'string',
-          prompt: 'The name of the standard reply, this will be used to send the reply',
+          prompt: 'What\'s the name of this standard reply?',
         },
         {
           key: 'reply',
           type: 'string',
-          prompt: 'The actual reply',
+          prompt: 'What\'s the actual reply message?',
         },
       ],
     });

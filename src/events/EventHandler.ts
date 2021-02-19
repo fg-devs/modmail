@@ -1,10 +1,15 @@
 import { Mutex, MutexInterface } from 'async-mutex';
 import {
-  DMChannel, GuildMember, Message, PartialGuildMember, PartialMessage,
+  DMChannel,
+  GuildMember,
+  Message,
+  PartialGuildMember,
+  PartialMessage, Role,
 } from 'discord.js';
 import Modmail from '../Modmail';
 import Embeds from '../util/Embeds';
 import { CONFIG } from '../globals';
+import Thread from '../controllers/threads/thread';
 
 export default class EventHandler {
   private readonly modmail: Modmail;
@@ -91,6 +96,11 @@ export default class EventHandler {
       ? await newMsgOpt.fetch()
       : newMsgOpt as Message;
 
+    // Ignore URL previews
+    if (oldMsg.content === newMsgOpt.content) {
+      return;
+    }
+
     if (newMsg.channel instanceof DMChannel && !newMsg.author.bot) {
       const msgCtrl = this.modmail.messages;
       const thMsg = await msgCtrl.getByID(oldMsg.id);
@@ -137,6 +147,74 @@ export default class EventHandler {
         ? await this.modmail.users.fetch(member.id, true)
         : member.user;
       const embed = Embeds.memberLeft(target);
+      await threadChan.send(embed);
+    }
+  }
+
+  public async onMemberUpdate(
+    oldMem: GuildMember | PartialGuildMember,
+    newMem: GuildMember,
+  ): Promise<void> {
+    const thread = await this.modmail.threads.getByAuthor(oldMem.id);
+
+    if (thread === null) {
+      return;
+    }
+
+    if (oldMem.roles.cache.size !== newMem.roles.cache.size) {
+      await EventHandler.postRoles(thread, oldMem, newMem);
+    }
+  }
+
+  private static async postRoles(
+    thread: Thread,
+    oldMem: GuildMember | PartialGuildMember,
+    newMem: GuildMember,
+  ): Promise<void> {
+    const threadChan = await thread.getThreadChannel();
+
+    if (threadChan === null) {
+      return;
+    }
+
+    const oldRolesRef = oldMem.roles.cache;
+    const newRolesRef = newMem.roles.cache;
+    const roles = newMem.roles.cache.values();
+    let added: Role | null = null;
+    let removed: Role | null = null;
+    let roleOpt = roles.next();
+
+    while (!roleOpt.done) {
+      const role = roleOpt.value;
+      // check if the role was added
+      if (!oldRolesRef.has(role.id)) {
+        added = role;
+        break;
+      }
+
+      roleOpt = roles.next();
+    }
+
+    if (added !== null) {
+      const embed = Embeds.memberRoleAdd(newMem, added);
+      await threadChan.send(embed);
+      return;
+    }
+
+    const oldRoles = oldMem.roles.cache.values();
+    roleOpt = oldRoles.next();
+
+    while (!roleOpt.done) {
+      const role = roleOpt.value;
+      if (!newRolesRef.has(role.id)) {
+        removed = role;
+        break;
+      }
+      roleOpt = oldRoles.next();
+    }
+
+    if (removed !== null) {
+      const embed = Embeds.memberRoleRemove(newMem, removed);
       await threadChan.send(embed);
     }
   }

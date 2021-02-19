@@ -1,10 +1,18 @@
 import {
-  Attachment, Edit, FileType, Role, RoleLevel,
+  Attachment,
+  Edit,
+  FileType,
+  Role,
+  RoleLevel,
 } from '@Floor-Gang/modmail-types';
 import {
-  GuildMember, MessageEmbed, MessageEmbedOptions, User,
+  GuildMember,
+  MessageEmbed,
+  MessageEmbedOptions,
+  User,
+  Role as DRole, Guild, EmbedField,
 } from 'discord.js';
-import { CLOSE_THREAD_DELAY, COLORS } from '../globals';
+import { CLOSE_THREAD_DELAY, COLORS, CONFIG } from '../globals';
 import Category from '../controllers/categories/category';
 import Modmail from '../Modmail';
 
@@ -21,27 +29,19 @@ export default class Embeds {
    * @param {boolean?} forwarded
    * @returns {Promise<MessageEmbed>}
    */
-  public static async threadDetails(
+  public static threadDetails(
     isAdminOnly: boolean,
     user: User,
     creator: User | null = null,
     forwarded = false,
-  ): Promise<MessageEmbed> {
-    const db = Modmail.getDB().threads;
-    const numOfThreads = await db.countUser(user.id);
+  ): MessageEmbed {
     const embed = Embeds.getGeneric({
       author: {
         name: user.tag,
         icon_url: user.avatarURL() || user.defaultAvatarURL,
       },
       color: COLORS.INTERNAL,
-      fields: [
-        {
-          inline: true,
-          name: 'Past Threads',
-          value: numOfThreads,
-        },
-      ],
+      fields: [],
     });
 
     if (creator !== null) {
@@ -54,6 +54,81 @@ export default class Embeds {
     }
 
     return embed;
+  }
+
+  public static async addHistory(
+    embed: MessageEmbed,
+    catID: string,
+    userID: string,
+  ): Promise<MessageEmbed> {
+    const modmail = Modmail.getDB();
+    const newEmbed = embed;
+    const thCount = await modmail.threads.countUser(userID);
+    newEmbed.description += '\n\n'
+      + '[Click here]'
+      + `(https://${CONFIG.domain}/category/${catID}/users/${userID}/history)`;
+    newEmbed.description += thCount > 0
+      ? ` to see this user's ${thCount} past threads`
+      : ' to see past threads, this user doesn\'t have any yet.';
+    return newEmbed;
+  }
+
+  public static async addRoles(
+    embed: MessageEmbed,
+    guilds: Iterator<Guild>,
+    userID: string,
+  ): Promise<MessageEmbed> {
+    const memberTasks: Promise<GuildMember | null>[] = [];
+    const newEmbed = embed;
+    let guildOpt = guilds.next();
+
+    while (!guildOpt.done) {
+      const guild = guildOpt.value;
+      const memberTask = guild.members.fetch(userID).catch(() => null);
+      memberTasks.push(memberTask);
+
+      guildOpt = guilds.next();
+    }
+
+    const members = await Promise.all(memberTasks);
+
+    for (let i = 0; i < members.length; i += 1) {
+      const member = members[i];
+      if (member === null) {
+        continue;
+      }
+
+      const field: EmbedField = {
+        name: member.guild.name,
+        value: '',
+        inline: true,
+      };
+
+      const roles = member.roles.cache.sort((rA, rB) => {
+        if (rA.position > rB.position) {
+          return -1;
+        }
+        if (rA.position === rB.position) {
+          return 0;
+        }
+        return 1;
+      }).values();
+      let roleOpt = roles.next();
+
+      while (!roleOpt.done) {
+        const role = roleOpt.value;
+        if (role.id !== role.guild.id) {
+          field.value += `• ${role.name}\n`;
+        }
+        roleOpt = roles.next();
+      }
+
+      if (field.value.length > 0) {
+        newEmbed.fields.push(field);
+      }
+    }
+
+    return newEmbed;
   }
 
   /**
@@ -79,11 +154,21 @@ export default class Embeds {
     for (let i = 0; i < categories.length; i += 1) {
       const cat = categories[i];
       const desc = cat.getDescription();
-      res.fields.push({
+      const field: EmbedField = {
         name: `${cat.getEmoji()} - ${cat.getName()}`,
         value: desc.length > 0 ? desc : '\u2800',
         inline: false,
-      });
+      };
+
+      if (cat.isPrivate()) {
+        field.name += ' **[private]**';
+      }
+
+      if (!cat.isActive()) {
+        field.name += ' **[deactivated]**';
+      }
+
+      res.fields.push(field);
     }
 
     return res;
@@ -191,11 +276,57 @@ export default class Embeds {
     return Embeds.getGeneric({
       title: 'User joined the server',
       description: `${member} joined the server`,
+      color: COLORS.INTERNAL,
       author: {
         icon_url: member.user.avatarURL() || member.user.defaultAvatarURL,
         name: member.user.tag,
       },
     });
+  }
+
+  public static memberRoleAdd(member: GuildMember, role: DRole): MessageEmbed {
+    return Embeds.getGeneric({
+      title: `${member.guild.name}`,
+      description: `${member} got the "${role.name}" role.`,
+      color: COLORS.INTERNAL,
+      author: {
+        icon_url: member.user.avatarURL() || member.user.defaultAvatarURL,
+        name: member.user.tag,
+      },
+    });
+  }
+
+  public static warning(context: string): MessageEmbed {
+    return Embeds.getGeneric({
+      title: '⚠ Warning ⚠',
+      description: context,
+      color: COLORS.WARNING,
+    });
+  }
+
+  public static linkWarning(context: Set<string>): MessageEmbed {
+    const links = context.values();
+    let res = 'This message has links, be sure to double'
+      + ' check the domains properly and that it\'s not a redirect.'
+      + '\n\n**Domains Referenced**\n';
+    let linkOpt = links.next();
+    while (!linkOpt.done) {
+      const link = new URL(linkOpt.value);
+      res += ` • **${link.host}**\n`;
+      linkOpt = links.next();
+    }
+
+    return Embeds.warning(res);
+  }
+
+  public static memberRoleRemove(
+    member: GuildMember,
+    role: DRole,
+  ): MessageEmbed {
+    const embed = Embeds.memberRoleAdd(member, role);
+    embed.description = `${member} lost the "${role.name}" role.`;
+
+    return embed;
   }
 
   /**
@@ -206,6 +337,7 @@ export default class Embeds {
     return Embeds.getGeneric({
       title: 'User left the server',
       description: `${user} left the server`,
+      color: COLORS.INTERNAL,
       author: {
         icon_url: user.avatarURL() || user.defaultAvatarURL,
         name: user.tag,

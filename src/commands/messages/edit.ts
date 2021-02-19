@@ -18,7 +18,7 @@ export default class Edit extends Command {
       args: [
         {
           key: 'content',
-          prompt: 'The content to add',
+          prompt: 'What\'s the new message?',
           type: 'string',
         },
       ],

@@ -20,7 +20,7 @@ export default class StandardReplyAnon extends Command {
         {
           key: 'name',
           type: 'string',
-          prompt: 'The name of the standard reply',
+          prompt: 'What\'s the name of the standard reply?',
         },
       ],
     });
