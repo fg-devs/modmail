@@ -68,8 +68,8 @@ export default class Embeds {
       + '[Click here]'
       + `(https://${CONFIG.domain}/category/${catID}/users/${userID}/history)`;
     newEmbed.description += thCount > 0
-      ? `to see this user's ${thCount} past threads`
-      : 'to see past threads, this user doesn\'t have any yet.';
+      ? ` to see this user's ${thCount} past threads`
+      : ' to see past threads, this user doesn\'t have any yet.';
     return newEmbed;
   }
 
