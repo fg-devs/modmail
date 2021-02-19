@@ -26,6 +26,11 @@ export default class Category {
     return this.ref.name;
   }
 
+  public async setPrivate(isPrivate: boolean): Promise<boolean> {
+    const pool = Modmail.getDB();
+    return pool.categories.setPrivate(this.ref.id, isPrivate);
+  }
+
   public getEmoji(): string {
     return this.ref.emojiID;
   }

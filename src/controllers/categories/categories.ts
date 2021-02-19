@@ -23,6 +23,7 @@ export default class CatController {
     catChan: CategoryChannel,
     emoji: string,
     name: string,
+    isPrivate: boolean,
     desc: string,
   ): Promise<Category> {
     const pool = Modmail.getDB();
@@ -32,6 +33,7 @@ export default class CatController {
       name,
       description: desc,
       emoji,
+      isPrivate,
       channelID: catChan.id,
     });
 
