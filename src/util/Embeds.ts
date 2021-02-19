@@ -10,7 +10,7 @@ import {
   MessageEmbed,
   MessageEmbedOptions,
   User,
-  Role as DRole,
+  Role as DRole, Guild, EmbedField,
 } from 'discord.js';
 import { CLOSE_THREAD_DELAY, COLORS, CONFIG } from '../globals';
 import Category from '../controllers/categories/category';
@@ -23,7 +23,6 @@ import Modmail from '../Modmail';
 export default class Embeds {
   /**
    * Details about a member in a message embed. Usually used for a new thread.
-   * @param {string} catID The category this is in
    * @param {boolean} isAdminOnly
    * @param {User} user
    * @param {User | null} creator
@@ -31,7 +30,6 @@ export default class Embeds {
    * @returns {Promise<MessageEmbed>}
    */
   public static async threadDetails(
-    catID: string,
     isAdminOnly: boolean,
     user: User,
     creator: User | null = null,
@@ -62,12 +60,75 @@ export default class Embeds {
     } else {
       embed.description = `${user} created ${isAdminOnly ? 'an admin only' : 'a new'} thread.`;
     }
-    embed.description += '\n\n'
-      + '[Click here]'
-      + `(https://${CONFIG.domain}/category/${catID}/users/${user.id}/history)`
-      + ' for the user\'s thread history.';
 
     return embed;
+  }
+
+  public static addHistory(
+    embed: MessageEmbed,
+    catID: string,
+    userID: string,
+  ): MessageEmbed {
+    const newEmbed = embed;
+    newEmbed.description += '\n\n'
+      + '[Click here]'
+      + `(https://${CONFIG.domain}/category/${catID}/users/${userID}/history)`
+      + ' for the user\'s thread history.';
+    return newEmbed;
+  }
+
+  public static async addRoles(
+    embed: MessageEmbed,
+    guilds: Iterator<Guild>,
+    userID: string,
+  ): Promise<MessageEmbed> {
+    const memberTasks: Promise<GuildMember | null>[] = [];
+    const newEmbed = embed;
+    let guildOpt = guilds.next();
+
+    while (!guildOpt.done) {
+      const guild = guildOpt.value;
+      const memberTask = guild.members.fetch(userID).catch(() => null);
+      memberTasks.push(memberTask);
+
+      guildOpt = guilds.next();
+    }
+
+    const members = await Promise.all(memberTasks);
+
+    for (let i = 0; i < members.length; i += 1) {
+      const member = members[i];
+      if (member === null) {
+        continue;
+      }
+
+      const field: EmbedField = {
+        name: member.guild.name,
+        value: '',
+        inline: true,
+      };
+
+      const roles = member.roles.cache.sort((rA, rB) => {
+        if (rA.position > rB.position) {
+          return 1;
+        }
+        if (rA.position === rB.position) {
+          return 0;
+        }
+        return -1;
+      }).values();
+      let roleOpt = roles.next();
+
+      while (!roleOpt.done) {
+        const role = roleOpt.value;
+        field.value += `• ${role.name}\n`;
+        roleOpt = roles.next();
+      }
+
+      newEmbed.fields.push(field);
+    }
+
+    return newEmbed;
   }
 
   /**

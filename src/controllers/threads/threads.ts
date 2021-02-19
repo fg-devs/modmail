@@ -153,6 +153,7 @@ export default class ThreadController extends Controller {
   ): Promise<TextChannel | null> {
     const guild = await category.getGuild();
     const parent = await category.getCategory();
+    const modmail = Modmail.getModmail();
 
     if (parent === null) {
       throw new Error('The category channel for this category is gone.');
@@ -162,12 +163,21 @@ export default class ThreadController extends Controller {
       throw new Error('The guild for this category is gone.');
     }
 
-    const threadDetails = await Embeds.threadDetails(
-      category.getID(),
+    let threadDetails = await Embeds.threadDetails(
       isAdminOnly,
       user,
       creator,
       forwarded,
+    );
+    threadDetails = Embeds.addHistory(
+      threadDetails,
+      category.getID(),
+      user.id,
+    );
+    threadDetails = await Embeds.addRoles(
+      threadDetails,
+      modmail.guilds.cache.values(),
+      user.id,
     );
     const channelName = `${isAdminOnly ? ADMIN_INDICATOR_PREFIX : ''}`
       + `${user.username}-${user.discriminator}`;
