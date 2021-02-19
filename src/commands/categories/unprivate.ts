@@ -28,7 +28,7 @@ export default class Unprivate extends Command {
     }
 
     await category.setPrivate(false);
-    await msg.say('Made this category private.');
+    await msg.say('Made this category not private.');
     return null;
   }
 }
