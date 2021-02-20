@@ -11,6 +11,7 @@ import {
 import Modmail from '../../Modmail';
 import Thread from '../threads/thread';
 import Embeds from '../../util/Embeds';
+import { COLORS } from '../../globals';
 
 export default class Message {
   private readonly modmail: Modmail;
@@ -174,7 +175,8 @@ export default class Message {
     const ccMsg = await this.getClientMessage();
 
     if (mmMsg !== null) {
-      await mmMsg.delete();
+      const embed = Embeds.markDeleted(mmMsg.embeds[0]);
+      await mmMsg.edit(embed);
     }
 
     if (ccMsg !== null) {

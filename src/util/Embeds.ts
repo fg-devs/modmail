@@ -407,6 +407,11 @@ export default class Embeds {
     });
   }
 
+  public static markDeleted(embed: MessageEmbed): MessageEmbed {
+    embed.setDescription(`**[deleted]**\n${embed.description}`);
+    return embed;
+  }
+
   /**
    * All embeds share the attributes returned here.
    * @returns {MessageEmbed}
