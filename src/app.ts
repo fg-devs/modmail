@@ -1,10 +1,8 @@
-import { ModmailServer } from './server';
+import ModmailServer from './server/server';
 import location from './bot/start';
-import BotCtrl from './server/controllers/bot';
 
 async function main() {
-  const botCtl = new BotCtrl(location);
-  const server = new ModmailServer(botCtl);
+  const server = new ModmailServer(location);
   await server.start();
 }
 

@@ -2,8 +2,8 @@ import {
   Response,
   Router,
 } from 'express';
-import ModmailServer from '../controllers/server';
-import Route from '../models/route';
+import ModmailServer from '../server';
+import Route from './route';
 import { RequestWithUser } from '../models/types';
 
 
@@ -14,14 +14,14 @@ export default class LogoutRoute extends Route {
   }
 
   public getRouter(): Router {
-    this.router.post('/', LogoutRoute.root.bind(this));
+    this.router.post('/', this.root.bind(this));
 
     return this.router;
   }
 
-  private static async root(req: RequestWithUser, res: Response) {
-    // TODO: Add proper logger
-    req.session.destroy(console.error);
+  private async root(req: RequestWithUser, res: Response) {
+    const logger = this.getLogger();
+    req.session.destroy((e: Error) => logger.error(e));
     res.status(200);
     res.end();
   }

@@ -5,7 +5,7 @@ import {
   RoleLevel,
 } from '@Floor-Gang/modmail-types';
 import { CategoryChannel, Guild } from 'discord.js';
-import ModmailBot from '../../controllers/bot';
+import ModmailBot from '../../bot';
 import { MAX_THREADS } from '../../../common/globals';
 
 export default class Category {

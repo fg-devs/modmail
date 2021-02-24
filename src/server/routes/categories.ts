@@ -1,10 +1,10 @@
-import ModmailServer from '../controllers/server';
+import ModmailServer from '../server';
 import MembersRoute from './categories/members';
 import UsersRoute from './categories/users';
 import ThreadsRoute from './categories/threads';
 import { RequestWithCategory, RequestWithUser } from '../models/types';
 import { Category, RoleLevel } from '@Floor-Gang/modmail-types';
-import Route from '../models/route';
+import Route from './route';
 import { NextFunction, Response, Router, } from 'express';
 import RolesRoute from './categories/roles';
 import ChannelsRoute from './categories/channels';
@@ -58,8 +58,6 @@ export default class CategoriesRoute extends Route {
     next: NextFunction,
   ): Promise<void> {
     if (req.session.user === undefined) {
-      // TODO: add proper logger
-      console.error('How did we get here?');
       this.failUnknown(res);
       return;
     }

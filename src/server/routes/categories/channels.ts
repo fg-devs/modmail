@@ -1,5 +1,5 @@
-import Route from '../../models/route';
-import ModmailServer from '../../controllers/server';
+import Route from '../route';
+import ModmailServer from '../../server';
 import { Response, Router } from 'express';
 import { RequestWithCategory } from '../../models/types';
 import { ChannelState } from '@Floor-Gang/modmail-types';

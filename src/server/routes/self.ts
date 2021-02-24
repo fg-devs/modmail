@@ -2,8 +2,8 @@ import {
   Response,
   Router,
 } from 'express';
-import ModmailServer from '../controllers/server';
-import Route from '../models/route';
+import ModmailServer from '../server';
+import Route from './route';
 import { RequestWithUser } from '../models/types';
 
 
@@ -20,6 +20,7 @@ export default class SelfRoute extends Route {
   }
 
   private async root(req: RequestWithUser, res: Response) {
+    const logger = this.getLogger();
     let { user } = req.session;
 
     if (!user) {
@@ -31,8 +32,7 @@ export default class SelfRoute extends Route {
     try {
       res.json(user);
     } catch (err) {
-      // TODO: proper logger
-      console.error(err);
+      logger.error(err);
       res.status(500);
     } finally {
       res.end();

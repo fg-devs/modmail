@@ -2,8 +2,8 @@ import { Response, Router } from 'express';
 import {
   RequestWithCategory,
 } from '../../models/types';
-import ModmailServer from '../../controllers/server';
-import Route from '../../models/route';
+import ModmailServer from '../../server';
+import Route from '../route';
 
 export default class MembersRoute extends Route {
   constructor(mm: ModmailServer) {

@@ -1,10 +1,10 @@
 import { Attachment, FileType } from '@Floor-Gang/modmail-types';
 import { Message, MessageAttachment } from 'discord.js';
 import { IMAGE_REGEX } from '../../common/globals';
-import Controller from '../models/controller';
-import ModmailBot from './bot';
+import Controller from './controller';
+import { Message as MMMessage } from './';
+import ModmailBot from '../bot';
 import Embeds from '../util/Embeds';
-import MMMessage from '../controllers/messages/message';
 
 export default class AttachmentController extends Controller {
   constructor(modmail: ModmailBot) {

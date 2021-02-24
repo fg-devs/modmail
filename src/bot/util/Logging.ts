@@ -1,5 +1,5 @@
 import { Command, CommandoMessage } from 'discord.js-commando';
-import ModmailBot from '../controllers/bot';
+import ModmailBot from '../bot';
 
 export default class LogUtil {
   /**

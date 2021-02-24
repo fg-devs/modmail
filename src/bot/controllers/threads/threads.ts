@@ -8,11 +8,11 @@ import {
 } from 'discord.js';
 import { RoleLevel } from '@Floor-Gang/modmail-types';
 import Thread from './thread';
-import Controller from '../../models/controller';
-import ModmailBot from '../bot';
-import Embeds from '../../util/Embeds';
+import Controller from '../controller';
+import { Category, } from '../';
+import { Embeds } from '../../util';
 import { ADMIN_INDICATOR_PREFIX, PROMPT_TIME } from '../../../common/globals';
-import Category from '../categories/category';
+import ModmailBot from '../../bot';
 
 export default class ThreadController extends Controller {
   constructor(modmail: ModmailBot) {

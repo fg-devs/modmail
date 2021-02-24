@@ -14,7 +14,7 @@ import {
 } from 'discord.js';
 import { CLOSE_THREAD_DELAY, COLORS, CONFIG } from '../../common/globals';
 import Category from '../controllers/categories/category';
-import ModmailBot from '../controllers/bot';
+import ModmailBot from '../bot';
 
 export default class Embeds {
   public static threadDetails(

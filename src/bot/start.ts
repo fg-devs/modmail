@@ -1,5 +1,5 @@
 import * as worker_threads from 'worker_threads';
-import ModmailBot from './controllers/bot';
+import ModmailBot from './bot';
 
 if (!worker_threads.isMainThread) {
   const bot = new ModmailBot();
