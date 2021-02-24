@@ -95,13 +95,8 @@ export default class ModmailBot extends CommandoClient {
     throw new Error('getModmail was called before initializing Modmail.');
   }
 
-  /**
-   * Get/create active logger
-   * @param {string} section Where this logger is going to be used
-   * @returns {Logger}
-   */
   public static getLogger(section: string): Logger {
-    const logger = getLogger(section);
+    const logger = getLogger(`ModmailBot::${section}`);
     logger.level = CONFIG.logLevel;
     return logger;
   }
