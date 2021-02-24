@@ -119,8 +119,10 @@ export default class BotController {
       const resp: GetStateRes<T> = await this.transaction(task);
       return resp.data;
     } catch (e) {
-      if (!e.message.includes('Not in cache')) {
+      if (!e.message.includes('not in cache')) {
         logger.error(`[${task.id}] An error has occurred\n`, e);
+      } else {
+        logger.debug(`[${task.id}] Entity not in cache\n`, e);
       }
       return null;
     }
