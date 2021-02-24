@@ -51,6 +51,6 @@ export default class LogUtil {
   }
 
   private static getCmdLogger(c: Command) {
-    return ModmailBot.getLogger(`(command) ${c.name}`);
+    return ModmailBot.getLogger(`command::${c.name}`);
   }
 }
