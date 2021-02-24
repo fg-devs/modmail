@@ -11,8 +11,6 @@ export default class DBConfig extends Conf {
 
   public readonly database: string;
 
-  public readonly schema: string;
-
   constructor() {
     super('database');
     this.host = 'localhost';
@@ -20,6 +18,5 @@ export default class DBConfig extends Conf {
     this.user = 'modmail';
     this.password = '1234';
     this.database = 'postgres';
-    this.schema = 'modmail';
   }
 }
