@@ -30,9 +30,9 @@ export default class ModmailServer {
 
   private static db: DatabaseManager | null = null;
 
-  constructor(bot: BotController) {
+  constructor(botLocation: string) {
     this.app = express();
-    this.bot = bot;
+    this.bot = new BotController(this, botLocation);
     this.oauth = new ClientOAuth2(CONFIG.server.oauth2);
   }
 
