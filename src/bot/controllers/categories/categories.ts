@@ -2,7 +2,7 @@ import { Category as PartialCategory } from '@Floor-Gang/modmail-types';
 import {
   CategoryChannel, Guild,
 } from 'discord.js';
-import { ModmailBot } from '../';
+import ModmailBot from '../../bot';
 import Category from './category';
 
 export type CatSelector = {

@@ -1,7 +1,7 @@
 import { RoleLevel } from '@Floor-Gang/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { CONFIG } from '../../common/globals';
-import { ModmailBot } from '../controllers/';
+import ModmailBot from '../bot';
 
 /**
  * This is where the perm checking magic happens. It makes sure that user using

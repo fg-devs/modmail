@@ -10,10 +10,10 @@ import {
 } from '@Floor-Gang/modmail-types';
 import getUrls from 'get-urls';
 import Category from '../categories/category';
-import { ModmailBot, Message as MMMessage, Threads } from '../';
-import Embeds from '../../util/Embeds';
+import { Message as MMMessage, Threads } from '../';
 import { CLOSE_THREAD_DELAY } from '../../../common/globals';
-import LogUtil from '../../util/Logging';
+import { Embeds, LogUtil } from '../../util';
+import ModmailBot from '../../bot';
 
 export default class Thread {
   private readonly modmail: ModmailBot;

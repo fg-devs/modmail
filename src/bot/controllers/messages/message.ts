@@ -8,8 +8,9 @@ import {
   Message as DMessage,
   PartialMessage as PartialDMessage, User,
 } from 'discord.js';
-import { ModmailBot, Thread } from '../';
-import Embeds from '../../util/Embeds';
+import { Thread } from '../';
+import ModmailBot from '../../bot';
+import { Embeds } from '../../util';
 
 export default class Message {
   private readonly modmail: ModmailBot;

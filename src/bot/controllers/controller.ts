@@ -1,5 +1,5 @@
 import { Logger } from 'log4js';
-import { ModmailBot } from './';
+import ModmailBot from '../bot';
 
 /**
  * A Controller instance is responsible more managing a certain type of entity
