@@ -1,9 +1,9 @@
-import Modmail from './Modmail';
+import ModmailServer from './server/server';
+import location from './bot/start';
 
 async function main() {
-  const app = new Modmail();
-
-  await app.start();
+  const server = new ModmailServer(location);
+  await server.start();
 }
 
 main().catch(console.error);
