@@ -1,11 +1,5 @@
 import Conf from './conf';
 
-/**
- * The "bot" section of the config.yml
- * @class BotConfig
- * @property {string} token
- * @property {string} prefix
- */
 export default class BotConfig extends Conf {
   public readonly token: string;
 

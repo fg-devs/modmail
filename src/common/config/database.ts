@@ -1,15 +1,5 @@
 import Conf from './conf';
 
-/**
- * The "database" section of the config.yml
- * @class DBConfig
- * @property {string} host
- * @property {number} port
- * @property {string} username
- * @property {string} password
- * @property {string} schema
- * @property {string} database
- */
 export default class DBConfig extends Conf {
   public readonly host: string;
 
