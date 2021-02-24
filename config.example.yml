@@ -1,12 +1,21 @@
-logLevel: 'debug'
-domain: ''
 bot:
   token: 'TOKEN'
   prefix: '!'
   owners: ['Owner ID 1', 'Owner ID 2']
+server:
+  domain: ''
+  appkey: 'put some random stuff here'
+  port: 80
+  oauth:
+    accessTokenUri: 'https://discord.com/api/oauth2/token'
+    authorizationUri: 'https://discord.com/api/oauth2/authorize'
+    redirectUri: 'http://127.0.0.1/oauth/callback'
+    clientId: ''
+    clientSecret: ''
+    scopes: [identify, guilds]
 database:
-  host: '127.0.0.1'
-  port: 5432
   user: 'modmail'
-  password: '1234'
+  password: ''
+  address: '127.0.0.1'
+  port: 5432
   database: 'postgres'
