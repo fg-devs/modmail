@@ -21,7 +21,7 @@ export default class LogoutRoute extends Route {
 
   private async root(req: RequestWithUser, res: Response) {
     const logger = this.getLogger();
-    req.session.destroy(logger.error);
+    req.session.destroy((e: Error) => logger.error(e));
     res.status(200);
     res.end();
   }

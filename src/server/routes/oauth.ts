@@ -88,7 +88,7 @@ export default class OAuthRoute extends Route {
         ...userData,
         token: user.accessToken,
       };
-      req.session.save(logger.error);
+      req.session.save((e: Error) => logger.error(e));
 
       // redirect to original origin
       const redirection = redirect !== undefined
