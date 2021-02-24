@@ -54,7 +54,7 @@ export default class Embeds {
     const thCount = await modmail.threads.countUser(userID);
     newEmbed.description += '\n\n'
       + '[Click here]'
-      + `(https://${CONFIG.domain}/category/${catID}/users/${userID}/history)`;
+      + `(https://${CONFIG.server.domain}/category/${catID}/users/${userID}/history)`;
     newEmbed.description += thCount > 0
       ? ` to see this user's ${thCount} past threads`
       : ' to see past threads, this user doesn\'t have any yet.';
