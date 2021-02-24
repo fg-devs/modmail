@@ -8,8 +8,7 @@ import {
   Message as DMessage,
   PartialMessage as PartialDMessage, User,
 } from 'discord.js';
-import ModmailBot from '../bot';
-import Thread from '../threads/thread';
+import { ModmailBot, Thread } from '../';
 import Embeds from '../../util/Embeds';
 
 export default class Message {
@@ -111,7 +110,7 @@ export default class Message {
   }
 
   public async editClient(
-    oldMsg: DMessage | PartialDMessage,
+    _oldMsg: DMessage | PartialDMessage,
     newMsg: DMessage,
   ): Promise<void> {
     const thread = await this.getThread();

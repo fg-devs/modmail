@@ -10,11 +10,9 @@ import {
 } from '@Floor-Gang/modmail-types';
 import getUrls from 'get-urls';
 import Category from '../categories/category';
-import ModmailBot from '../bot';
+import { ModmailBot, Message as MMMessage, Threads } from '../';
 import Embeds from '../../util/Embeds';
-import MMMessage from '../messages/message';
 import { CLOSE_THREAD_DELAY } from '../../../common/globals';
-import ThreadController from './threads';
 import LogUtil from '../../util/Logging';
 
 export default class Thread {
@@ -277,7 +275,7 @@ export default class Thread {
   ): Promise<boolean> {
     const pool = ModmailBot.getDB();
     const author = await this.getUser();
-    const channel = await ThreadController.setupChannel(
+    const channel = await Threads.setupChannel(
       author,
       category,
       isAdminOnly,

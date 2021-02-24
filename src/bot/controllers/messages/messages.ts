@@ -1,8 +1,8 @@
 import { Thread, Message as PartialMessage } from '@Floor-Gang/modmail-types';
 import { Message, TextChannel } from 'discord.js';
 import MMMessage from './message';
-import Controller from '../../models/controller';
-import ModmailBot from '../bot';
+import Controller from '../controller';
+import { ModmailBot } from '../';
 import Embeds from '../../util/Embeds';
 
 export default class MessageController extends Controller {
