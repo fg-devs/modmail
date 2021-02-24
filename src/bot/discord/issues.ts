@@ -48,7 +48,7 @@ ${LogUtil.breakDownErr(err)}`;
     _p: Promise<Message | Message[] | null>,
     msg: CommandoMessage,
   ): void {
-    const log = ModmailBot.getLogger(`(command) ${c.name}`);
+    const log = ModmailBot.getLogger(`command::${c.name}`);
     const message = `${msg.author.tag} executed this command\n`
     + `${LogUtil.breakDownMsg(msg)}`;
 
