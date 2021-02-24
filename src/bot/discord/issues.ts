@@ -2,6 +2,7 @@ import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
 import ModmailBot from '../bot';
 import LogUtil from '../util/Logging';
+import { Logger } from 'log4js';
 
 export default class IssueHandler {
   /**
@@ -18,7 +19,7 @@ export default class IssueHandler {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-explicit-any
     ..._args: any[]
   ): void {
-    const log = ModmailBot.getLogger(`(command) ${cmd.name}`);
+    const log = this.getLogger(cmd);
     const message = `${msg.author.tag} executed "${msg.command?.name}"
 ${LogUtil.breakDownMsg(msg)}
 ${LogUtil.breakDownErr(err)}`;
@@ -31,7 +32,7 @@ ${LogUtil.breakDownErr(err)}`;
    * @param {Command} c Command being added
    */
   public onCommandRegister(c: Command): void {
-    const log = ModmailBot.getLogger(`(command) ${c.name}`);
+    const log = this.getLogger(c);
     const message = 'registered';
 
     log.debug(message);
@@ -48,10 +49,14 @@ ${LogUtil.breakDownErr(err)}`;
     _p: Promise<Message | Message[] | null>,
     msg: CommandoMessage,
   ): void {
-    const log = ModmailBot.getLogger(`command::${c.name}`);
+    const log = this.getLogger(c);
     const message = `${msg.author.tag} executed this command\n`
     + `${LogUtil.breakDownMsg(msg)}`;
 
     log.debug(message);
+  }
+
+  private getLogger(c: Command): Logger {
+    return ModmailBot.getLogger(`command::${c.name}`);
   }
 }
