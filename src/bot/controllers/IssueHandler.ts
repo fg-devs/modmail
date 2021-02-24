@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { Command, CommandoMessage } from 'discord.js-commando';
-import ModmailBot from '../controllers/bot';
+import { ModmailBot } from './';
 import LogUtil from '../util/Logging';
 
 export default class IssueHandler {

@@ -17,7 +17,7 @@ import {
   WORKER_CALLS,
 } from '@Floor-Gang/modmail-types';
 import { parentPort, MessagePort } from 'worker_threads';
-import ModmailBot from '../controllers/bot';
+import ModmailBot from './discord/bot';
 import * as PermUtil from '../util/Perms';
 
 export default class WorkerHandler {
