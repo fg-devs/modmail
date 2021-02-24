@@ -1,7 +1,7 @@
 import { Response, Router } from 'express';
 import { RequestWithCategory } from '../../models/types';
 import ModmailServer from '../../server';
-import Route from '../../models/route';
+import Route from '../route';
 import { RoleLevel, Thread } from '@Floor-Gang/modmail-types';
 
 export default class ThreadsRoute extends Route {

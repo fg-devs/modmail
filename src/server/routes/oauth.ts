@@ -10,7 +10,7 @@ import {
   User
 } from '../models/types';
 import ModmailServer from '../server';
-import Route from '../models/route';
+import Route from './route';
 
 export interface OAuthData {
   access_token: string;
@@ -50,6 +50,7 @@ export default class OAuthRoute extends Route {
     req: RequestWithUser,
     res: Response,
   ): Promise<void> {
+    const logger = this.getLogger();
     const { code } = req.query;
     const { redirect } = req.session;
 
@@ -87,8 +88,7 @@ export default class OAuthRoute extends Route {
         ...userData,
         token: user.accessToken,
       };
-      // TODO: Add proper logger
-      req.session.save(console.error);
+      req.session.save(logger.error);
 
       // redirect to original origin
       const redirection = redirect !== undefined

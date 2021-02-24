@@ -14,18 +14,23 @@ import {
 } from '@Floor-Gang/modmail-types';
 import { Worker } from 'worker_threads';
 import { v1 as uuid } from 'uuid';
+import { Logger } from 'log4js';
 import { MAX_LISTENERS, MAX_RESPONSE_TIME } from '../../common/globals';
 import { Semaphore } from 'async-mutex';
+import ModmailServer from '../server';
 
 export default class BotController {
   private readonly bot: Worker;
 
-  private readonly semaphore: Semaphore;
+  private readonly listeners: Semaphore;
 
-  constructor(location: string) {
+  private readonly modmail: ModmailServer;
+
+  constructor(modmail: ModmailServer, location: string) {
     this.bot = new Worker(location);
-    this.semaphore = new Semaphore(MAX_LISTENERS);
+    this.listeners = new Semaphore(MAX_LISTENERS);
     this.bot.setMaxListeners(MAX_LISTENERS);
+    this.modmail = modmail;
   }
 
   public async getChannel(
@@ -103,6 +108,7 @@ export default class BotController {
     id: string,
     cacheOnly = false,
   ): Promise<T | null> {
+    const logger = this.getLogger();
     const task: GetStateReq = {
       args: [id, cacheOnly],
       task: apiCall,
@@ -114,14 +120,18 @@ export default class BotController {
       return resp.data;
     } catch (e) {
       if (!e.message.includes('Not in cache')) {
-        console.error(`[${task.id}] An error has occurred\n`, e);
+        logger.error(`[${task.id}] An error has occurred\n`, e);
       }
       return null;
     }
   }
 
+  private getLogger(): Logger {
+    return this.modmail.getLogger(`(controller) bot`);
+  }
+
   private async transaction(req: ServerMessage): Promise<ServerResponse> {
-    const [, release] = await this.semaphore.acquire();
+    const [, release] = await this.listeners.acquire();
     try {
       const result = await new Promise<ServerResponse>((res, rej) => {
         const callback = (msg: ServerResponse) => {

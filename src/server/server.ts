@@ -12,6 +12,7 @@ import CategoriesRoute from './routes/categories';
 import { DatabaseManager } from './../database';
 import { RequestWithUser } from './models/types';
 import BotController from './controllers/bot';
+import { getLogger, Logger } from 'log4js';
 import {
   Message,
   Thread,
@@ -44,6 +45,7 @@ export default class ModmailServer {
     const categories = new CategoriesRoute(this);
     const self = new SelfRoute(this);
     const logout = new LogoutRoute(this);
+    const logger = this.getLogger('start');
 
     this.app.use(session({
       secret: CONFIG.server.appkey,
@@ -63,7 +65,7 @@ export default class ModmailServer {
     this.app.listen(
       CONFIG.server.port,
       // TODO: proper logger
-      () => console.debug(`Started listening on port ${CONFIG.server.port}`),
+      () => logger.info(`Server is ready. Listening on port ${CONFIG.server.port}`),
     );
   }
 
@@ -91,6 +93,12 @@ export default class ModmailServer {
       return ModmailServer.db;
     }
     throw new Error('getDB was called before starting ModmailServer');
+  }
+
+  public getLogger(section: string): Logger {
+    const logger = getLogger(`ModmailServer::${section}`);
+    logger.level = CONFIG.logLevel;
+    return logger;
   }
 
   public async getUserCache(targets: Iterator<string>): Promise<UserStateCache> {

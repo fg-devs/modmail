@@ -1,4 +1,5 @@
 import { Response, Router } from 'express';
+import { Logger } from 'log4js';
 import ModmailServer from '../server';
 
 export default class Route {
@@ -33,24 +34,29 @@ export default class Route {
   }
 
   protected failBadReq(res: Response, context?: string) {
+    const logger = this.getLogger();
     if (context) {
       // TODO: Added proper logger
-      console.warn(context);
+      logger.warn(context);
     }
     res.status(400);
     res.end();
   }
 
+  protected getLogger(): Logger {
+    return this.modmail.getLogger(this.name);
+  }
+
   protected failUnknown(res: Response) {
-    // TODO: Add proper logger
-    console.error('How did we get here?');
+    const logger = this.getLogger();
+    logger.error('How did we get here?');
     res.status(500);
     res.end();
   }
 
   protected failError(res: Response, err: Error) {
-    // TODO: Add proper logger
-    console.error(err);
+    const logger = this.getLogger();
+    logger.error(err);
     res.status(500);
     res.end();
   }
