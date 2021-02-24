@@ -304,6 +304,6 @@ export default class WorkerHandler {
   }
 
   private static getLogger(id: string) {
-    return ModmailBot.getLogger(`(worker-task) ${id}`);
+    return ModmailBot.getLogger(`worker::task::${id}`);
   }
 }
