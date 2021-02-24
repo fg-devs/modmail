@@ -4,21 +4,21 @@ import express, {
   NextFunction,
   Response,
 } from 'express';
-import OAuthRoute from '../routes/oauth';
-import { CONFIG } from '../../common/globals';
+import OAuthRoute from './routes/oauth';
+import { CONFIG } from '../common/globals';
 import session from 'express-session';
-import SelfRoute from '../routes/self';
-import CategoriesRoute from '../routes/categories';
-import { DatabaseManager } from '../../database';
-import { RequestWithUser } from '../models/types';
-import BotController from './bot';
+import SelfRoute from './routes/self';
+import CategoriesRoute from './routes/categories';
+import { DatabaseManager } from './../database';
+import { RequestWithUser } from './models/types';
+import BotController from './controllers/bot';
 import {
   Message,
   Thread,
   UserState,
   UserStateCache,
 } from '@Floor-Gang/modmail-types';
-import LogoutRoute from './../routes/logout';
+import LogoutRoute from './routes/logout';
 
 export default class ModmailServer {
   private readonly bot: BotController;

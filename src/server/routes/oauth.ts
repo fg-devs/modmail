@@ -9,7 +9,7 @@ import {
   RequestWithUser,
   User
 } from '../models/types';
-import ModmailServer from '../controllers/server';
+import ModmailServer from '../server';
 import Route from '../models/route';
 
 export interface OAuthData {

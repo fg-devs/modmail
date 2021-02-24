@@ -1,5 +1,5 @@
 import { Response, Router } from 'express';
-import ModmailServer from '../controllers/server';
+import ModmailServer from '../server';
 
 export default class Route {
   protected readonly name: string;

@@ -1,4 +1,4 @@
-import ModmailServer from '../controllers/server';
+import ModmailServer from '../server';
 import MembersRoute from './categories/members';
 import UsersRoute from './categories/users';
 import ThreadsRoute from './categories/threads';
