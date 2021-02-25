@@ -33,7 +33,8 @@ export default class UsersRoute extends Route {
     const { member } = req.session;
 
     if (member === undefined) {
-      this.failUnknown(res);
+      res.status(401);
+      res.end();
       return;
     }
 

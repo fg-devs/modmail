@@ -79,7 +79,7 @@ export default class CategoriesRoute extends Route {
     );
 
     if (member.role !== 'mod' && member.role !== 'admin') {
-      res.status(401);
+      res.status(403);
       res.end();
       return;
     }

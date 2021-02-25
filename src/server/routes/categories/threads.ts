@@ -23,13 +23,9 @@ export default class ThreadsRoute extends Route {
     const { category } = req.session;
     const { member } = req.session;
     const { threadID } = req.params;
-    if (member === undefined || category === undefined) {
-      res.status(500);
+    if (member === undefined || category === undefined || category === null) {
+      res.status(401);
       res.end();
-      return;
-    }
-
-    if (category === null) {
       return;
     }
 
@@ -80,7 +76,7 @@ export default class ThreadsRoute extends Route {
     const { category } = req.session;
     const { member } = req.session;
     if (category === undefined || member === undefined) {
-      res.status(500);
+      res.status(401);
       res.end();
       return;
     }
