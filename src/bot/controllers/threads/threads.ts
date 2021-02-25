@@ -187,11 +187,10 @@ export default class ThreadController extends Controller {
       + `${user.username}-${user.discriminator}`;
     const channel = await guild.channels.create(
       channelName,
-      { type: 'text' },
+      { type: 'text', parent },
     );
 
     try {
-      await channel.setParent(parent);
       await channel.send(threadDetails);
       await channel.setTopic(`User ID: ${user.id}`);
 
