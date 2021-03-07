@@ -1,6 +1,7 @@
 import { RoleLevel } from '@NewCircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
+import { CONFIG } from '../../../../common/globals'; 
 import ModmailBot from '../../../bot';
 import { LogUtil, PermsUtil } from '../../../util';
 
@@ -41,7 +42,7 @@ export default class StandardReplyCreate extends Command {
       await pool.standardReplies.create(args.name, args.reply);
       await msg.say(
         'Successfully created a new standard reply'
-        + `\n - Usage: \`${this.client.commandPrefix}sr ${args.name}\``,
+        + `\n - Usage: \`${CONFIG.bot.prefix}sr ${args.name}\``,
       );
     } catch (err) {
       let res;
