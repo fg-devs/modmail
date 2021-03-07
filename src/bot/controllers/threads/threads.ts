@@ -259,8 +259,10 @@ export default class ThreadController extends Controller {
     channel: TextChannel | DMChannel,
   ): Promise<boolean> {
     const msg = await channel.send('Is this about a staff member?');
-    await msg.react('👍');
+    
     await msg.react('👎');
+    await msg.react('👍');
+    
     const reactions = await msg.awaitReactions(
       (r: MessageReaction, u: User) => (r.emoji.name === '👍' || r.emoji.name === '👎') && !u.bot,
       {
