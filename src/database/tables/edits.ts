@@ -1,5 +1,5 @@
 import { PoolClient } from 'pg';
-import { Edit } from '@Floor-Gang/modmail-types';
+import { Edit } from '@NewCircuit/modmail-types';
 import Table from '../models/table';
 
 export default class EditsTable extends Table {

@@ -15,7 +15,7 @@ import {
   ServerResponse,
   UserState,
   WORKER_CALLS,
-} from '@Floor-Gang/modmail-types';
+} from '@NewCircuit/modmail-types';
 import { parentPort, MessagePort } from 'worker_threads';
 import ModmailBot from '../bot';
 import * as PermUtil from '../util/Perms';

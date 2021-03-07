@@ -1,4 +1,4 @@
-import { Category as PartialCategory } from '@Floor-Gang/modmail-types';
+import { Category as PartialCategory } from '@NewCircuit/modmail-types';
 import {
   CategoryChannel, Guild,
 } from 'discord.js';

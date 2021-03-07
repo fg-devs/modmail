@@ -1,4 +1,4 @@
-import { StandardReply } from '@Floor-Gang/modmail-types';
+import { StandardReply } from '@NewCircuit/modmail-types';
 import { DBStandardReply } from '../models/types';
 import { PoolClient } from 'pg';
 import Table from '../models/table';

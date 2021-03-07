@@ -1,4 +1,4 @@
-import { MuteStatus } from '@Floor-Gang/modmail-types';
+import { MuteStatus } from '@NewCircuit/modmail-types';
 import { DBMuteStatus } from '../models/types';
 import { PoolClient } from 'pg';
 import Table from '../models/table';

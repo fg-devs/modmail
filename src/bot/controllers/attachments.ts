@@ -1,4 +1,4 @@
-import { Attachment, FileType } from '@Floor-Gang/modmail-types';
+import { Attachment, FileType } from '@NewCircuit/modmail-types';
 import { Message, MessageAttachment } from 'discord.js';
 import { IMAGE_REGEX } from '../../common/globals';
 import Controller from './controller';

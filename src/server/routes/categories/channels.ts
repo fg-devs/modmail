@@ -2,7 +2,7 @@ import Route from '../route';
 import ModmailServer from '../../server';
 import { Response, Router } from 'express';
 import { RequestWithCategory } from '../../models/types';
-import { ChannelState } from '@Floor-Gang/modmail-types';
+import { ChannelState } from '@NewCircuit/modmail-types';
 
 export default class ChannelsRoute extends Route {
   constructor(mm: ModmailServer) {

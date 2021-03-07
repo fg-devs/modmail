@@ -11,7 +11,7 @@ import {
   ChannelState,
   RoleState,
   GetStateRes,
-} from '@Floor-Gang/modmail-types';
+} from '@NewCircuit/modmail-types';
 import { Worker } from 'worker_threads';
 import { v1 as uuid } from 'uuid';
 import { Logger } from 'log4js';

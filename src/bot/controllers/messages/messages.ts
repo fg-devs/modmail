@@ -1,4 +1,4 @@
-import { Thread, Message as PartialMessage } from '@Floor-Gang/modmail-types';
+import { Thread, Message as PartialMessage } from '@NewCircuit/modmail-types';
 import { Message, TextChannel } from 'discord.js';
 import MMMessage from './message';
 import Controller from '../controller';
