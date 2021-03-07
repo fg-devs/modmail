@@ -1,11 +1,11 @@
 import { Role } from '@NewCircuit/modmail-types';
 import { DBRole } from '../models/types';
-import { PoolClient } from 'pg';
+import { Pool } from 'pg';
 import * as PermUtil from '../util/PermUtil';
 import Table from '../models/table';
 
 export default class PermissionsTable extends Table {
-  constructor(pool: PoolClient) {
+  constructor(pool: Pool) {
     super(pool, 'permissions');
   }
 
@@ -15,8 +15,9 @@ export default class PermissionsTable extends Table {
    * @returns {Promise<boolean>} Whether it was added or not
    */
   public async add(role: Role): Promise<boolean> {
+    const client = await this.getClient();
     const level = PermUtil.resolve(role.level);
-    const res = await this.pool.query(
+    const res = await client.query(
       `INSERT INTO modmail.permissions (category_id, role_id, level)
        VALUES ($1, $2, $3);`,
       [role.category, role.roleID, level],
@@ -32,7 +33,8 @@ export default class PermissionsTable extends Table {
    * @returns {Promise<boolean>} Whether it was removed or not
    */
   public async remove(id: string): Promise<boolean> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `DELETE
        FROM modmail.permissions
        WHERE role_id = $1;`,
@@ -43,7 +45,8 @@ export default class PermissionsTable extends Table {
   }
 
   public async fetch(roleID: string): Promise<Role | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.permissions
        WHERE role_id = $1;`,
@@ -58,7 +61,8 @@ export default class PermissionsTable extends Table {
   }
 
   public async fetchFrom(roleIDs: string[]): Promise<Role[]> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.permissions
        WHERE role_id = ANY ($1);`,
@@ -69,7 +73,8 @@ export default class PermissionsTable extends Table {
   }
 
   public async fetchAll(category: string): Promise<Role[]> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.permissions
        WHERE category_id = $1;`,
@@ -83,7 +88,8 @@ export default class PermissionsTable extends Table {
    * Initialize the permissions table
    */
   protected async init(): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `CREATE TABLE IF NOT EXISTS modmail.permissions
        (
            category_id BIGINT                                                 NOT NULL
@@ -93,7 +99,7 @@ export default class PermissionsTable extends Table {
        )`
     );
 
-    await this.pool.query(
+    await client.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS permissions_role_id_uindex on modmail.permissions (role_id)`,
     );
   }

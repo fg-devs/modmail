@@ -1,10 +1,10 @@
 import { StandardReply } from '@NewCircuit/modmail-types';
 import { DBStandardReply } from '../models/types';
-import { PoolClient } from 'pg';
+import { Pool } from 'pg';
 import Table from '../models/table';
 
 export default class StandardRepliesTable extends Table {
-  constructor(pool: PoolClient) {
+  constructor(pool: Pool) {
     super(pool, 'standard_replies');
   }
 
@@ -14,7 +14,8 @@ export default class StandardRepliesTable extends Table {
    * @param reply
    */
   public async create(name: string, reply: string): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `INSERT INTO modmail.standard_replies (name, reply)
        VALUES (LOWER($1), $2);`,
       [name, reply],
@@ -26,7 +27,8 @@ export default class StandardRepliesTable extends Table {
    * @param {string} name
    */
   public async remove(name: string): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `DELETE
        FROM modmail.standard_replies
        WHERE name = LOWER($1);`,
@@ -40,7 +42,8 @@ export default class StandardRepliesTable extends Table {
    * @param {string} reply
    */
   public async update(name: string, reply: string): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `UPDATE modmail.standard_replies
        SET reply = $2
        WHERE name = LOWER($1)`,
@@ -54,7 +57,8 @@ export default class StandardRepliesTable extends Table {
    * @return {StandardReply | null}
    */
   public async fetch(name: string): Promise<StandardReply | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.standard_replies
        WHERE name = LOWER($1);`,
@@ -67,7 +71,8 @@ export default class StandardRepliesTable extends Table {
   }
 
   public async fetchAll(): Promise<StandardReply[]> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.standard_replies;`,
     );
@@ -79,7 +84,8 @@ export default class StandardRepliesTable extends Table {
    * Initialize standard replies table
    */
   protected async init(): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `CREATE TABLE IF NOT EXISTS modmail.standard_replies
        (
            name  TEXT PRIMARY KEY NOT NULL,
@@ -89,7 +95,8 @@ export default class StandardRepliesTable extends Table {
   }
 
   protected async migrate(): Promise<void> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT COUNT(*)
        FROM information_schema.columns
        WHERE table_name = 'standard_replies'
@@ -101,15 +108,15 @@ export default class StandardRepliesTable extends Table {
     // remove ID & set all names to lowercase
     if (count > 0) {
       // noinspection SqlResolve
-      await this.pool.query(
+      await client.query(
         `ALTER TABLE modmail.standard_replies
             DROP COLUMN id;`,
       );
-      await this.pool.query(
+      await client.query(
         `CREATE UNIQUE INDEX IF NOT EXISTS standard_replies_name_uindex
             ON modmail.standard_replies (name);`,
       );
-      await this.pool.query(
+      await client.query(
         `UPDATE modmail.standard_replies
          SET name=LOWER(name);`,
       );

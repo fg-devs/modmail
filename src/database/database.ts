@@ -32,9 +32,7 @@ export default class DatabaseManager {
 
     public readonly permissions: PermissionsTable;
 
-    private readonly pool: PoolClient;
-
-    constructor(pool: PoolClient) {
+    constructor(pool: Pool) {
       this.edits = new EditsManager(pool);
       this.messages = new MessagesTable(pool);
       this.mutes = new MutesTable(pool);
@@ -44,18 +42,28 @@ export default class DatabaseManager {
       this.attachments = new AttachmentsTable(pool);
       this.standardReplies = new StandardRepliesTable(pool);
       this.permissions = new PermissionsTable(pool);
-      this.pool = pool;
     }
 
     public static async getDB(config: PoolConfig): Promise<DatabaseManager> {
       const pool = new Pool(config);
-
-      const poolClient = await pool.connect();
-      const db = new DatabaseManager(poolClient);
+      const client = await pool.connect();
+      const db = new DatabaseManager(pool);
       const tasks: Promise<void>[] = [];
 
-      // Initialize schema and enums
-      await db.init();
+      await client.query(
+        `CREATE SCHEMA IF NOT EXISTS modmail`,
+      );
+
+      try {
+        await client.query(
+          `CREATE TYPE modmail.file_type AS ENUM ('image', 'file');`,
+        );
+
+        await client.query(
+          `CREATE TYPE modmail.role_level AS ENUM ('admin', 'mod');`,
+        );
+      } catch (_) { /* ignore these errors */ }
+
       // Initialize users first
       await db.users.validate();
       // Initialize categories second
@@ -74,21 +82,5 @@ export default class DatabaseManager {
 
       await Promise.all(tasks);
       return db;
-    }
-
-    public async init(): Promise<void> {
-      await this.pool.query(
-        `CREATE SCHEMA IF NOT EXISTS modmail`,
-      );
-
-      try {
-        await this.pool.query(
-          `CREATE TYPE modmail.file_type AS ENUM ('image', 'file');`,
-        );
-
-        await this.pool.query(
-          `CREATE TYPE modmail.role_level AS ENUM ('admin', 'mod');`,
-        );
-      } catch (_) { /* ignore these errors */ }
     }
 }

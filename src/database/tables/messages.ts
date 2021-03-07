@@ -1,10 +1,10 @@
 import { Message } from '@NewCircuit/modmail-types';
 import { DBMessage } from '../models/types';
-import { PoolClient } from 'pg';
+import { Pool } from 'pg';
 import Table from '../models/table';
 
 export default class MessagesTable extends Table {
-  constructor(pool: PoolClient) {
+  constructor(pool: Pool) {
     super(pool, 'messages');
   }
 
@@ -15,7 +15,8 @@ export default class MessagesTable extends Table {
    * @returns {Promise<void>}
    */
   public async add(message: Message): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `INSERT INTO modmail.messages
        (sender, client_id, modmail_id, content, thread_id, internal)
        VALUES ($1, $2, $3, $4, $5, $6);`,
@@ -31,7 +32,8 @@ export default class MessagesTable extends Table {
    * @returns {Promise<Message | null>}
    */
   public async getLastMessage(id: string, author: string): Promise<Message | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.messages
        WHERE sender = $1
@@ -55,7 +57,8 @@ export default class MessagesTable extends Table {
    * @returns {Promise<boolean>}
    */
   public async setDeleted(id: string): Promise<boolean> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `UPDATE modmail.messages
        SET is_deleted = true
        WHERE modmail_id = $1
@@ -72,7 +75,8 @@ export default class MessagesTable extends Table {
    * @returns {Promise<Message | null>}
    */
   public async fetch(id: string): Promise<Message | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.messages
        WHERE modmail_id = $1
@@ -88,7 +92,8 @@ export default class MessagesTable extends Table {
   }
 
   public async fetchAll(threadID: string): Promise<Message[]> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.messages
        WHERE thread_id = $1
@@ -100,7 +105,8 @@ export default class MessagesTable extends Table {
   }
 
   public async fetchLast(threadID: String): Promise<Message | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.messages
        WHERE thread_id = $1
@@ -117,7 +123,8 @@ export default class MessagesTable extends Table {
   }
 
   public async getPastMessages(threadID: string): Promise<Message[]> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.messages
        WHERE thread_id = $1
@@ -131,7 +138,8 @@ export default class MessagesTable extends Table {
    * Initialize the messages table
    */
   protected async init(): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `CREATE TABLE IF NOT EXISTS modmail.messages
        (
            sender     BIGINT                NOT NULL
@@ -148,11 +156,11 @@ export default class MessagesTable extends Table {
        );`,
     );
 
-    await this.pool.query(
+    await client.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS messages_client_id_uindex on modmail.messages (client_id);`,
     );
 
-    await this.pool.query(
+    await client.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS messages_modmail_id_uindex on modmail.messages (modmail_id);`,
     );
   }
@@ -179,7 +187,8 @@ export default class MessagesTable extends Table {
   }
 
   public async update(oldID: string, newID: string): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `UPDATE modmail.messages SET modmail_id = $1 WHERE modmail_id = $2;`,
       [newID, oldID],
     );

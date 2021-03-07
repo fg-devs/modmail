@@ -1,16 +1,19 @@
-import { PoolClient } from 'pg';
+import { 
+  Pool,
+  PoolClient,
+} from 'pg';
 
 /**
  * Table represents a table in the database which is used by DatabaseManager
  */
 export default class Table {
-  protected readonly pool: PoolClient;
+  protected readonly pool: Pool;
 
   protected readonly name: string;
 
   protected readonly full: string;
 
-  constructor(pool: PoolClient, name: string) {
+  constructor(pool: Pool, name: string) {
     this.pool = pool;
     this.name = name;
     this.full = `modmail.${this.name}`;
@@ -22,7 +25,8 @@ export default class Table {
    * @returns {Promise<void>}
    */
   public async validate(): Promise<void> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       'SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = $1 AND table_name = $2',
       ['modmail', this.name],
     );
@@ -33,6 +37,10 @@ export default class Table {
     } else {
       await this.migrate();
     }
+  }
+
+  protected async getClient(): Promise<PoolClient> {
+    return this.pool.connect();
   }
 
   /**

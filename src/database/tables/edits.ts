@@ -1,14 +1,15 @@
-import { PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { Edit } from '@NewCircuit/modmail-types';
 import Table from '../models/table';
 
 export default class EditsTable extends Table {
-  constructor(pool: PoolClient) {
+  constructor(pool: Pool) {
     super(pool, 'edits');
   }
 
   public async add(content: string, msgID: string): Promise<Edit> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `WITH last_version (num) AS (
           SELECT coalesce(
                          (SELECT version
@@ -32,7 +33,8 @@ export default class EditsTable extends Table {
   }
 
   public async fetch(msgID: string): Promise<Edit[]> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.edits
        WHERE message = $1
@@ -47,7 +49,8 @@ export default class EditsTable extends Table {
    * Initialize the edits table
    */
   protected async init(): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `CREATE TABLE IF NOT EXISTS modmail.edits
        (
            content TEXT              NOT NULL,

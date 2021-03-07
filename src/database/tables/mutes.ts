@@ -1,10 +1,10 @@
 import { MuteStatus } from '@NewCircuit/modmail-types';
 import { DBMuteStatus } from '../models/types';
-import { PoolClient } from 'pg';
+import { Pool } from 'pg';
 import Table from '../models/table';
 
 export default class MutesTable extends Table {
-  constructor(pool: PoolClient) {
+  constructor(pool: Pool) {
     super(pool, 'mutes');
   }
 
@@ -14,13 +14,14 @@ export default class MutesTable extends Table {
    * @returns {Promise<boolean>}
    */
   public async add(mute: MuteStatus): Promise<boolean> {
+    const client = await this.getClient();
     const isMuted = await this.isMuted(mute.user, mute.category);
 
     if (isMuted) {
       return false;
     }
 
-    await this.pool.query(
+    await client.query(
       `INSERT INTO modmail.mutes (user_id, category_id, till, reason)
        VALUES ($1, $2, $3, $4);`,
       [mute.user, mute.category, mute.till, mute.reason],
@@ -35,7 +36,8 @@ export default class MutesTable extends Table {
    * @returns {Promise<boolean>}
    */
   public async delete(user: string, category: string): Promise<boolean> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `DELETE
        FROM modmail.mutes
        WHERE user_id = $1
@@ -53,7 +55,8 @@ export default class MutesTable extends Table {
    * @returns {Promise<MuteStatus>}
    */
   public async fetchAll(user: string): Promise<MuteStatus[]> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.mutes
        WHERE user_id = $1`,
@@ -104,7 +107,8 @@ export default class MutesTable extends Table {
    * @returns {Promise<boolean>}
    */
   public async remove(user: string, category: string): Promise<boolean> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `DELETE
        FROM modmail.mutes
        WHERE user_id = $1
@@ -119,7 +123,8 @@ export default class MutesTable extends Table {
    * Initialize the mutes table
    */
   protected async init(): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `CREATE TABLE IF NOT EXISTS modmail.mutes
        (
            user_id     BIGINT NOT NULL

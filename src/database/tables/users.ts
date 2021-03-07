@@ -1,8 +1,8 @@
-import { PoolClient } from 'pg';
+import { Pool } from 'pg';
 import Table from '../models/table';
 
 export default class UsersTable extends Table {
-  constructor(pool: PoolClient) {
+  constructor(pool: Pool) {
     super(pool, 'users');
   }
 
@@ -12,7 +12,8 @@ export default class UsersTable extends Table {
    * @returns {Promise<void>}
    */
   public async create(id: string): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `INSERT INTO modmail.users (id)
        VALUES ($1)
        ON CONFLICT (id) DO NOTHING;`,
@@ -24,7 +25,8 @@ export default class UsersTable extends Table {
    * Initialize users table
    */
   protected async init(): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `CREATE TABLE IF NOT EXISTS modmail.users
        (
            id BIGINT NOT NULL
@@ -32,7 +34,7 @@ export default class UsersTable extends Table {
        )`,
     );
 
-    await this.pool.query(
+    await client.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS users_id_uindex ON modmail.users (id);`,
     );
   }

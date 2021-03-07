@@ -1,6 +1,6 @@
 import { Category } from '@NewCircuit/modmail-types';
 import { DBCategory } from '../models/types';
-import { PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { SnowflakeUtil } from 'discord.js';
 import Table from '../models/table';
 import {
@@ -8,7 +8,7 @@ import {
 } from '../models/types';
 
 export default class CategoriesTable extends Table {
-  constructor(pool: PoolClient) {
+  constructor(pool: Pool) {
     super(pool, 'categories');
   }
 
@@ -19,6 +19,7 @@ export default class CategoriesTable extends Table {
    * @returns {Promise<Category>}
    */
   public async create(opt: CreateCategoryOpt): Promise<Category> {
+    const client = await this.getClient();
     const categoryID = SnowflakeUtil.generate(Date.now());
     const {
       name,
@@ -30,7 +31,7 @@ export default class CategoriesTable extends Table {
     const isPrivate = opt.isPrivate !== undefined
       ? opt.isPrivate
       : false;
-    await this.pool.query(
+    await client.query(
       `INSERT INTO modmail.categories (id, name, description, guild_id, emoji,
                                        channel_id, is_private)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
@@ -50,14 +51,15 @@ export default class CategoriesTable extends Table {
   }
 
   public async deactivate(id: string): Promise<boolean> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `UPDATE modmail.categories
        SET is_active = false
        WHERE id = $1`,
       [id],
     );
 
-    await this.pool.query(
+    await client.query(
       `UPDATE modmail.categories
        SET channel_id = null
        WHERE id = $1`,
@@ -68,7 +70,8 @@ export default class CategoriesTable extends Table {
   }
 
   public async reactivate(id: string, channelID: string): Promise<boolean> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `UPDATE modmail.categories
        SET is_active  = true,
            channel_id = $2
@@ -86,7 +89,8 @@ export default class CategoriesTable extends Table {
    * @returns {Promise<boolean>} Whether or not something changed
    */
   public async setEmote(id: string, emoji: string): Promise<boolean> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `UPDATE modmail.categories
        SET emoji = $1
        WHERE id = $2`,
@@ -103,7 +107,8 @@ export default class CategoriesTable extends Table {
    * @returns {Promise<boolean>}
    */
   public async setName(id: string, name: string): Promise<boolean> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `UPDATE modmail.categories
        SET name = $1
        WHERE id = $2`,
@@ -114,7 +119,8 @@ export default class CategoriesTable extends Table {
   }
 
   public async setPrivate(id: string, isPrivate: boolean): Promise<boolean> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `UPDATE modmail.categories
        SET is_private = $1
        WHERE id = $2`,
@@ -125,16 +131,14 @@ export default class CategoriesTable extends Table {
   }
 
   public async fetchAll(activeOnly = true): Promise<Category[]> {
+    const client = await this.getClient();
     let res;
     if (activeOnly) {
-      res = await this.pool.query(
-        `SELECT *
-         FROM modmail.categories
-         WHERE is_active = true;`,
+      res = await client.query(
+        "SELECT * FROM modmail.categories WHERE is_active = true;",
       );
     } else {
-      res = await this.pool.query(`SELECT *
-                                   FROM modmail.categories;`);
+      res = await client.query("SELECT * FROM modmail.categories;");
     }
 
     if (res.rowCount === 0) {
@@ -150,7 +154,8 @@ export default class CategoriesTable extends Table {
    * @returns {Promise<Category | null>}
    */
   public async fetchByID(id: string): Promise<Category | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.categories
        WHERE id = $1`,
@@ -165,7 +170,8 @@ export default class CategoriesTable extends Table {
   }
 
   public async fetchByEmoji(emoji: string): Promise<Category | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.categories
        WHERE emoji = $1`,
@@ -180,7 +186,8 @@ export default class CategoriesTable extends Table {
   }
 
   public async fetchByGuild(guildID: string): Promise<Category | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.categories
        WHERE guild_id = $1`,
@@ -195,7 +202,8 @@ export default class CategoriesTable extends Table {
   }
 
   public async fetchByName(name: string): Promise<Category | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.categories
        WHERE name = $1`,
@@ -213,7 +221,8 @@ export default class CategoriesTable extends Table {
    * Initialize the categories table if it doesn't exist
    */
   protected async init(): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `CREATE TABLE IF NOT EXISTS modmail.categories
        (
            id          BIGINT                NOT NULL
@@ -230,35 +239,36 @@ export default class CategoriesTable extends Table {
   }
 
   protected async migrate(): Promise<void> {
+    const client = await this.getClient();
     let count;
     let res;
     // Add description column
-    await this.pool.query(
+    await client.query(
       `ALTER TABLE modmail.categories
           ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '' NOT NULL;`,
     );
 
     // Make channel_id nullable
-    await this.pool.query(
+    await client.query(
       `ALTER TABLE modmail.categories
           ALTER COLUMN channel_id DROP NOT NULL;`,
     );
 
     // make inactive categories channel_id nullable
-    await this.pool.query(
+    await client.query(
       `UPDATE modmail.categories
        SET channel_id = null
        WHERE is_active = false;`,
     );
 
     // make only guild per category
-    await this.pool.query(
+    await client.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS categories_guild_id_uindex
           ON modmail.categories (guild_id);`,
     );
 
     // rename emote to emoji
-    res = await this.pool.query(
+    res = await client.query(
       `SELECT COUNT(*)
        FROM information_schema.columns
        WHERE table_schema = 'modmail'
@@ -269,14 +279,14 @@ export default class CategoriesTable extends Table {
 
     if (count > 0) {
       // noinspection SqlResolve
-      await this.pool.query(
+      await client.query(
         `ALTER TABLE modmail.categories
             RENAME COLUMN emote TO emoji;`
       );
     }
 
     // add private categories
-    await this.pool.query(
+    await client.query(
       `ALTER TABLE modmail.categories
           ADD COLUMN IF NOT EXISTS is_private BOOL DEFAULT false NOT NULL;`,
     );

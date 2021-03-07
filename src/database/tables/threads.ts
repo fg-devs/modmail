@@ -1,16 +1,17 @@
 import { Thread } from '@NewCircuit/modmail-types';
 import { DBThread } from '../models/types';
 import { SnowflakeUtil } from 'discord.js';
-import { PoolClient } from 'pg';
+import { Pool } from 'pg';
 import Table from '../models/table';
 
 export default class ThreadsTable extends Table {
-  constructor(pool: PoolClient) {
+  constructor(pool: Pool) {
     super(pool, 'threads');
   }
 
   public async participants(threadID: string): Promise<string[]> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT DISTINCT sender FROM modmail.messages WHERE thread_id = $1;`,
       [threadID],
     );
@@ -22,20 +23,21 @@ export default class ThreadsTable extends Table {
     userID: string,
     catID: string | null = null,
   ): Promise<Thread[]> {
+    const client = await this.getClient();
     let res;
-    res = await this.pool.query(
+    res = await client.query(
       `SELECT DISTINCT thread_id FROM modmail.messages WHERE sender = $1`,
       [userID],
     );
 
     const threadIDs = res.rows.map((th) => th.thread_id);;
     if (catID === null) {
-      res = await this.pool.query(
+      res = await client.query(
         `SELECT * FROM modmail.threads WHERE id = ANY ($1) ORDER BY id DESC`,
         [threadIDs],
       );
     } else {
-      res = await this.pool.query(
+      res = await client.query(
         `SELECT * FROM modmail.threads
            WHERE id = ANY ($1)
            AND category = $2
@@ -54,7 +56,8 @@ export default class ThreadsTable extends Table {
    * @returns {Promise<boolean>}
    */
   public async close(id: string): Promise<boolean> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `UPDATE modmail.threads
        SET is_active = false
        WHERE channel = $1;`,
@@ -77,8 +80,9 @@ export default class ThreadsTable extends Table {
     categoryID: string,
     isAdminOnly: boolean,
   ): Promise<Thread> {
+    const client = await this.getClient();
     const threadID = SnowflakeUtil.generate(Date.now());
-    await this.pool.query(
+    await client.query(
       `INSERT INTO modmail.threads (id, author, channel, category, is_admin_only)
        VALUES ($1, $2, $3, $4, $5);`,
       [threadID, author, channelID, categoryID, isAdminOnly],
@@ -103,7 +107,8 @@ export default class ThreadsTable extends Table {
    * @returns {Promise<number>}
    */
   public async countUser(user: string): Promise<number> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT COUNT(*)
        FROM modmail.threads
        WHERE author = $1
@@ -115,7 +120,8 @@ export default class ThreadsTable extends Table {
   }
 
   public async countCategory(category: string): Promise<number> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT COUNT(*)
        FROM modmail.threads
        WHERE category = $1
@@ -127,7 +133,8 @@ export default class ThreadsTable extends Table {
   }
 
   public async getByUser(userID: string): Promise<Thread | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.threads
        WHERE author = $1
@@ -148,7 +155,8 @@ export default class ThreadsTable extends Table {
    * @returns {Promise<Thread | null>} if thread was found
    */
   public async getCurrentThread(user: string): Promise<Thread | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.threads
        WHERE author = $1
@@ -168,7 +176,8 @@ export default class ThreadsTable extends Table {
    * @returns {Promise<Thread | null>}
    */
   public async getByChannel(channelID: string): Promise<Thread | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.threads
        WHERE channel = $1
@@ -190,7 +199,8 @@ export default class ThreadsTable extends Table {
    * @returns {Promise<Thread[]>}
    */
   public async getByCategory(catID: string): Promise<Thread[]> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.threads
        WHERE category = $1
@@ -207,7 +217,8 @@ export default class ThreadsTable extends Table {
    * @returns {Promise<Thread | null>}
    */
   public async getByID(threadID: string): Promise<Thread | null> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.threads
        WHERE id = $1;`,
@@ -226,7 +237,8 @@ export default class ThreadsTable extends Table {
     categoryID: string,
     channelID: string,
   ): Promise<boolean> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `UPDATE modmail.threads SET category = $2, channel = $3 WHERE id = $1`,
       [threadID, categoryID, channelID],
     );
@@ -238,7 +250,8 @@ export default class ThreadsTable extends Table {
    * Initialize threads table
    */
   protected async init(): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `CREATE TABLE IF NOT EXISTS modmail.threads
        (
            id        BIGINT               NOT NULL
@@ -254,22 +267,23 @@ export default class ThreadsTable extends Table {
        );`,
     );
 
-    await this.pool.query(
+    await client.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS threads_channel_uindex ON modmail.threads (channel);`,
     );
 
-    await this.pool.query(
+    await client.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS threads_channel_uindex_2 ON modmail.threads (channel);`,
     );
 
-    await this.pool.query(
+    await client.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS threads_id_uindex ON modmail.threads (id);`,
     );
   }
 
   protected async migrate(): Promise<void> {
+    const client = await this.getClient();
     // Add is_admin_only column
-    await this.pool.query(
+    await client.query(
       `ALTER TABLE modmail.threads
           ADD COLUMN IF NOT EXISTS is_admin_only boolean DEFAULT false NOT NULL`,
     );

@@ -1,18 +1,19 @@
 import { Attachment, FileType } from '@NewCircuit/modmail-types';
 import { SnowflakeUtil } from 'discord.js';
-import { PoolClient } from 'pg';
+import { Pool } from 'pg';
 import Table from '../models/table';
 import { CreateAttachmentOpt, DBAttachment } from '../models/types';
 
 export default class AttachmentsTable extends Table {
-  constructor(pool: PoolClient) {
+  constructor(pool: Pool) {
     super(pool, 'attachments');
   }
 
   public async create(opt: CreateAttachmentOpt): Promise<Attachment> {
+    const client = await this.getClient();
     const id = SnowflakeUtil.generate(Date.now());
     const type = opt.type === FileType.Image ? 'image' : 'file';
-    await this.pool.query(
+    await client.query(
       `INSERT INTO modmail.attachments (id, message_id, name, source, sender, type)
        VALUES ($1, $2, $3, $4, $5, $6);`,
       [id, opt.messageID, opt.name, opt.source, opt.sender, type],
@@ -25,7 +26,8 @@ export default class AttachmentsTable extends Table {
   }
 
   public async fetch(msgID: string): Promise<Attachment[]> {
-    const res = await this.pool.query(
+    const client = await this.getClient();
+    const res = await client.query(
       `SELECT *
        FROM modmail.attachments
        WHERE message_id = $1`,
@@ -50,7 +52,8 @@ export default class AttachmentsTable extends Table {
    * Initialize attachments table
    */
   protected async init(): Promise<void> {
-    await this.pool.query(
+    const client = await this.getClient();
+    await client.query(
       `CREATE TABLE IF NOT EXISTS modmail.attachments
        (
            id         BIGINT                                                NOT NULL
@@ -68,7 +71,7 @@ export default class AttachmentsTable extends Table {
       `,
     );
 
-    await this.pool.query(
+    await client.query(
       `CREATE
       UNIQUE INDEX IF NOT EXISTS attachments_id_uindex ON modmail.attachments (id);`,
     );
