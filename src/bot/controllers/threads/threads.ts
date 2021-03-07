@@ -54,7 +54,7 @@ export default class ThreadController extends Controller {
       return null;
     }
 
-    const isAdminOnly = await ThreadController.isAboutStaff(dms);
+    const isAdminOnly = await ThreadController.isAdminOnly(dms);
     // check if they already have an open thread
     const currentThread = await this.modmail.threads.getByAuthor(
       msg.author.id,
@@ -255,10 +255,15 @@ export default class ThreadController extends Controller {
     return null;
   }
 
-  public static async isAboutStaff(
+  public static async isAdminOnly(
     channel: TextChannel | DMChannel,
+    forwarded = false,
   ): Promise<boolean> {
-    const msg = await channel.send('Is this about a staff member?');
+    const msg = await channel.send(
+      forwarded
+      ? 'Should this be admin only?'
+      : 'Is this about a staff member?'
+    );
     
     await msg.react('👎');
     await msg.react('👍');

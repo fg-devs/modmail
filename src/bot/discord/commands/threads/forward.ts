@@ -33,7 +33,7 @@ export default class Forward extends Command {
       return null;
     }
 
-    const isAdminOnly = await Threads.isAboutStaff(channel);
+    const isAdminOnly = await Threads.isAdminOnly(channel, true);
 
     try {
       await thread.forward(msg.author, isAdminOnly, category);
