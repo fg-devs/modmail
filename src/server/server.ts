@@ -28,19 +28,20 @@ export default class ModmailServer {
 
   private readonly oauth: ClientOAuth2;
 
-  private static db: DatabaseManager | null = null;
+  private static db: DatabaseManager;
 
   constructor(botLocation: string) {
     this.app = express();
     this.bot = new BotController(this, botLocation);
     this.oauth = new ClientOAuth2(CONFIG.server.oauth2);
+    ModmailServer.db = new DatabaseManager(CONFIG.database);
   }
 
   /**
    * This method must be called before all else can happen
    */
   public async start() {
-    ModmailServer.db = await DatabaseManager.getDB(CONFIG.database);
+
     const oauth = new OAuthRoute(this);
     const categories = new CategoriesRoute(this);
     const self = new SelfRoute(this);

@@ -26,7 +26,7 @@ export default class ModmailBot extends CommandoClient {
 
   private static modmail: ModmailBot;
 
-  private static db: DatabaseManager | null;
+  private static db: DatabaseManager;
 
   constructor() {
     super({
