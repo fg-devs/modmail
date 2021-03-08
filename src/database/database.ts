@@ -53,11 +53,12 @@ export default class DatabaseManager {
       const client = await this.pool.connect();
       const tasks: Promise<void>[] = [];
 
+
       await client.query(
         `CREATE SCHEMA IF NOT EXISTS modmail`,
       );
-
-      try {
+      
+      try { 
         await client.query(
           `CREATE TYPE modmail.file_type AS ENUM ('image', 'file');`,
         );
@@ -65,7 +66,11 @@ export default class DatabaseManager {
         await client.query(
           `CREATE TYPE modmail.role_level AS ENUM ('admin', 'mod');`,
         );
-      } catch (_) { /* ignore these errors */ }
+      } catch (_) {
+        /* ignore these errors */
+      } finally {
+        client.release();
+      }
 
       // Initialize users first
       await this.users.validate();

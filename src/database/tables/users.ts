@@ -13,12 +13,17 @@ export default class UsersTable extends Table {
    */
   public async create(id: string): Promise<void> {
     const client = await this.getClient();
-    await client.query(
-      `INSERT INTO modmail.users (id)
-       VALUES ($1)
-       ON CONFLICT (id) DO NOTHING;`,
-      [id],
-    );
+
+    try {
+      await client.query(
+        `INSERT INTO modmail.users (id)
+         VALUES ($1)
+         ON CONFLICT (id) DO NOTHING;`,
+        [id],
+      );
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -26,16 +31,21 @@ export default class UsersTable extends Table {
    */
   protected async init(): Promise<void> {
     const client = await this.getClient();
-    await client.query(
-      `CREATE TABLE IF NOT EXISTS modmail.users
-       (
-           id BIGINT NOT NULL
-               CONSTRAINT users_pk PRIMARY KEY
-       )`,
-    );
 
-    await client.query(
-      `CREATE UNIQUE INDEX IF NOT EXISTS users_id_uindex ON modmail.users (id);`,
-    );
+    try {
+      await client.query(
+        `CREATE TABLE IF NOT EXISTS modmail.users
+         (
+             id BIGINT NOT NULL
+                 CONSTRAINT users_pk PRIMARY KEY
+         )`,
+      );
+
+      await client.query(
+        `CREATE UNIQUE INDEX IF NOT EXISTS users_id_uindex ON modmail.users (id);`,
+      );
+    } finally {
+      client.release();
+    }
   }
 }

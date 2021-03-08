@@ -16,13 +16,18 @@ export default class MessagesTable extends Table {
    */
   public async add(message: Message): Promise<void> {
     const client = await this.getClient();
-    await client.query(
-      `INSERT INTO modmail.messages
-       (sender, client_id, modmail_id, content, thread_id, internal)
-       VALUES ($1, $2, $3, $4, $5, $6);`,
-      [message.sender, message.clientID, message.modmailID,
-        message.content, message.threadID, message.internal,],
-    );
+
+    try {
+      await client.query(
+        `INSERT INTO modmail.messages
+         (sender, client_id, modmail_id, content, thread_id, internal)
+         VALUES ($1, $2, $3, $4, $5, $6);`,
+        [message.sender, message.clientID, message.modmailID,
+          message.content, message.threadID, message.internal,],
+      );
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -33,22 +38,27 @@ export default class MessagesTable extends Table {
    */
   public async getLastMessage(id: string, author: string): Promise<Message | null> {
     const client = await this.getClient();
-    const res = await client.query(
-      `SELECT *
-       FROM modmail.messages
-       WHERE sender = $1
-         AND thread_id = $2
-         AND is_deleted = false
-         AND internal = false
-       ORDER BY modmail_id DESC;`,
-      [author, id],
-    );
 
-    if (res.rowCount === 0) {
-      return null;
+    try {
+      const res = await client.query(
+        `SELECT *
+         FROM modmail.messages
+         WHERE sender = $1
+           AND thread_id = $2
+           AND is_deleted = false
+           AND internal = false
+         ORDER BY modmail_id DESC;`,
+        [author, id],
+      );
+
+      if (res.rowCount === 0) {
+        return null;
+      }
+
+      return MessagesTable.parse(res.rows[0]);
+    } finally {
+      client.release();
     }
-
-    return MessagesTable.parse(res.rows[0]);
   }
 
   /**
@@ -58,15 +68,20 @@ export default class MessagesTable extends Table {
    */
   public async setDeleted(id: string): Promise<boolean> {
     const client = await this.getClient();
-    const res = await client.query(
-      `UPDATE modmail.messages
-       SET is_deleted = true
-       WHERE modmail_id = $1
-          OR client_id = $1;`,
-      [id],
-    );
 
-    return res.rowCount !== 0;
+    try {
+      const res = await client.query(
+        `UPDATE modmail.messages
+         SET is_deleted = true
+         WHERE modmail_id = $1
+            OR client_id = $1;`,
+        [id],
+      );
+
+      return res.rowCount !== 0;
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -76,62 +91,82 @@ export default class MessagesTable extends Table {
    */
   public async fetch(id: string): Promise<Message | null> {
     const client = await this.getClient();
-    const res = await client.query(
-      `SELECT *
-       FROM modmail.messages
-       WHERE modmail_id = $1
-          OR client_id = $1;`,
-      [id],
-    );
 
-    if (res.rowCount === 0) {
-      return null;
+    try {
+      const res = await client.query(
+        `SELECT *
+         FROM modmail.messages
+         WHERE modmail_id = $1
+            OR client_id = $1;`,
+        [id],
+      );
+
+      if (res.rowCount === 0) {
+        return null;
+      }
+
+      return MessagesTable.parse(res.rows[0]);
+    } finally {
+      client.release();
     }
-
-    return MessagesTable.parse(res.rows[0]);
   }
 
   public async fetchAll(threadID: string): Promise<Message[]> {
     const client = await this.getClient();
-    const res = await client.query(
-      `SELECT *
-       FROM modmail.messages
-       WHERE thread_id = $1
-       ORDER BY modmail_id`,
-      [threadID],
-    );
 
-    return res.rows.map((data) => MessagesTable.parse(data));
+    try {
+      const res = await client.query(
+        `SELECT *
+         FROM modmail.messages
+         WHERE thread_id = $1
+         ORDER BY modmail_id`,
+        [threadID],
+      );
+
+      return res.rows.map((data) => MessagesTable.parse(data));
+    } finally {
+      client.release();
+    }
   }
 
   public async fetchLast(threadID: String): Promise<Message | null> {
     const client = await this.getClient();
-    const res = await client.query(
-      `SELECT *
-       FROM modmail.messages
-       WHERE thread_id = $1
-       ORDER BY modmail_id DESC
-       LIMIT 1;`,
-      [threadID],
-    );
 
-    if (res.rowCount === 0) {
-      return null;
+    try {
+      const res = await client.query(
+        `SELECT *
+         FROM modmail.messages
+         WHERE thread_id = $1
+         ORDER BY modmail_id DESC
+         LIMIT 1;`,
+        [threadID],
+      );
+
+      if (res.rowCount === 0) {
+        return null;
+      }
+
+      return MessagesTable.parse(res.rows[0]);
+    } finally {
+      client.release();
     }
-
-    return MessagesTable.parse(res.rows[0]);
   }
 
   public async getPastMessages(threadID: string): Promise<Message[]> {
     const client = await this.getClient();
-    const res = await client.query(
-      `SELECT *
-       FROM modmail.messages
-       WHERE thread_id = $1
-         AND is_deleted = false;`,
-      [threadID],
-    );
-    return res.rows.map((row: DBMessage) => MessagesTable.parse(row));
+
+    try {
+      const res = await client.query(
+        `SELECT *
+         FROM modmail.messages
+         WHERE thread_id = $1
+           AND is_deleted = false;`,
+        [threadID],
+      );
+      return res.rows.map((row: DBMessage) => MessagesTable.parse(row));
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -139,30 +174,35 @@ export default class MessagesTable extends Table {
    */
   protected async init(): Promise<void> {
     const client = await this.getClient();
-    await client.query(
-      `CREATE TABLE IF NOT EXISTS modmail.messages
-       (
-           sender     BIGINT                NOT NULL
-               CONSTRAINT messages_users_id_fk
-                   REFERENCES modmail.users,
-           client_id  BIGINT,
-           modmail_id BIGINT                NOT NULL,
-           content    TEXT                  NOT NULL,
-           thread_id  BIGINT                NOT NULL
-               CONSTRAINT messages_threads_id_fk
-                   REFERENCES modmail.threads,
-           is_deleted BOOLEAN DEFAULT false NOT NULL,
-           internal   BOOLEAN DEFAULT false NOT NULL
-       );`,
-    );
 
-    await client.query(
-      `CREATE UNIQUE INDEX IF NOT EXISTS messages_client_id_uindex on modmail.messages (client_id);`,
-    );
+    try {
+      await client.query(
+        `CREATE TABLE IF NOT EXISTS modmail.messages
+         (
+             sender     BIGINT                NOT NULL
+                 CONSTRAINT messages_users_id_fk
+                     REFERENCES modmail.users,
+             client_id  BIGINT,
+             modmail_id BIGINT                NOT NULL,
+             content    TEXT                  NOT NULL,
+             thread_id  BIGINT                NOT NULL
+                 CONSTRAINT messages_threads_id_fk
+                     REFERENCES modmail.threads,
+             is_deleted BOOLEAN DEFAULT false NOT NULL,
+             internal   BOOLEAN DEFAULT false NOT NULL
+         );`,
+      );
 
-    await client.query(
-      `CREATE UNIQUE INDEX IF NOT EXISTS messages_modmail_id_uindex on modmail.messages (modmail_id);`,
-    );
+      await client.query(
+        `CREATE UNIQUE INDEX IF NOT EXISTS messages_client_id_uindex on modmail.messages (client_id);`,
+      );
+
+      await client.query(
+        `CREATE UNIQUE INDEX IF NOT EXISTS messages_modmail_id_uindex on modmail.messages (modmail_id);`,
+      );
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -188,9 +228,14 @@ export default class MessagesTable extends Table {
 
   public async update(oldID: string, newID: string): Promise<void> {
     const client = await this.getClient();
-    await client.query(
-      `UPDATE modmail.messages SET modmail_id = $1 WHERE modmail_id = $2;`,
-      [newID, oldID],
-    );
+
+    try {
+      await client.query(
+        `UPDATE modmail.messages SET modmail_id = $1 WHERE modmail_id = $2;`,
+        [newID, oldID],
+      );
+    } finally {
+      client.release();
+    }
   }
 }

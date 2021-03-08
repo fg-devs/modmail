@@ -15,11 +15,16 @@ export default class StandardRepliesTable extends Table {
    */
   public async create(name: string, reply: string): Promise<void> {
     const client = await this.getClient();
-    await client.query(
-      `INSERT INTO modmail.standard_replies (name, reply)
-       VALUES (LOWER($1), $2);`,
-      [name, reply],
-    );
+
+    try {
+      await client.query(
+        `INSERT INTO modmail.standard_replies (name, reply)
+         VALUES (LOWER($1), $2);`,
+        [name, reply],
+      );
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -28,12 +33,17 @@ export default class StandardRepliesTable extends Table {
    */
   public async remove(name: string): Promise<void> {
     const client = await this.getClient();
-    await client.query(
-      `DELETE
-       FROM modmail.standard_replies
-       WHERE name = LOWER($1);`,
-      [name],
-    );
+
+    try {
+      await client.query(
+        `DELETE
+         FROM modmail.standard_replies
+         WHERE name = LOWER($1);`,
+        [name],
+      );
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -43,12 +53,17 @@ export default class StandardRepliesTable extends Table {
    */
   public async update(name: string, reply: string): Promise<void> {
     const client = await this.getClient();
-    await client.query(
-      `UPDATE modmail.standard_replies
-       SET reply = $2
-       WHERE name = LOWER($1)`,
-      [name, reply],
-    );
+
+    try {
+      await client.query(
+        `UPDATE modmail.standard_replies
+         SET reply = $2
+         WHERE name = LOWER($1)`,
+        [name, reply],
+      );
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -58,26 +73,36 @@ export default class StandardRepliesTable extends Table {
    */
   public async fetch(name: string): Promise<StandardReply | null> {
     const client = await this.getClient();
-    const res = await client.query(
-      `SELECT *
-       FROM modmail.standard_replies
-       WHERE name = LOWER($1);`,
-      [name.toLowerCase()],
-    );
-    if (res.rowCount === 0) {
-      return null;
+
+    try {
+      const res = await client.query(
+        `SELECT *
+         FROM modmail.standard_replies
+         WHERE name = LOWER($1);`,
+        [name.toLowerCase()],
+      );
+      if (res.rowCount === 0) {
+        return null;
+      }
+      return StandardRepliesTable.parse(res.rows[0]);
+    } finally {
+      client.release();
     }
-    return StandardRepliesTable.parse(res.rows[0]);
   }
 
   public async fetchAll(): Promise<StandardReply[]> {
     const client = await this.getClient();
-    const res = await client.query(
-      `SELECT *
-       FROM modmail.standard_replies;`,
-    );
 
-    return res.rows.map((sr) => StandardRepliesTable.parse(sr));
+    try {
+      const res = await client.query(
+        `SELECT *
+         FROM modmail.standard_replies;`,
+      );
+
+      return res.rows.map((sr) => StandardRepliesTable.parse(sr));
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -85,41 +110,51 @@ export default class StandardRepliesTable extends Table {
    */
   protected async init(): Promise<void> {
     const client = await this.getClient();
-    await client.query(
-      `CREATE TABLE IF NOT EXISTS modmail.standard_replies
-       (
-           name  TEXT PRIMARY KEY NOT NULL,
-           reply TEXT             NOT NULL
-       );`
-    );
+
+    try {
+      await client.query(
+        `CREATE TABLE IF NOT EXISTS modmail.standard_replies
+         (
+             name  TEXT PRIMARY KEY NOT NULL,
+             reply TEXT             NOT NULL
+         );`
+      );
+    } finally {
+      client.release();
+    }
   }
 
   protected async migrate(): Promise<void> {
     const client = await this.getClient();
-    const res = await client.query(
-      `SELECT COUNT(*)
-       FROM information_schema.columns
-       WHERE table_name = 'standard_replies'
-         AND table_schema = 'modmail'
-         AND column_name = 'id';`
-    );
-    const count = res.rows[0].count;
 
-    // remove ID & set all names to lowercase
-    if (count > 0) {
-      // noinspection SqlResolve
-      await client.query(
-        `ALTER TABLE modmail.standard_replies
-            DROP COLUMN id;`,
+    try {
+      const res = await client.query(
+        `SELECT COUNT(*)
+         FROM information_schema.columns
+         WHERE table_name = 'standard_replies'
+           AND table_schema = 'modmail'
+           AND column_name = 'id';`
       );
-      await client.query(
-        `CREATE UNIQUE INDEX IF NOT EXISTS standard_replies_name_uindex
-            ON modmail.standard_replies (name);`,
-      );
-      await client.query(
-        `UPDATE modmail.standard_replies
-         SET name=LOWER(name);`,
-      );
+      const count = res.rows[0].count;
+
+      // remove ID & set all names to lowercase
+      if (count > 0) {
+        // noinspection SqlResolve
+        await client.query(
+          `ALTER TABLE modmail.standard_replies
+              DROP COLUMN id;`,
+        );
+        await client.query(
+          `CREATE UNIQUE INDEX IF NOT EXISTS standard_replies_name_uindex
+              ON modmail.standard_replies (name);`,
+        );
+        await client.query(
+          `UPDATE modmail.standard_replies
+           SET name=LOWER(name);`,
+        );
+      }
+    } finally {
+      client.release();
     }
   }
 

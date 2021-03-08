@@ -21,12 +21,17 @@ export default class MutesTable extends Table {
       return false;
     }
 
-    await client.query(
-      `INSERT INTO modmail.mutes (user_id, category_id, till, reason)
-       VALUES ($1, $2, $3, $4);`,
-      [mute.user, mute.category, mute.till, mute.reason],
-    );
-    return true;
+    try { 
+      await client.query(
+        `INSERT INTO modmail.mutes (user_id, category_id, till, reason)
+         VALUES ($1, $2, $3, $4);`,
+        [mute.user, mute.category, mute.till, mute.reason],
+      );
+      
+      return true;
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -37,16 +42,21 @@ export default class MutesTable extends Table {
    */
   public async delete(user: string, category: string): Promise<boolean> {
     const client = await this.getClient();
-    const res = await client.query(
-      `DELETE
-       FROM modmail.mutes
-       WHERE user_id = $1
-         AND category_id = $2
-         AND till > $3;`,
-      [user, category, Date.now()],
-    );
 
-    return res.rowCount !== 0;
+    try {
+      const res = await client.query(
+        `DELETE
+         FROM modmail.mutes
+         WHERE user_id = $1
+           AND category_id = $2
+           AND till > $3;`,
+        [user, category, Date.now()],
+      );
+
+      return res.rowCount !== 0;
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -56,14 +66,19 @@ export default class MutesTable extends Table {
    */
   public async fetchAll(user: string): Promise<MuteStatus[]> {
     const client = await this.getClient();
-    const res = await client.query(
-      `SELECT *
-       FROM modmail.mutes
-       WHERE user_id = $1`,
-      [user],
-    );
 
-    return res.rows.map(MutesTable.parse);
+    try {
+      const res = await client.query(
+        `SELECT *
+         FROM modmail.mutes
+         WHERE user_id = $1`,
+        [user],
+      );
+
+      return res.rows.map(MutesTable.parse);
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -108,15 +123,20 @@ export default class MutesTable extends Table {
    */
   public async remove(user: string, category: string): Promise<boolean> {
     const client = await this.getClient();
-    const res = await client.query(
-      `DELETE
-       FROM modmail.mutes
-       WHERE user_id = $1
-         AND category_id = $2;`,
-      [user, category],
-    );
 
-    return res.rowCount !== 0;
+    try {
+      const res = await client.query(
+        `DELETE
+         FROM modmail.mutes
+         WHERE user_id = $1
+           AND category_id = $2;`,
+        [user, category],
+      );
+
+      return res.rowCount !== 0;
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -124,17 +144,22 @@ export default class MutesTable extends Table {
    */
   protected async init(): Promise<void> {
     const client = await this.getClient();
-    await client.query(
-      `CREATE TABLE IF NOT EXISTS modmail.mutes
-       (
-           user_id     BIGINT NOT NULL
-               CONSTRAINT threads_users_id_fk
-                   REFERENCES modmail.users,
-           till        BIGINT NOT NULL,
-           category_id BIGINT NOT NULL,
-           reason      text   NOT NULL
-       )`,
-    );
+
+    try {
+      await client.query(
+        `CREATE TABLE IF NOT EXISTS modmail.mutes
+         (
+             user_id     BIGINT NOT NULL
+                 CONSTRAINT threads_users_id_fk
+                     REFERENCES modmail.users,
+             till        BIGINT NOT NULL,
+             category_id BIGINT NOT NULL,
+             reason      text   NOT NULL
+         )`,
+      );
+    } finally {
+      client.release();
+    }
   }
 
   /**
