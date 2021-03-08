@@ -7,7 +7,7 @@ import {
   Thread,
   UserState,
   Message,
-} from '@NewCircuit/modmail-types';
+} from '@newcircuit/modmail-types';
 
 export default class UsersRoute extends Route {
   constructor(mm: ModmailServer) {

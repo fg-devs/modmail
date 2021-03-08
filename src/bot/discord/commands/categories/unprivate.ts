@@ -1,4 +1,4 @@
-import { RoleLevel } from '@NewCircuit/modmail-types';
+import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoClient, CommandoMessage } from 'discord.js-commando';
 import { PermsUtil } from '../../../util';
 import { Command } from '../../';

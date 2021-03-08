@@ -2,7 +2,7 @@ import {
   Attachment,
   Edit,
   Message as PartialMessage,
-} from '@NewCircuit/modmail-types';
+} from '@newcircuit/modmail-types';
 import {
   GuildMember,
   Message as DMessage,

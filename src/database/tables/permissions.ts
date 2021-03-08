@@ -1,4 +1,4 @@
-import { Role } from '@NewCircuit/modmail-types';
+import { Role } from '@newcircuit/modmail-types';
 import { DBRole } from '../models/types';
 import { Pool } from 'pg';
 import * as PermUtil from '../util/PermUtil';

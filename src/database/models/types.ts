@@ -1,5 +1,5 @@
 /* eslint-disable no-shadow */
-import { FileType } from '@NewCircuit/modmail-types';
+import { FileType } from '@newcircuit/modmail-types';
 
 /**
  * CreateCategoryOpt is used by CategoryTable.create()

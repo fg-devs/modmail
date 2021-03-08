@@ -4,7 +4,7 @@ import {
   FileType,
   Role,
   RoleLevel,
-} from '@NewCircuit/modmail-types';
+} from '@newcircuit/modmail-types';
 import {
   GuildMember,
   MessageEmbed,

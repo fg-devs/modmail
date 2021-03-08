@@ -1,4 +1,4 @@
-import { MuteStatus } from '@NewCircuit/modmail-types';
+import { MuteStatus } from '@newcircuit/modmail-types';
 import { DBMuteStatus } from '../models/types';
 import { Pool } from 'pg';
 import Table from '../models/table';

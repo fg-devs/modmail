@@ -1,4 +1,4 @@
-import { Message } from '@NewCircuit/modmail-types';
+import { Message } from '@newcircuit/modmail-types';
 import { DBMessage } from '../models/types';
 import { Pool } from 'pg';
 import Table from '../models/table';

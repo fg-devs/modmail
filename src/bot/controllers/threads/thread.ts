@@ -7,7 +7,7 @@ import {
   Edit,
   Message as PartialMessage,
   Thread as PartialThread,
-} from '@NewCircuit/modmail-types';
+} from '@newcircuit/modmail-types';
 import getUrls from 'get-urls';
 import Category from '../categories/category';
 import { Message as MMMessage, Threads } from '../';

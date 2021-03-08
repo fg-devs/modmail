@@ -1,4 +1,4 @@
-import { Attachment, FileType } from '@NewCircuit/modmail-types';
+import { Attachment, FileType } from '@newcircuit/modmail-types';
 import { SnowflakeUtil } from 'discord.js';
 import { Pool } from 'pg';
 import Table from '../models/table';
