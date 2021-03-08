@@ -14,6 +14,8 @@ import {
 } from 'pg';
 
 export default class DatabaseManager {
+    public readonly pool: Pool;
+
     public readonly edits: EditsManager;
 
     public readonly messages: MessagesTable;
@@ -32,7 +34,10 @@ export default class DatabaseManager {
 
     public readonly permissions: PermissionsTable;
 
-    constructor(pool: Pool) {
+    constructor(config: PoolConfig) {
+      const pool = new Pool(config);
+
+      this.pool = pool;
       this.edits = new EditsManager(pool);
       this.messages = new MessagesTable(pool);
       this.mutes = new MutesTable(pool);
@@ -44,10 +49,8 @@ export default class DatabaseManager {
       this.permissions = new PermissionsTable(pool);
     }
 
-    public static async getDB(config: PoolConfig): Promise<DatabaseManager> {
-      const pool = new Pool(config);
-      const client = await pool.connect();
-      const db = new DatabaseManager(pool);
+    public async init(): Promise<void> {
+      const client = await this.pool.connect();
       const tasks: Promise<void>[] = [];
 
       await client.query(
@@ -65,22 +68,21 @@ export default class DatabaseManager {
       } catch (_) { /* ignore these errors */ }
 
       // Initialize users first
-      await db.users.validate();
+      await this.users.validate();
       // Initialize categories second
-      await db.categories.validate();
+      await this.categories.validate();
       // Initialize threads third
-      await db.threads.validate();
+      await this.threads.validate();
       // Initialize messages fourth
-      await db.messages.validate();
+      await this.messages.validate();
 
       // Initialize everything else
-      tasks.push(db.attachments.validate());
-      tasks.push(db.edits.validate());
-      tasks.push(db.mutes.validate());
-      tasks.push(db.permissions.validate());
-      tasks.push(db.standardReplies.validate());
+      tasks.push(this.attachments.validate());
+      tasks.push(this.edits.validate());
+      tasks.push(this.mutes.validate());
+      tasks.push(this.permissions.validate());
+      tasks.push(this.standardReplies.validate());
 
       await Promise.all(tasks);
-      return db;
     }
 }

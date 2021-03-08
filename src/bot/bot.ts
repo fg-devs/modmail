@@ -24,7 +24,7 @@ export default class ModmailBot extends CommandoClient {
 
   private readonly events: EventHandler;
 
-  private static modmail: ModmailBot | null = null;
+  private static modmail: ModmailBot;
 
   private static db: DatabaseManager | null;
 
@@ -39,7 +39,7 @@ export default class ModmailBot extends CommandoClient {
     this.threads = new Threads(this);
     this.messages = new Messages(this);
 
-    ModmailBot.db = null;
+    ModmailBot.db = new DatabaseManager(CONFIG.database);
     this.events = new EventHandler(this);
     this.registerEvents();
     this.dispatcher.addInhibitor(this.inhibiter.bind(this));
@@ -70,15 +70,12 @@ export default class ModmailBot extends CommandoClient {
    * @returns {Promise<void>}
    */
   public async start(): Promise<void> {
-    ModmailBot.db = await DatabaseManager.getDB(CONFIG.database);
+    await ModmailBot.db.init();
     await this.login(CONFIG.bot.token);
   }
 
   public static getDB(): DatabaseManager {
-    if (ModmailBot.db !== null) {
-      return ModmailBot.db;
-    }
-    throw new Error('getDB was called before starting Modmail.');
+    return ModmailBot.db;
   }
 
   public static getLocation(): string {
