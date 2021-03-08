@@ -2,7 +2,7 @@ import { Response, Router } from 'express';
 import { RequestWithCategory } from '../../models/types';
 import ModmailServer from '../../server';
 import Route from '../route';
-import { RoleLevel, Thread } from '@NewCircuit/modmail-types';
+import { RoleLevel, Thread } from '@newcircuit/modmail-types';
 
 export default class ThreadsRoute extends Route {
   constructor(mm: ModmailServer) {

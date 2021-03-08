@@ -1,4 +1,4 @@
-import { Thread } from '@NewCircuit/modmail-types';
+import { Thread } from '@newcircuit/modmail-types';
 import { DBThread } from '../models/types';
 import { SnowflakeUtil } from 'discord.js';
 import { Pool } from 'pg';

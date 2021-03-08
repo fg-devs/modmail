@@ -2,7 +2,7 @@ import Route from '../route';
 import ModmailServer from '../../server';
 import { Response, Router } from 'express';
 import { RequestWithCategory } from '../../models/types';
-import { RoleState } from '@NewCircuit/modmail-types';
+import { RoleState } from '@newcircuit/modmail-types';
 
 export default class RolesRoute extends Route {
   constructor(mm: ModmailServer) {

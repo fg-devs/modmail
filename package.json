@@ -6,7 +6,7 @@
   "author": "NewCircuit <https://github.com/NewCircuit>",
   "license": "GPL-3.0",
   "dependencies": {
-    "@NewCircuit/modmail-types": "^1.14.0",
+    "@newcircuit/modmail-types": "^2.0.0",
     "async-mutex": "^0.2.6",
     "client-oauth2": "^4.3.3",
     "cookie-parser": "^1.4.5",

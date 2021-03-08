@@ -18,7 +18,7 @@ import {
   Thread,
   UserState,
   UserStateCache,
-} from '@NewCircuit/modmail-types';
+} from '@newcircuit/modmail-types';
 import LogoutRoute from './routes/logout';
 
 export default class ModmailServer {

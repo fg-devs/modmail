@@ -6,7 +6,7 @@ import {
   TextChannel,
   User,
 } from 'discord.js';
-import { RoleLevel } from '@NewCircuit/modmail-types';
+import { RoleLevel } from '@newcircuit/modmail-types';
 import Thread from './thread';
 import Controller from '../controller';
 import { Category, } from '../';

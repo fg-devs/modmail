@@ -1,6 +1,6 @@
 import { Guild, Message } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
-import { RoleLevel } from '@NewCircuit/modmail-types';
+import { RoleLevel } from '@newcircuit/modmail-types';
 import { Command } from '../../';
 import ModmailBot from '../../../bot';
 import { LogUtil, PermsUtil } from '../../../util';

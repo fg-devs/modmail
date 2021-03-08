@@ -3,7 +3,7 @@ import {
   MuteStatus,
   Role,
   RoleLevel,
-} from '@NewCircuit/modmail-types';
+} from '@newcircuit/modmail-types';
 import { CategoryChannel, Guild } from 'discord.js';
 import ModmailBot from '../../bot';
 import { MAX_THREADS } from '../../../common/globals';

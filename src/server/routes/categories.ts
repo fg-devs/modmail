@@ -3,7 +3,7 @@ import MembersRoute from './categories/members';
 import UsersRoute from './categories/users';
 import ThreadsRoute from './categories/threads';
 import { RequestWithCategory, RequestWithUser } from '../models/types';
-import { Category, RoleLevel } from '@NewCircuit/modmail-types';
+import { Category, RoleLevel } from '@newcircuit/modmail-types';
 import Route from './route';
 import { NextFunction, Response, Router, } from 'express';
 import RolesRoute from './categories/roles';

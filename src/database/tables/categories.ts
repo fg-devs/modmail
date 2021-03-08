@@ -1,4 +1,4 @@
-import { Category } from '@NewCircuit/modmail-types';
+import { Category } from '@newcircuit/modmail-types';
 import { DBCategory } from '../models/types';
 import { Pool } from 'pg';
 import { SnowflakeUtil } from 'discord.js';
