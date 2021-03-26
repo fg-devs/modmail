@@ -1,23 +1,29 @@
 import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { LogUtil, PermsUtil } from '../../../util';
+import ModmailBot from '../../../bot';
 
 type Args = {
   id: string,
   emoji: string,
 }
 
-export default class SetEmote extends Command {
+/**
+ * Set a new unique emoji for a category
+ * Requirements:
+ *  * Owner
+ */
+export default class SetEmoji extends Command {
   constructor(client: ModmailBot) {
     super(client, {
-      name: 'setemote',
+      name: 'setemoji',
       aliases: ['se'],
       description: 'Set emote for a category',
       group: 'category',
       guildOnly: true,
-      memberName: 'setemote',
+      ownerOnly: true,
+      memberName: 'setemoji',
       args: [
         {
           key: 'id',
@@ -33,7 +39,6 @@ export default class SetEmote extends Command {
     });
   }
 
-  @PermsUtil.Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const modmail = ModmailBot.getModmail();
     const category = await modmail.categories.getByID(args.id);

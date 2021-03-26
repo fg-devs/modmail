@@ -1,13 +1,19 @@
 import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { LogUtil, PermsUtil } from '../../../util/';
+import ModmailBot from '../../../bot';
 
 type Args = {
   roleID: string;
 }
 
+/**
+ * Remove a Discord role from a Modmail category
+ * Requirements:
+ *  * Admin+
+ *  * Must be used in a Discord guild being used as a Modmail category
+ */
 export default class RemoveRole extends Command {
   constructor(client: ModmailBot) {
     super(client, {

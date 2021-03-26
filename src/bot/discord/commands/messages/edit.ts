@@ -6,6 +6,11 @@ type Args = {
   content: string;
 }
 
+/**
+ * Edit a message of a thread
+ * Requirements:
+ *  * Must be used under an active thread text-channel
+ */
 export default class Edit extends Command {
   constructor(client: ModmailBot) {
     super(client, {

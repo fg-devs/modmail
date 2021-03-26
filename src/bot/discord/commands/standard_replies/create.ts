@@ -2,14 +2,20 @@ import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
 import { CONFIG } from '../../../../common/globals'; 
-import ModmailBot from '../../../bot';
 import { LogUtil, PermsUtil } from '../../../util';
+import ModmailBot from '../../../bot';
 
 type Args = {
   name: string,
   reply: string
 }
 
+/**
+ * Create a standard reply for Modmail
+ * Requirements:
+ *  * Mod+
+ *  * Must have a unique name for the standard reply
+ */
 export default class StandardReplyCreate extends Command {
   constructor(client: ModmailBot) {
     super(client, {

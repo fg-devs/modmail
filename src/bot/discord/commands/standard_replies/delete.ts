@@ -1,13 +1,20 @@
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { PermsUtil } from '../../../util/';
+import ModmailBot from '../../../bot';
 
 type Args = {
   name: string,
 }
 
+
+/**
+ * Remove a standard reply from Modmail
+ * Requirements:
+ *  * Mod+
+ *  * The name of the standard reply must exist
+ */
 export default class StandardReplyDelete extends Command {
   constructor(client: ModmailBot) {
     super(client, {

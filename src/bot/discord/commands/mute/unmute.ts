@@ -1,13 +1,19 @@
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { PermsUtil, LogUtil } from '../../../util';
+import ModmailBot from '../../../bot';
 
 type Args = {
   userID: string,
 }
 
+/**
+ * Unmute a member from a category early
+ * Requirements:
+ *  * Mod+
+ *  * Must be used in a Discord guild that is being used as a Modmail category
+ */
 export default class Unmute extends Command {
   constructor(client: ModmailBot) {
     super(client, {

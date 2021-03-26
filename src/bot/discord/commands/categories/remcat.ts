@@ -1,13 +1,17 @@
 import { CommandoMessage } from 'discord.js-commando';
-import { RoleLevel } from '@newcircuit/modmail-types';
-import { Command, } from '../../';
+import { Command } from '../../';
+import { LogUtil } from '../../../util';
 import ModmailBot from '../../../bot';
-import { PermsUtil, LogUtil } from '../../../util';
 
 type CatArgs = {
   emoji: string;
 }
 
+/**
+ * This command is used for deactivating a Modmail category
+ * Requirements:
+ *  * Owner
+ */
 export default class RemoveCategory extends Command {
   constructor(client: ModmailBot) {
     super(client, {
@@ -16,6 +20,7 @@ export default class RemoveCategory extends Command {
       description: 'Remove a category',
       group: 'category',
       guildOnly: true,
+      ownerOnly: true,
       memberName: 'remcat',
       args: [
         {
@@ -27,7 +32,6 @@ export default class RemoveCategory extends Command {
     });
   }
 
-  @PermsUtil.Requires(RoleLevel.Admin)
   public async run(msg: CommandoMessage, args: CatArgs): Promise<null> {
     const modmail = ModmailBot.getModmail();
     const { emoji } = args;

@@ -2,14 +2,20 @@ import { Guild, Message } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { LogUtil, PermsUtil } from '../../../util';
+import ModmailBot from '../../../bot';
 
 type Args = {
   roleID: string;
   level: string;
 }
 
+/**
+ * Add a Discord role to a Modmail category
+ * Requirements:
+ *  * Admin+
+ *  * Must be used in a Discord guild being used as a Modmail category
+ */
 export default class AddRole extends Command {
   constructor(client: ModmailBot) {
     super(client, {

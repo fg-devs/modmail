@@ -1,12 +1,17 @@
 import { CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { LogUtil } from '../../../util';
+import ModmailBot from '../../../bot';
 
 type Args = {
   msgID?: string;
 }
 
+/**
+ * Delete a message of a thread
+ * Requirements:
+ *  * Must be used under an active thread text-channel
+ */
 export default class Delete extends Command {
   constructor(client: ModmailBot) {
     super(client, {

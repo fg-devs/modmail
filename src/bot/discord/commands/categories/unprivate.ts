@@ -4,7 +4,13 @@ import { PermsUtil } from '../../../util';
 import { Command } from '../../';
 import ModmailBot from '../../../bot';
 
-
+/**
+ * Make a Modmail category public
+ * Requirements:
+ *  * Admin+
+ *  * Must be used under a Discord category "parent" channel
+ *    that is being used as a Modmail category
+ */
 export default class Unprivate extends Command {
   constructor(client: CommandoClient) {
     super(client, {

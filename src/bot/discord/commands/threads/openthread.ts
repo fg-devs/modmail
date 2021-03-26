@@ -1,14 +1,20 @@
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { Threads } from '../../../controllers';
 import { Embeds, LogUtil, PermsUtil } from '../../../util/';
+import ModmailBot from '../../../bot';
 
 type Args = {
   userID: string;
 }
 
+/**
+ * Reach out to a member from a category
+ * Requirements:
+ *  * Mod+
+ *  * Must be used in a Discord guild being used a Modmail category
+ */
 export default class OpenThread extends Command {
   constructor(client: ModmailBot) {
     super(client, {

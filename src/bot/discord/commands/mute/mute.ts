@@ -1,8 +1,8 @@
 import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { LogUtil, PermsUtil, TimeUtil } from '../../../util';
+import ModmailBot from '../../../bot';
 
 type Args = {
   userID: string,
@@ -10,6 +10,12 @@ type Args = {
   reason: string[],
 }
 
+/**
+ * Mute a member from contacting a category
+ * Requirements:
+ *  * Mod+
+ *  * Must be used in a Discord guild that is being used as a Modmail category
+ */
 export default class Mute extends Command {
   constructor(client: ModmailBot) {
     super(client, {
@@ -47,7 +53,8 @@ export default class Mute extends Command {
     const [userID, time] = Mute.fuzzy(args);
 
     if (category === null) {
-      const res = 'Please run this command in a guild with an active category.';
+      const res = 'Please run this command in a guild with'
+                + ' an active category.';
       LogUtil.cmdWarn(msg, res);
       await msg.say(res);
       return null;

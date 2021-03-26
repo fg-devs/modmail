@@ -5,6 +5,13 @@ import { TextChannel } from 'discord.js';
 import { Command } from '../../';
 import ModmailBot from '../../../bot';
 
+/**
+ * This command is used for re-activating a category
+ * Requirements:
+ *  * Admin+
+ *  * Must be under a Discord category "parent" channel
+ *  * The category being reactivated must be deactivated
+ */
 export default class ActivateCategory extends Command {
   constructor(client: ModmailBot) {
     super(client, {

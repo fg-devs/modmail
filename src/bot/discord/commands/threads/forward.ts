@@ -1,10 +1,15 @@
 import { CommandoMessage } from 'discord.js-commando';
 import { TextChannel } from 'discord.js';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { Threads } from '../../../controllers';
 import { LogUtil } from '../../../util/';
+import ModmailBot from '../../../bot';
 
+/**
+ * Forward a thread to another category
+ * Requirements:
+ *  * Must be used in a thread text-channel
+ */
 export default class Forward extends Command {
   constructor(client: ModmailBot) {
     super(client, {

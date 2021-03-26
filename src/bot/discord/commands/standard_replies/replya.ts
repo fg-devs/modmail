@@ -1,12 +1,18 @@
 import { CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { LogUtil } from '../../../util/';
+import ModmailBot from '../../../bot';
 
 type Args = {
   name: string
 }
 
+/**
+ * Utilize a standard reply anonymously for a thread
+ * Requirements:
+ *  * Must be used in a thread text-channel
+ *  * The standard reply must exist
+ */
 export default class StandardReplyAnon extends Command {
   constructor(client: ModmailBot) {
     super(client, {

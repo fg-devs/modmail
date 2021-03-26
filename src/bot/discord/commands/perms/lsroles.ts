@@ -1,9 +1,15 @@
 import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { Embeds, LogUtil, PermsUtil } from '../../../util/';
+import ModmailBot from '../../../bot';
 
+/**
+ * List all the Discord roles of a Modmail category
+ * Requirements:
+ *  * Mod+
+ *  * Must be used in a Discord guild being used as a Modmail category
+ */
 export default class ListRoles extends Command {
   constructor(client: ModmailBot) {
     super(client, {

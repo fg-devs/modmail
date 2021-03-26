@@ -2,6 +2,11 @@ import { CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
 import ModmailBot from '../../../bot';
 
+/**
+ * Send a message anonymously to the member of a thread
+ * Requirements:
+ *  * Must be used in a thread text-channel
+ */
 export default class ReplyA extends Command {
   constructor(client: ModmailBot) {
     super(client, {

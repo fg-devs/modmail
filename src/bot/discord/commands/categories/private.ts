@@ -4,6 +4,12 @@ import { CommandoClient, CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
 import ModmailBot from '../../../bot';
 
+/**
+ * Make a category private
+ *  * Admin+
+ *  * Must be in a category "parent" channel that
+ *    is being utilized a Modmail category
+ */
 export default class Private extends Command {
   constructor(client: CommandoClient) {
     super(client, {

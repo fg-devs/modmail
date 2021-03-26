@@ -1,8 +1,8 @@
 import { TextChannel } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { LogUtil } from '../../../util';
+import ModmailBot from '../../../bot';
 
 type CatArgs = {
   name: string;
@@ -11,6 +11,15 @@ type CatArgs = {
   description: string[];
 }
 
+/**
+ * This command is used for creating a category
+ * Requirements:
+ *  * Owner
+ *  * Must be under a Discord category "parent" channel
+ *    that isn't being used by another Modmail category
+ *  * Name & Emoji must be unique
+ *  
+ */
 export default class AddCategory extends Command {
   constructor(client: ModmailBot) {
     super(client, {

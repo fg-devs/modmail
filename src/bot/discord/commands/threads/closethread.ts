@@ -1,8 +1,13 @@
 import { CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { LogUtil } from '../../../util/';
+import ModmailBot from '../../../bot';
 
+/**
+ * Close a thread
+ * Requirements:
+ *  * Must be used in a thread text-channel
+ */
 export default class CloseThread extends Command {
   constructor(client: ModmailBot) {
     super(client, {

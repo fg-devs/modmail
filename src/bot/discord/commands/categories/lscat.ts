@@ -1,9 +1,14 @@
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { Embeds, PermsUtil } from '../../../util';
+import ModmailBot from '../../../bot';
 
+/**
+ * List all the categories
+ * Requirements:
+ *  * Mod+
+ */
 export default class ListCategories extends Command {
   constructor(client: ModmailBot) {
     super(client, {

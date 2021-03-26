@@ -2,10 +2,15 @@ import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { MessageAttachment } from 'discord.js';
 import { Command } from '../../';
-import ModmailBot from '../../../bot';
 import { PermsUtil } from '../../../util/';
+import ModmailBot from '../../../bot';
 
-export default class StandardReplyCreate extends Command {
+/**
+ * List all the standard replies
+ * Requirements:
+ *  * Mod+
+ */
+export default class StandardReplyList extends Command {
   constructor(client: ModmailBot) {
     super(client, {
       description: 'list all standard replies',
