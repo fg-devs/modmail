@@ -19,6 +19,11 @@ import { MAX_LISTENERS, MAX_RESPONSE_TIME } from '../../common/globals';
 import { Semaphore } from 'async-mutex';
 import ModmailServer from '../server';
 
+/**
+ * This class is responsible for managing the Discord bot that is running in
+ * a separate worker thread. All the methods work in a read-only manner for
+ * getting and evaluating data
+ */
 export default class BotController {
   private readonly bot: Worker;
 
@@ -66,7 +71,10 @@ export default class BotController {
     );
   }
 
-  public async getRoles(guildID: string, memberID: string): Promise<string[]> {
+  public async getRoles(
+    guildID: string,
+    memberID: string,
+  ): Promise<string[]> {
     const task: GetRolesReq = {
       args: [guildID, memberID],
       task: WORKER_CALLS.getRoles,
@@ -77,7 +85,10 @@ export default class BotController {
     return resp.data as string[];
   }
 
-  public async getMember(guildID: string, memberID: string): Promise<MemberState> {
+  public async getMember(
+    guildID: string,
+    memberID: string,
+  ): Promise<MemberState> {
     const task: GetMemberStateReq = {
       args: [guildID, memberID],
       task: WORKER_CALLS.getMember,
