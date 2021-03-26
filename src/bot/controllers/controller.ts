@@ -4,8 +4,7 @@ import ModmailBot from '../bot';
 /**
  * A Controller instance is responsible more managing a certain type of entity
  * that may exist in the Modmail ecosystem
- * @class Controller
- * @property {string} name Name of the controller (for logging purposes)
+ * @property {string}  name Name of the controller (for logging purposes)
  * @property {Modmail} modmail Modmail to get a logger instance
  */
 export default class Controller {

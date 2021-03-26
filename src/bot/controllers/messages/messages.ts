@@ -1,9 +1,9 @@
 import { Thread, Message as PartialMessage } from '@newcircuit/modmail-types';
 import { Message, TextChannel } from 'discord.js';
+import { Embeds } from '../../util';
 import MMMessage from './message';
 import Controller from '../controller';
 import ModmailBot from '../../bot';
-import { Embeds } from '../../util';
 
 export default class MessageController extends Controller {
   constructor(modmail: ModmailBot) {
@@ -14,9 +14,17 @@ export default class MessageController extends Controller {
     const pool = ModmailBot.getDB();
     const data = await pool.messages.fetchAll(threadID);
 
-    return data.map((msg: PartialMessage) => new MMMessage(this.modmail, msg));
+    return data.map(
+      (msg: PartialMessage) => new MMMessage(this.modmail, msg),
+    );
   }
 
+  /**
+   * Get the last message from a user of a thread
+   * @param  {string} threadID The thread fetching from
+   * @param  {string} authorID The member seeking
+   * @return {Promise<MMMessage | null>}
+   */
   public async getLastFrom(
     threadID: string,
     authorID: string,
@@ -24,7 +32,9 @@ export default class MessageController extends Controller {
     const pool = ModmailBot.getDB();
     const data = await pool.messages.getLastMessage(threadID, authorID);
 
-    if (data === null) { return null; }
+    if (data === null) {
+      return null;
+    }
 
     return new MMMessage(this.modmail, data);
   }
@@ -33,7 +43,9 @@ export default class MessageController extends Controller {
     const pool = ModmailBot.getDB();
     const data = await pool.messages.fetch(id);
 
-    if (data === null) { return null; }
+    if (data === null) {
+      return null;
+    }
 
     return new MMMessage(this.modmail, data);
   }

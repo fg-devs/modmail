@@ -7,11 +7,11 @@ import {
   User,
 } from 'discord.js';
 import { RoleLevel } from '@newcircuit/modmail-types';
-import Thread from './thread';
-import Controller from '../controller';
 import { Category, } from '../';
 import { Embeds } from '../../util';
 import { ADMIN_INDICATOR_PREFIX, PROMPT_TIME } from '../../../common/globals';
+import Thread from './thread';
+import Controller from '../controller';
 import ModmailBot from '../../bot';
 
 export default class ThreadController extends Controller {
@@ -20,8 +20,9 @@ export default class ThreadController extends Controller {
   }
 
   /**
-   * Create a new thread
-   * @param {Message} msg Message sent by user in a DM
+   * Create a new thread for a member
+   * @param {Message} msg The initial message they sent to the bot
+   * @returns {Promise<Thread | null>}
    */
   public async createFor(msg: Message): Promise<Thread | null> {
     const pool = ModmailBot.getDB();
@@ -81,11 +82,17 @@ export default class ThreadController extends Controller {
       isAdminOnly,
     );
     await msg.reply(
-      `The thread is open, all messages now will be sent to the ${isAdminOnly ? 'admin' : 'staff'}`,
+      'The thread is open, all messages now will be sent to the '
+      + isAdminOnly ? 'admin' : 'staff',
     );
     return new Thread(this.modmail, thread);
   }
 
+  /**
+   * Get the thread that a member created
+   * @param {string}  userID ID of the member
+   * @return {Promise<Thread | null>}
+   */
   public async getByAuthor(userID: string): Promise<Thread | null> {
     const pool = ModmailBot.getDB();
     const data = await pool.threads.getByUser(userID);
@@ -97,6 +104,11 @@ export default class ThreadController extends Controller {
     return null;
   }
 
+  /**
+   * Get a thread that is associated with the text-based channel
+   * @param {string} channelID
+   * @returns {Promise<Thread | null>}
+   */
   public async getByChannel(channelID: string): Promise<Thread | null> {
     const pool = ModmailBot.getDB();
     const data = await pool.threads.getByChannel(channelID);
@@ -108,9 +120,14 @@ export default class ThreadController extends Controller {
     return null;
   }
 
-  public async getByID(id: string): Promise<Thread | null> {
+  /**
+   * Get a thread based on a thread ID provided
+   * @param {string} threadID
+   * @returns {Promise<Thread | null>}
+   */
+  public async getByID(threadID: string): Promise<Thread | null> {
     const pool = ModmailBot.getDB();
-    const data = await pool.threads.getByID(id);
+    const data = await pool.threads.getByID(threadID);
 
     if (data !== null) {
       return new Thread(this.modmail, data);
@@ -120,34 +137,51 @@ export default class ThreadController extends Controller {
   }
 
   /**
-   * Create thread channel
-   * @param {User} user creating the thread channel for
+   * Create a new text-channel in the Discord server for a thread
+   * @param {User} member The member of the thread 
    * @param {Category} category
    * @param {boolean} isAdminOnly
    * @returns {Promise<TextChannel | null>} Nullable if something went wrong
    */
   private async createChannel(
-    user: User,
+    member: User,
     category: Category,
     isAdminOnly: boolean,
   ): Promise<TextChannel | null> {
     const pool = ModmailBot.getDB();
     const logger = this.getLogger();
 
-    // setup channel and send details about the user and the thread
+    // setup channel and send details about the member and the thread
     try {
-      const channel = await ThreadController.setupChannel(user, category, isAdminOnly);
+      const channel = await ThreadController.setupChannel(
+        member,
+        category,
+        isAdminOnly,
+      );
 
-      // create user if they don't exit
-      await pool.users.create(user.id);
+      // create member if they don't exit
+      await pool.users.create(member.id);
 
       return channel;
     } catch (e) {
-      logger.error(`Failed to create channel for ${user} in ${category}\n`, e);
+      logger.error(
+        `Failed to create channel for ${member} in ${category}\n`,
+        e,
+      );
     }
     return null;
   }
 
+  /**
+   * Setup a newly created text channel
+   * @param {User} user The member who created the thread
+   * @param {Category} category The category that the thread was created for
+   * @param {boolean} isAdminOnly [description]
+   * @param {User | null} creator The staff member that created the thread
+   * @param {boolean} forwarded Whether or not the creator actually forwarded
+   * the thread from another category
+   * @return {Promise<TextChannel | null>} 
+   */
   public static async setupChannel(
     user: User,
     category: Category,
@@ -205,11 +239,20 @@ export default class ThreadController extends Controller {
     }
   }
 
+  /**
+   * Get a category based on a given Discord category channel
+   * @param  {TextChannel | DMChannel} channel
+   * @param  {boolean} privateCats
+   * @return {Promise<Category | null>}
+   */
   public async getCategory(
     channel: TextChannel | DMChannel,
     privateCats = false,
   ): Promise<Category | null> {
-    const categories = await this.modmail.categories.getAll(true, privateCats);
+    const categories = await this.modmail.categories.getAll(
+      true,
+      privateCats,
+    );
 
     if (categories.length === 1) {
       return categories[0];
@@ -255,6 +298,13 @@ export default class ThreadController extends Controller {
     return null;
   }
 
+  /**
+   * Ask the creator if they want the thread to be admin only
+   * @param {TextChannel | DMChannel} channel The channel to prompt
+   * the creator in
+   * @param {boolean} forwarded Whether or not the thread is being forwarded
+   * @return {Promise<boolean>}
+   */
   public static async isAdminOnly(
     channel: TextChannel | DMChannel,
     forwarded = false,
@@ -268,8 +318,11 @@ export default class ThreadController extends Controller {
     await msg.react('👎');
     await msg.react('👍');
     
+    const filter = (r: MessageReaction, u: User) => {
+      return (r.emoji.name === '👍' || r.emoji.name === '👎') && !u.bot;
+    }
     const reactions = await msg.awaitReactions(
-      (r: MessageReaction, u: User) => (r.emoji.name === '👍' || r.emoji.name === '👎') && !u.bot,
+      filter,
       {
         time: PROMPT_TIME,
         max: 1,

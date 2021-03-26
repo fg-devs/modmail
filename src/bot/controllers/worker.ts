@@ -20,6 +20,9 @@ import { parentPort, MessagePort } from 'worker_threads';
 import ModmailBot from '../bot';
 import * as PermUtil from '../util/Perms';
 
+/**
+ * This controller controls the Discord bot for the API in a worker thread
+ */
 export default class WorkerHandler {
   private readonly modmail: ModmailBot;
 
@@ -34,6 +37,11 @@ export default class WorkerHandler {
     this.parent = parentPort;
   }
 
+  /**
+   * This method handles all the messages coming from the server
+   * @param  {ServerMessage} msg The server request message
+   * @return {Promise<void>}
+   */
   public async onMessage(msg: ServerMessage): Promise<void> {
     const log = WorkerHandler.getLogger(msg.id);
     const res: ServerResponse = {
@@ -85,9 +93,11 @@ export default class WorkerHandler {
   }
 
   /**
-   * Get a member for the modmail server
-   * @param guildID
-   * @param userID
+   * Get roles of a guild member for the server
+   * @param  {string} guildID The ID of the guild to fetch from
+   * @param  {string} userID  The ID of the user to fetch roles from
+   * @return {Promise<string[]>}
+   * @throws {Error} If nothing resolves
    */
   public async getRoles(guildID: string, userID: string): Promise<string[]> {
     const guild = await this.modmail.guilds.fetch(guildID, true);
@@ -100,6 +110,13 @@ export default class WorkerHandler {
     return member.roles.cache.map((r) => r.id);
   }
 
+  /**
+   * Get a channel on Discord for the server
+   * @param  {string} channelID The ID of the channel to fetch
+   * @param  {boolean} cacheOnly Whether or not to only rely on cache
+   * @return {Promise<ChannelState>}
+   * @throws {Error} If nothing resolves
+   */
   public async getChannelState(
     channelID: string,
     cacheOnly: boolean,
@@ -116,6 +133,13 @@ export default class WorkerHandler {
     return WorkerHandler.parseChannel(channel as GuildChannel);
   }
 
+  /**
+   * Get a role on Discord for the server
+   * @param  {string} roleID The ID of the role to fetch
+   * @param  {boolean} cacheOnly Whether or not to only rely on cache
+   * @return {Promise<RoleState>}
+   * @throws {Error} If nothing resolves
+   */
   public async getRoleState(
     roleID: string,
     cacheOnly: boolean,
@@ -146,6 +170,13 @@ export default class WorkerHandler {
     throw new Error('Role does not exist');
   }
 
+  /**
+   * Get a user on Discord for the server
+   * @param  {string} userID The ID of the user to fetch
+   * @param  {boolean} cacheOnly Whether or not to only rely on cache
+   * @return {Promise<UserState>}
+   * @throws {Error} If nothing resolves
+   */
   public async getUserState(
     userID: string,
     cacheOnly: boolean,
@@ -167,6 +198,13 @@ export default class WorkerHandler {
     return WorkerHandler.parseUser(user);
   }
 
+  /**
+   * Get a guild member on Discord for the server
+   * @param  {string} guildID The ID of the guild to fetch from
+   * @param  {string} userID  The ID of the user to fetch for
+   * @return {Promise<MemberState>}
+   * @throws {Error} If nothing resolves
+   */
   public async getMemberState(
     guildID: string,
     userID: string,
@@ -185,6 +223,13 @@ export default class WorkerHandler {
     );
   }
 
+  /**
+   * Get all members of a guild
+   * @param  {string} guildID The ID of the guild to fetch from
+   * @param  {string | undefined} after After a certain member (optional)
+   * @param  {number | undefined} limit A limit of members to fetch (optional)
+   * @return {Promise<MemberState[]>}
+   */
   public async getAllMemberStates(
     guildID: string,
     after = '',

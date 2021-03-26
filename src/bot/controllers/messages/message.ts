@@ -9,36 +9,36 @@ import {
   PartialMessage as PartialDMessage, User,
 } from 'discord.js';
 import { Thread } from '../';
-import ModmailBot from '../../bot';
 import { Embeds } from '../../util';
+import ModmailBot from '../../bot';
 
 export default class Message {
   private readonly modmail: ModmailBot;
 
-  private readonly ref: PartialMessage;
+  private readonly data: PartialMessage;
 
   private thread: Thread | null;
 
   constructor(modmail: ModmailBot, data: PartialMessage) {
     this.modmail = modmail;
-    this.ref = data;
+    this.data = data;
     this.thread = null;
   }
 
   public getID(): string {
-    return this.ref.modmailID;
+    return this.data.modmailID;
   }
 
   public getClientID(): string | null {
-    return this.ref.clientID;
+    return this.data.clientID;
   }
 
   public isInternal(): boolean {
-    return this.ref.internal;
+    return this.data.internal;
   }
 
   public getSenderID(): string {
-    return this.ref.sender;
+    return this.data.sender;
   }
 
   public async getSender(): Promise<GuildMember | User> {
@@ -55,9 +55,13 @@ export default class Message {
   }
 
   public getContent(): string {
-    return this.ref.content;
+    return this.data.content;
   }
 
+  /**
+   * Get the message copy in the member's DMs
+   * @return {Promise<DMessage | null>}
+   */
   public async getClientMessage(): Promise<DMessage | null> {
     const thread = await this.getThread();
 
@@ -67,7 +71,7 @@ export default class Message {
 
     try {
       return await dm.messages.fetch(
-        this.ref.clientID || '',
+        this.data.clientID || '',
         true,
       );
     } catch (_) {
@@ -75,6 +79,10 @@ export default class Message {
     }
   }
 
+  /**
+   * Get the message copy of the thread
+   * @return {Promise<DMessage | null>}
+   */
   public async getModmailMessage(): Promise<DMessage | null> {
     const thread = await this.getThread();
 
@@ -86,7 +94,7 @@ export default class Message {
 
     try {
       return await channel.messages.fetch(
-        this.ref.modmailID,
+        this.data.modmailID,
         true,
       );
     } catch (_) {
@@ -97,19 +105,25 @@ export default class Message {
   public async getAttachments(): Promise<Attachment[]> {
     const pool = ModmailBot.getDB();
 
-    return pool.attachments.fetch(this.ref.modmailID);
+    return pool.attachments.fetch(this.data.modmailID);
   }
 
   public async getEdits(): Promise<Edit[]> {
     const pool = ModmailBot.getDB();
 
-    return pool.edits.fetch(this.ref.modmailID);
+    return pool.edits.fetch(this.data.modmailID);
   }
 
   public async getUser(): Promise<User> {
-    return this.modmail.users.fetch(this.ref.sender);
+    return this.modmail.users.fetch(this.data.sender);
   }
 
+  /**
+   * When a member (client) edits their message this method is called
+   * @param  {DMessage | PartialDMessage} _oldMsg Not utilized
+   * @param  {DMessage} newMsg The message they edited
+   * @return {Promise<void>}
+   */
   public async editClient(
     _oldMsg: DMessage | PartialDMessage,
     newMsg: DMessage,
@@ -117,7 +131,9 @@ export default class Message {
     const thread = await this.getThread();
     const pool = ModmailBot.getDB();
 
-    if (thread === null) { return; }
+    if (thread === null) {
+      return;
+    }
 
     // get thread channel
     const thChan = await thread.getThreadChannel();
@@ -136,38 +152,54 @@ export default class Message {
     await pool.edits.add(newMsg.content, thMessage.id);
     const edits = await pool.edits.fetch(thMessage.id);
     const embed = Embeds.editsRecv(newMsg.author, edits);
-    embed.description = `**Original**\n${this.ref.content}`;
+    embed.description = `**Original**\n${this.data.content}`;
     // edit the thread iteration of the message that was edited
     await thMessage.edit(embed);
   }
 
-  public async edit(newContent: string): Promise<void> {
+  /**
+   * Edit the Discord copies of this message and store this new edit in the
+   * database
+   * @param  {string} content The new content that is replacing the current 
+   * message
+   * @return {Promise<void>}
+   */
+  public async edit(content: string): Promise<void> {
     const pool = ModmailBot.getDB();
     const thMessage = await this.getModmailMessage();
+    const clMessage = await this.getClientMessage();
     const author = await this.getUser();
-    const clientMessage = await this.getClientMessage();
 
+    // update the message in the thread
     if (thMessage !== null) {
-      const threadEmbed = thMessage.embeds[0];
-      threadEmbed.description = newContent;
-
       // store the new edit to the edits table
-      await pool.edits.add(newContent, thMessage.id);
+      await pool.edits.add(content, thMessage.id);
+
+      const threadEmbed = thMessage.embeds[0];
       const edits = await pool.edits.fetch(thMessage.id);
       const embed = Embeds.editsSend(author, edits);
-      embed.description = `**Original**\n${this.ref.content}`;
+
+      threadEmbed.description = content;
+      embed.description = `**Original**\n${this.data.content}`;
+
       // edit the thread iteration of the message that was edited
       await thMessage.edit(embed);
     }
 
-    if (clientMessage !== null) {
-      const clientEmbed = clientMessage.embeds[0];
-      clientEmbed.description = newContent;
+    // update the user's end
+    if (clMessage !== null) {
+      const clientEmbed = clMessage.embeds[0];
+      clientEmbed.description = content;
 
-      await clientMessage.edit(clientEmbed);
+      await clMessage.edit(clientEmbed);
     }
   }
 
+  /**
+   * Delete messages on Discord and mark this message in the database as
+   * deleted
+   * @return {Promise<void>}
+   */
   public async delete(): Promise<void> {
     const pool = ModmailBot.getDB();
     const mmMsg = await this.getModmailMessage();
@@ -182,15 +214,19 @@ export default class Message {
       await ccMsg.delete();
     }
 
-    await pool.messages.setDeleted(this.ref.modmailID);
+    await pool.messages.setDeleted(this.data.modmailID);
   }
 
+  /**
+   * Get the thread that this message is part of
+   * @return {Promise<Thread | null>}
+   */
   public async getThread(): Promise<Thread | null> {
     if (this.thread !== null) {
       return this.thread;
     }
 
-    const thread = await this.modmail.threads.getByID(this.ref.threadID);
+    const thread = await this.modmail.threads.getByID(this.data.threadID);
 
     if (thread !== null) {
       this.thread = thread;

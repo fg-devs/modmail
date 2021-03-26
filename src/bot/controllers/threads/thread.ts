@@ -8,11 +8,11 @@ import {
   Message as PartialMessage,
   Thread as PartialThread,
 } from '@newcircuit/modmail-types';
-import getUrls from 'get-urls';
-import Category from '../categories/category';
 import { Message as MMMessage, Threads } from '../';
 import { CLOSE_THREAD_DELAY } from '../../../common/globals';
 import { Embeds, LogUtil } from '../../util';
+import Category from '../categories/category';
+import getUrls from 'get-urls';
 import ModmailBot from '../../bot';
 
 export default class Thread {
@@ -25,6 +25,10 @@ export default class Thread {
     this.ref = ref;
   }
 
+  /**
+   * Close this thread
+   * @return {Promise<void>}
+   */
   public async close(): Promise<void> {
     const pool = ModmailBot.getDB();
     const dmEmbed = Embeds.closeThreadClient();
@@ -107,6 +111,11 @@ export default class Thread {
     }
   }
 
+  /**
+   * Delete a message inside this thread based on an ID
+   * @param  {string} id ID of the message
+   * @return {Promise<void>}
+   */
   public async deleteMsg(id: string): Promise<void> {
     const msg = await this.getMessage(id);
 
@@ -124,8 +133,8 @@ export default class Thread {
   }
 
   /**
-   * Send a user's message to an active thread
-   * @param {Message} msg The user's message
+   * Send a member's message to an active thread
+   * @param {Message} msg The member's message
    */
   public async recvMsg(msg: Message): Promise<void> {
     const pool = ModmailBot.getDB();
@@ -174,6 +183,13 @@ export default class Thread {
     await msg.react('✅');
   }
 
+  /**
+   * Send a staff's standard reply to a thread
+   * @param  {CommandoMessage} msg The staff's original message
+   * @param  {string} context The standard reply name
+   * @param  {boolean} anonymously Whether or not they're talking anonymously
+   * @return {Promise<void>}
+   */
   public async sendSR(
     msg: CommandoMessage,
     context: string,
@@ -194,6 +210,12 @@ export default class Thread {
     }
   }
 
+  /**
+   * Send a staff's message to a thread
+   * @param  {CommandoMessage} msg The staff's original message
+   * @param  {boolean} anonymously Whether or not they're talking anonymously
+   * @return {Promise<void>}
+   */
   public async sendMsg(msg: CommandoMessage, anonymously: boolean): Promise<void> {
     const content = msg.argString || '';
     const attachments = msg.attachments.values();
@@ -224,6 +246,13 @@ export default class Thread {
     }
   }
 
+  /**
+   * Send a message to the thread (this is where all the magic happens)
+   * @param  {string} content Content to send
+   * @param  {GuildMember} sender The person who sent it
+   * @param  {boolean} anonymously
+   * @return {Promise<MMMessage>}
+   */
   private async send(
     content: string,
     sender: GuildMember,
@@ -268,6 +297,14 @@ export default class Thread {
     return new MMMessage(this.modmail, mmMsg);
   }
 
+  /**
+   * Forward this thread to another category
+   * @param  {User} forwarder The user that forwarded it
+   * @param  {boolean} isAdminOnly Whether or not they want it to be admin 
+   * only
+   * @param  {Category} category The category we're forwarding this to
+   * @return {Promise<boolean>}
+   */
   public async forward(
     forwarder: User,
     isAdminOnly: boolean,

@@ -1,8 +1,8 @@
 import { Attachment, FileType } from '@newcircuit/modmail-types';
 import { Message, MessageAttachment } from 'discord.js';
 import { IMAGE_REGEX } from '../../common/globals';
-import Controller from './controller';
 import { Message as MMMessage } from './';
+import Controller from './controller';
 import ModmailBot from '../bot';
 import Embeds from '../util/Embeds';
 
@@ -11,6 +11,12 @@ export default class AttachmentController extends Controller {
     super(modmail, 'attachments');
   }
 
+  /**
+   * Store a Discord attachment into the database
+   * @param  {MMMessage} msg The Modmail message that this is associated with
+   * @param  {MessageAttachment} msgAtt The Discord message attachment
+   * @return {Promise<Attachment>}
+   */
   public async create(
     msg: MMMessage,
     msgAtt: MessageAttachment,
@@ -28,9 +34,18 @@ export default class AttachmentController extends Controller {
     });
   }
 
+  /**
+   * Handle a staff's attachments of a modmail message
+   * @param  {MMMessage} msg The modmail message
+   * @param  {Iterator<MessageAttachment>} msgAtts The Discord message
+   * attachments that are apart of this modmail message
+   * @param  {boolean} anonymously Whether or not the staff sent them
+   * anonymously
+   * @return {Promise<void>}
+   */
   public async handle(
     msg: MMMessage,
-    messageAttachments: Iterator<MessageAttachment>,
+    msgAtts: Iterator<MessageAttachment>,
     anonymously: boolean,
   ): Promise<void> {
     const thread = await msg.getThread();
@@ -44,10 +59,11 @@ export default class AttachmentController extends Controller {
     const recvTasks: Promise<Message>[] = [];
     const sender = await msg.getSender();
 
-    let msgAttOpt = messageAttachments.next();
+    // Store all the attachments into the database
+    let msgAttOpt = msgAtts.next();
     while (!msgAttOpt.done) {
       attTasks.push(this.create(msg, msgAttOpt.value));
-      msgAttOpt = messageAttachments.next();
+      msgAttOpt = msgAtts.next();
     }
 
     const attachments = await Promise.all(attTasks);
@@ -58,6 +74,7 @@ export default class AttachmentController extends Controller {
       throw new Error('The thread channel doesn\'t exist anymore.');
     }
 
+    // Send all the attachments to the member's DMs and thread
     for (let i = 0; i < attachments.length; i += 1) {
       const attachment = attachments[i];
       const threadEmbed = Embeds.attachmentSend(
@@ -80,14 +97,15 @@ export default class AttachmentController extends Controller {
   }
 
   /**
-   * Handles attachments sent by a client
-   * @param {Message} msg Message sent the user
-   * @param {Iterator<MessageAttachment>} messageAttachments
+   * Handles attachments sent by a member
+   * @param   {MMMessage} msg Message sent the member
+   * @param   {Iterator<MessageAttachment>} msgAtts The Discord message
+   * attachments of this Modmail message
    * @returns {Promise<void>}
    */
   public async handleDM(
     msg: MMMessage,
-    messageAttachments: Iterator<MessageAttachment>,
+    msgAtts: Iterator<MessageAttachment>,
   ): Promise<void> {
     const thread = await msg.getThread();
 
@@ -104,15 +122,16 @@ export default class AttachmentController extends Controller {
     const attTasks: Promise<Attachment>[] = [];
     const recvTasks: Promise<Message>[] = [];
     const user = await msg.getUser();
-    let msgAttOpt = messageAttachments.next();
 
+    // Store all the attachments
+    let msgAttOpt = msgAtts.next();
     while (!msgAttOpt.done) {
       attTasks.push(this.create(msg, msgAttOpt.value));
-      msgAttOpt = messageAttachments.next();
+      msgAttOpt = msgAtts.next();
     }
 
+    // Send the attachments to the thread
     const attachments = await Promise.all(attTasks);
-
     for (let i = 0; i < attachments.length; i += 1) {
       const attachment = attachments[i];
       const threadEmbed = Embeds.attachmentRecv(
@@ -129,7 +148,7 @@ export default class AttachmentController extends Controller {
   /**
    * Checks whether or not an attachment is an image or not
    * using the IMAGE_REGEX declared in globals
-   * @param {MessageAttachment} attachment
+   * @param   {MessageAttachment} attachment
    * @returns {boolean}
    */
   public static isImage(attachment: MessageAttachment): boolean {
@@ -143,7 +162,7 @@ export default class AttachmentController extends Controller {
 
   /**
    * Get the file extension of the attachment
-   * @param {string} name File name
+   * @param   {string} name File name
    * @returns {string}
    */
   public static getExtension(name: string): string {

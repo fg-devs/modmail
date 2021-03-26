@@ -19,6 +19,14 @@ export default class CatController {
     this.modmail = modmail;
   }
 
+  /**
+   * Create a new category with the required attributes provided
+   * @param {CategoryChannel} catChan The Discord category channel that we we will be using for this new Modmail category
+   * @param {string} emoji The emoji that will uniquely identify this category
+   * @param {string} name The category name
+   * @param {boolean} isPrivate If a category is private it means only the staff can reach out to the community members
+   * @param {string} desc The community description
+   */
   public async create(
     catChan: CategoryChannel,
     emoji: string,
@@ -29,17 +37,22 @@ export default class CatController {
     const pool = ModmailBot.getDB();
 
     const data = await pool.categories.create({
+      // The Discord category "parent channel" that will be utilized
+      channelID: catChan.id,
       guildID: catChan.guild.id,
       name,
       description: desc,
       emoji,
       isPrivate,
-      channelID: catChan.id,
     });
 
     return new Category(this.modmail, data);
   }
 
+  /**
+   * Get a Modmail category based on a provided emoji
+   * @returns {Promise<Category | null>}
+   */
   public async getByEmoji(emoji: string): Promise<Category | null> {
     const pool = ModmailBot.getDB();
     const data = await pool.categories.fetchByEmoji(emoji);
@@ -51,6 +64,10 @@ export default class CatController {
     return new Category(this.modmail, data);
   }
 
+  /**
+   * Get a Modmail category based on a Discord guild ID
+   * @returns {Promise<Category | null>}
+   */
   public async getByGuild(guildID: string): Promise<Category | null> {
     const pool = ModmailBot.getDB();
     const data = await pool.categories.fetchByGuild(guildID);
@@ -62,6 +79,10 @@ export default class CatController {
     return new Category(this.modmail, data);
   }
 
+  /**
+   * Get a Modmail category based on it's ID
+   * @returns {Promise<Category | null>}
+   */
   public async getByID(catID: string): Promise<Category | null> {
     const pool = ModmailBot.getDB();
     const data = await pool.categories.fetchByID(catID);
@@ -73,6 +94,13 @@ export default class CatController {
     return new Category(this.modmail, data);
   }
 
+  /**
+   * Get all categories, default: active only and no private categories
+   * @param {boolean} onlyActive Whether or not to fetch only 
+   * active categories
+   * @param {boolean} privateCats Whether or not to fetch private categories
+   * as well.
+   */
   public async getAll(
     onlyActive = true,
     privateCats = false,
@@ -91,7 +119,8 @@ export default class CatController {
   /**
    * List roles of a member in a mention list fashion (see returns).
    * @param {Category[]} categories
-   * @returns {string} "category = 👍"
+   * @returns {string} 
+   * @example "category name = 👍\n"
    */
   public static listCategories(categories: Category[]): string {
     let res = '';
