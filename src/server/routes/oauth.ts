@@ -33,7 +33,17 @@ export default class OAuthRoute extends Route {
     return this.router;
   }
 
-  private async oauth(req: RequestWithRedirect, res: Response): Promise<void> {
+  /**
+   * For redirecting the user to Discord's OAuth login page
+   * GET /api/oauth
+   * @param  {RequestWithRedirect} req
+   * @param  {Response} res
+   * @return {Promise<void>}
+   */
+  private async oauth(
+    req: RequestWithRedirect,
+    res: Response,
+  ): Promise<void> {
     const client = this.modmail.getOAuth();
     const redirection = client.code.getUri();
     const { redirect } = req.query;
@@ -46,6 +56,13 @@ export default class OAuthRoute extends Route {
     res.redirect(redirection);
   }
 
+  /**
+   * Discord will redirect the user to this endpoint when they've logged in
+   * GET /api/oauth/callback
+   * @param  {RequestWithUser} req
+   * @param  {Response} res
+   * @return {Promise<void>}
+   */
   private async callback(
     req: RequestWithUser,
     res: Response,

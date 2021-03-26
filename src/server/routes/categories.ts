@@ -28,7 +28,10 @@ export default class CategoriesRoute extends Route {
 
     // Thread Endpoints
     this.router.get('/:categoryID/threads', threads.getThreads.bind(threads));
-    this.router.get('/:categoryID/threads/:threadID', threads.getThread.bind(threads));
+    this.router.get(
+      '/:categoryID/threads/:threadID',
+      threads.getThread.bind(threads),
+    );
 
     // Member & User states
     this.router.get('/:categoryID/members', members.getMembers.bind(members));

@@ -41,7 +41,6 @@ export default class ModmailServer {
    * This method must be called before all else can happen
    */
   public async start() {
-
     const oauth = new OAuthRoute(this);
     const categories = new CategoriesRoute(this);
     const self = new SelfRoute(this);
@@ -65,8 +64,9 @@ export default class ModmailServer {
 
     this.app.listen(
       CONFIG.server.port,
-      // TODO: proper logger
-      () => logger.info(`Server is ready. Listening on port ${CONFIG.server.port}`),
+      () => logger.info(
+        `Server is ready. Listening on port ${CONFIG.server.port}`,
+      ),
     );
   }
 

@@ -15,6 +15,13 @@ export default class UsersRoute extends Route {
     super(mm, 'users', router);
   }
 
+  /**
+   * For getting data on a certain user on Discord
+   * GET /api/categories/:categoryID/users/:userID
+   * @param  {RequestWithCategory} req
+   * @param  {Response} res
+   * @return {Promise<void>}
+   */
   public async getUser(
     req: RequestWithCategory,
     res: Response,
@@ -26,6 +33,13 @@ export default class UsersRoute extends Route {
     await this.sendState<UserState>(res, user);
   }
 
+  /**
+   * Get a user's thread history
+   * GET /api/categories/:categoryID/users/:userID/history
+   * @param  {RequestWithCategory} req
+   * @param  {Response} res
+   * @return {Promise<void>}
+   */
   public async getHistory(
     req: RequestWithCategory,
     res: Response,

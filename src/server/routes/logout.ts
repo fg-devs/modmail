@@ -6,7 +6,10 @@ import ModmailServer from '../server';
 import Route from './route';
 import { RequestWithUser } from '../models/types';
 
-
+/**
+ * Utilized for destroying the user's cookies
+ * POST /api/logout
+ */
 export default class LogoutRoute extends Route {
   constructor(mm: ModmailServer) {
     const router = Router();

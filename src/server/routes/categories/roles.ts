@@ -14,6 +14,13 @@ export default class RolesRoute extends Route {
     return super.getRouter();
   }
 
+  /**
+   * For getting roles of a Discord guild
+   * GET /api/categories/:categoryID/roles
+   * @param  {RequestWithCategory} req
+   * @param  {Response} res
+   * @return {Promise<void>}
+   */
   public async getRole(
     req: RequestWithCategory,
     res: Response,

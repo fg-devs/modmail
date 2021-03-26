@@ -10,6 +10,13 @@ export default class ChannelsRoute extends Route {
     super(mm, 'channels', router);
   }
 
+  /**
+   * For getting data on a certain channel on Discord
+   * GET /api/categories/:categoryID/channels/:channelID
+   * @param  {RequestWithCategory} req
+   * @param  {Response} res
+   * @return {Promise<void>}
+   */
   public async getChannel(
     req: RequestWithCategory,
     res: Response,

@@ -6,7 +6,9 @@ import ModmailServer from '../server';
 import Route from './route';
 import { RequestWithUser } from '../models/types';
 
-
+/**
+ * This route is for fetching data about the OAuth token being utilized
+ */
 export default class SelfRoute extends Route {
   constructor(mm: ModmailServer) {
     const router = Router();
@@ -19,6 +21,11 @@ export default class SelfRoute extends Route {
     return this.router;
   }
 
+  /**
+   * GET /api/self
+   * @param {RequestWithUser} req
+   * @param {Response} res
+   */
   private async root(req: RequestWithUser, res: Response) {
     const logger = this.getLogger();
     let { user } = req.session;

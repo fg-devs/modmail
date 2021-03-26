@@ -11,6 +11,13 @@ export default class MembersRoute extends Route {
     super(mm, 'members', router);
   }
 
+  /**
+   * For getting members of a Discord guild
+   * GET /api/categories/:categoryID/members
+   * @param  {RequestWithCategory} req
+   * @param  {Response} res
+   * @return {Promise<void>}
+   */
   public async getMembers(
     req: RequestWithCategory,
     res: Response,

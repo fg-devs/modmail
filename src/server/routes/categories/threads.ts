@@ -11,7 +11,7 @@ export default class ThreadsRoute extends Route {
   }
 
   /**
-   * GET /categories/:categoryID/:threadID -> ThreadResponse
+   * GET /api/categories/:categoryID/threads/:threadID
    * @param {RequestWithUser} req
    * @param {Response} res
    * @returns {Promise<void>}
@@ -64,7 +64,7 @@ export default class ThreadsRoute extends Route {
   }
 
   /**
-   * GET /api/categories/:categoryID -> ThreadsResponse
+   * GET /api/categories/:categoryID/threads
    * @param {RequestWithUser} req
    * @param {Response} res
    * @returns {Promise<void>}
