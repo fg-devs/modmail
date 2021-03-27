@@ -2,11 +2,10 @@
 You can set `CONFIG` enviroment variable with a file path for custom config
 placement.
 
-## General Configuration
-Everything that is on the root of the config is listed here
+## Logging Configuration
 | Attribute Name | Description                                                         | Default |
 |----------------|---------------------------------------------------------------------|---------|
-| logLevel       | How much log details do you want? Options: DEBUG, INFO, ERROR, WARN | DEBUG   |
+| level          | How much log details do you want? Options: DEBUG, INFO, ERROR, WARN | DEBUG   |
 
 ## Bot Configuration
 Everything under `bot` is listed here
