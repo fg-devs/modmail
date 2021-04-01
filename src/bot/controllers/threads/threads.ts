@@ -225,8 +225,9 @@ export default class ThreadController extends Controller {
     );
 
     try {
-      await channel.send(threadDetails);
+      const details = await channel.send(threadDetails);
       await channel.setTopic(`User ID: ${user.id}`);
+      details.pin();
 
       if (isAdminOnly) {
         await ThreadController.makeAdminOnly(category, channel);
