@@ -78,10 +78,6 @@ export default class ModmailBot extends CommandoClient {
     return ModmailBot.db;
   }
 
-  public static getLocation(): string {
-    return __filename;
-  }
-
   /**
    * Get the instance of modmail
    */

@@ -31,8 +31,8 @@ export default class BotController {
 
   private readonly modmail: ModmailServer;
 
-  constructor(modmail: ModmailServer, location: string) {
-    this.bot = new Worker(location);
+  constructor(modmail: ModmailServer, bot: Worker) {
+    this.bot = bot;
     this.listeners = new Semaphore(MAX_LISTENERS);
     this.bot.setMaxListeners(MAX_LISTENERS);
     this.modmail = modmail;

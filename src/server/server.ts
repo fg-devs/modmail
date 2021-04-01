@@ -11,6 +11,7 @@ import SelfRoute from './routes/self';
 import CategoriesRoute from './routes/categories';
 import { DatabaseManager } from './../database';
 import { RequestWithUser } from './models/types';
+import { Worker } from 'worker_threads';
 import BotController from './controllers/bot';
 import { getLogger, Logger } from 'log4js';
 import {
@@ -30,9 +31,9 @@ export default class ModmailServer {
 
   private static db: DatabaseManager;
 
-  constructor(botLocation: string) {
+  constructor(bot: Worker) {
     this.app = express();
-    this.bot = new BotController(this, botLocation);
+    this.bot = new BotController(this, bot);
     this.oauth = new ClientOAuth2(CONFIG.server.oauth2);
     ModmailServer.db = new DatabaseManager(CONFIG.database);
   }
