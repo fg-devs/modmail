@@ -39,6 +39,7 @@
   "scripts": {
     "start": "node ./dist/app.js",
     "build": "tsc",
+    "postinstall": "./scripts/build.sh",
     "test": "npm build && npm start"
   }
 }
