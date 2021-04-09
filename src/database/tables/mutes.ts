@@ -14,13 +14,13 @@ export default class MutesTable extends Table {
    * @returns {Promise<boolean>}
    */
   public async add(mute: MuteStatus): Promise<boolean> {
-    const client = await this.getClient();
     const isMuted = await this.isMuted(mute.user, mute.category);
 
     if (isMuted) {
       return false;
     }
 
+    const client = await this.getClient();
     try { 
       await client.query(
         `INSERT INTO modmail.mutes (user_id, category_id, till, reason)
