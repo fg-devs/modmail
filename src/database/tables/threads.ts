@@ -1,8 +1,8 @@
 import { Thread } from '@newcircuit/modmail-types';
-import { DBThread } from '../models/types';
+import { DBThread } from '../types';
 import { SnowflakeUtil } from 'discord.js';
 import { Pool } from 'pg';
-import Table from '../models/table';
+import Table from '../table';
 
 export default class ThreadsTable extends Table {
   constructor(pool: Pool) {

@@ -1,7 +1,7 @@
 import { MuteStatus } from '@newcircuit/modmail-types';
-import { DBMuteStatus } from '../models/types';
+import { DBMuteStatus } from '../types';
 import { Pool } from 'pg';
-import Table from '../models/table';
+import Table from '../table';
 
 export default class MutesTable extends Table {
   constructor(pool: Pool) {

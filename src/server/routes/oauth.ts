@@ -8,9 +8,9 @@ import {
   RequestWithRedirect,
   RequestWithUser,
   User
-} from '../models/types';
-import ModmailServer from '../server';
-import Route from './route';
+} from '../types';
+import ModmailServer from '../';
+import Route from '../route';
 
 export interface OAuthData {
   access_token: string;

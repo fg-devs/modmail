@@ -1,7 +1,7 @@
-import Route from '../route';
-import ModmailServer from '../../server';
+import Route from '../../route';
+import ModmailServer from '../../';
 import { Response, Router } from 'express';
-import { RequestWithCategory } from '../../models/types';
+import { RequestWithCategory } from '../../types';
 import { ChannelState } from '@newcircuit/modmail-types';
 
 export default class ChannelsRoute extends Route {

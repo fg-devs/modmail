@@ -2,9 +2,9 @@ import {
   Response,
   Router,
 } from 'express';
-import ModmailServer from '../server';
-import Route from './route';
-import { RequestWithUser } from '../models/types';
+import ModmailServer from '../';
+import Route from '../route';
+import { RequestWithUser } from '../types';
 
 /**
  * This route is for fetching data about the OAuth token being utilized
