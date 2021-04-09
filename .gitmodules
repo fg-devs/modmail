@@ -1,0 +1,3 @@
+[submodule "modmail-types"]
+	path = src/types
+	url = https://github.com/newcircuit/modmail-types
