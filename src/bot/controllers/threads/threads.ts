@@ -83,7 +83,7 @@ export default class ThreadController extends Controller {
     );
     await msg.reply(
       'The thread is open, all messages now will be sent to the '
-      + isAdminOnly ? 'admin' : 'staff',
+      + (isAdminOnly ? 'admin' : 'staff'),
     );
     return new Thread(this.modmail, thread);
   }
