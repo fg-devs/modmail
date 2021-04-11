@@ -9,8 +9,8 @@ import { CONFIG } from '../globals';
 import {
   Attachments,
   Categories,
-  Threads,
   Messages,
+  Threads,
   WorkerHandler,
 } from '../controllers';
 
@@ -35,12 +35,17 @@ export default class ModmailBot extends CommandoClient {
       owner: CONFIG.bot.owners,
     });
 
+    // Controllers
     this.attachments = new Attachments(this);
     this.categories = new Categories(this);
-    this.threads = new Threads(this);
     this.messages = new Messages(this);
+    this.threads = new Threads(this);
 
+    // Globally accessible throughout the bot scope
     ModmailBot.db = new DatabaseManager(CONFIG.database);
+    ModmailBot.modmail = this;
+
+    // Event / command handlers
     this.events = new EventHandler(this);
     this.registerEvents();
     this.dispatcher.addInhibitor(this.inhibiter.bind(this));
@@ -62,8 +67,7 @@ export default class ModmailBot extends CommandoClient {
         ['standard_replies'],
         ['perms'],
       ])
-      .registerCommandsIn(path.join(__dirname, '/discord/commands'));
-    ModmailBot.modmail = this;
+      .registerCommandsIn(path.join(__dirname, '/commands'));
   }
 
   /**
