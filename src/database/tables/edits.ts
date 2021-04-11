@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { Edit } from '@newcircuit/modmail-types';
-import Table from '../models/table';
+import Table from '../table';
 
 export default class EditsTable extends Table {
   constructor(pool: Pool) {

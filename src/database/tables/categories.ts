@@ -1,11 +1,11 @@
 import { Category } from '@newcircuit/modmail-types';
-import { DBCategory } from '../models/types';
 import { Pool } from 'pg';
 import { SnowflakeUtil } from 'discord.js';
-import Table from '../models/table';
+import Table from '../table';
 import {
   CreateCategoryOpt,
-} from '../models/types';
+  DBCategory,
+} from '../types';
 
 export default class CategoriesTable extends Table {
   constructor(pool: Pool) {

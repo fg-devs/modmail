@@ -1,7 +1,7 @@
 import { Response, Router } from 'express';
-import { RequestWithCategory } from '../../models/types';
-import ModmailServer from '../../server';
-import Route from '../route';
+import { RequestWithCategory } from '../../types';
+import ModmailServer from '../../';
+import Route from '../../route';
 import {
   RoleLevel,
   Thread,

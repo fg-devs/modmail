@@ -11,7 +11,7 @@ import UsersTable from './tables/users';
 import {
   CreateCategoryOpt,
   CreateAttachmentOpt,
-} from './models/types';
+} from './types';
 
 export {
   AttachmentsTable,

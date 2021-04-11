@@ -1,7 +1,7 @@
 import { StandardReply } from '@newcircuit/modmail-types';
-import { DBStandardReply } from '../models/types';
+import { DBStandardReply } from '../types';
 import { Pool } from 'pg';
-import Table from '../models/table';
+import Table from '../table';
 
 export default class StandardRepliesTable extends Table {
   constructor(pool: Pool) {

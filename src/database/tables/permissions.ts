@@ -1,8 +1,8 @@
 import { Role } from '@newcircuit/modmail-types';
-import { DBRole } from '../models/types';
+import { DBRole } from '../types';
 import { Pool } from 'pg';
-import * as PermUtil from '../util/PermUtil';
-import Table from '../models/table';
+import { PermsUtil } from '../../util/';
+import Table from '../table';
 
 export default class PermissionsTable extends Table {
   constructor(pool: Pool) {
@@ -16,7 +16,7 @@ export default class PermissionsTable extends Table {
    */
   public async add(role: Role): Promise<boolean> {
     const client = await this.getClient();
-    const level = PermUtil.resolve(role.level);
+    const level = PermsUtil.resolve(role.level);
 
     try {
       const res = await client.query(
@@ -138,7 +138,7 @@ export default class PermissionsTable extends Table {
     return {
       category: role.category_id.toString(),
       roleID: role.role_id.toString(),
-      level: PermUtil.resolveStr(role.level),
+      level: PermsUtil.resolveStr(role.level),
     };
   }
 }

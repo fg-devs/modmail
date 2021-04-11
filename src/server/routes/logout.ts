@@ -2,9 +2,9 @@ import {
   Response,
   Router,
 } from 'express';
-import ModmailServer from '../server';
-import Route from './route';
-import { RequestWithUser } from '../models/types';
+import ModmailServer from '../';
+import Route from '../route';
+import { RequestWithUser } from '../types';
 
 /**
  * Utilized for destroying the user's cookies

@@ -1,8 +1,8 @@
 import { Attachment, FileType } from '@newcircuit/modmail-types';
 import { SnowflakeUtil } from 'discord.js';
 import { Pool } from 'pg';
-import Table from '../models/table';
-import { CreateAttachmentOpt, DBAttachment } from '../models/types';
+import Table from '../table';
+import { CreateAttachmentOpt, DBAttachment } from '../types';
 
 export default class AttachmentsTable extends Table {
   constructor(pool: Pool) {

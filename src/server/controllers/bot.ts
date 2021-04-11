@@ -15,9 +15,9 @@ import {
 import { Worker } from 'worker_threads';
 import { v1 as uuid } from 'uuid';
 import { Logger } from 'log4js';
-import { MAX_LISTENERS, MAX_RESPONSE_TIME } from '../../common/globals';
+import { MAX_LISTENERS, MAX_RESPONSE_TIME } from '../../globals';
 import { Semaphore } from 'async-mutex';
-import ModmailServer from '../server';
+import ModmailServer from '../';
 
 /**
  * This class is responsible for managing the Discord bot that is running in

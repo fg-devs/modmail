@@ -6,7 +6,7 @@
   "author": "NewCircuit <https://github.com/NewCircuit>",
   "license": "GPL-3.0",
   "dependencies": {
-    "@newcircuit/modmail-types": "^2.0.0",
+    "@newcircuit/modmail-types": "github:newcircuit/modmail-types#12a0142c7348a1febdb038f996259c77d9bb4756",
     "async-mutex": "^0.2.6",
     "client-oauth2": "^4.3.3",
     "cookie-parser": "^1.4.5",
@@ -37,7 +37,7 @@
     "typescript": "^4.1.5"
   },
   "scripts": {
-    "start": "node ./dist/app.js",
+    "start": "node ./build/app.js",
     "build": "tsc",
     "test": "npm build && npm start"
   }

@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import Table from '../models/table';
+import Table from '../table';
 
 export default class UsersTable extends Table {
   constructor(pool: Pool) {

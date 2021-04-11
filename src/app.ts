@@ -2,8 +2,8 @@ import {
   isMainThread,
   Worker,
 } from 'worker_threads';
-import ModmailServer from './server/server';
-import ModmailBot from './bot/bot';
+import ModmailServer from './server';
+import ModmailBot from './bot';
 
 async function main() {
   if (isMainThread) {
