@@ -81,8 +81,8 @@ export default class AddCategory extends Command {
       await msg.say('Category added.');
     } catch (e) {
       let res;
-      if (e.message.includes('channel_id') || e.message.includes('guild_id')) {
-        res = 'This guild already has a category';
+      if (e.message.includes('channel_id')) {
+        res = 'This category is already registered';
       } else if (e.message.includes('emoji')) {
         res = 'This emoji is already being used.';
       } else {
