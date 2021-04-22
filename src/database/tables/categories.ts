@@ -287,7 +287,7 @@ export default class CategoriesTable extends Table {
              name        TEXT UNIQUE           NOT NULL,
              is_active   BOOLEAN DEFAULT true  NOT NULL,
              is_private  BOOLEAN DEFAULT false NOT NULL,
-             guild_id    BIGINT UNIQUE         NOT NULL,
+             guild_id    BIGINT                NOT NULL,
              emoji       TEXT UNIQUE           NOT NULL,
              description TEXT    DEFAULT ''    NOT NULL
          );`,
