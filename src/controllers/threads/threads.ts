@@ -54,8 +54,6 @@ export default class ThreadController extends Controller {
       await msg.reply('You\'re muted from this category.');
       return null;
     }
-
-    const isAdminOnly = await ThreadController.isAdminOnly(dms);
     // check if they already have an open thread
     const currentThread = await this.modmail.threads.getByAuthor(
       msg.author.id,
@@ -68,7 +66,7 @@ export default class ThreadController extends Controller {
     const channel = await this.createChannel(
       msg.author,
       category,
-      isAdminOnly,
+      false,
     );
 
     if (channel === null) {
@@ -79,11 +77,10 @@ export default class ThreadController extends Controller {
       msg.author.id,
       channel.id,
       category.getID(),
-      isAdminOnly,
+      false
     );
     await msg.reply(
-      'The thread is open, all messages now will be sent to the '
-      + (isAdminOnly ? 'admin' : 'staff'),
+      'The thread is open, all messages now will be sent to the staff',
     );
     return new Thread(this.modmail, thread);
   }
@@ -138,7 +135,7 @@ export default class ThreadController extends Controller {
 
   /**
    * Create a new text-channel in the Discord server for a thread
-   * @param {User} member The member of the thread 
+   * @param {User} member The member of the thread
    * @param {Category} category
    * @param {boolean} isAdminOnly
    * @returns {Promise<TextChannel | null>} Nullable if something went wrong
@@ -180,7 +177,7 @@ export default class ThreadController extends Controller {
    * @param {User | null} creator The staff member that created the thread
    * @param {boolean} forwarded Whether or not the creator actually forwarded
    * the thread from another category
-   * @return {Promise<TextChannel | null>} 
+   * @return {Promise<TextChannel | null>}
    */
   public static async setupChannel(
     user: User,
@@ -315,10 +312,10 @@ export default class ThreadController extends Controller {
       ? 'Should this be admin only?'
       : 'Is this about a staff member?'
     );
-    
+
     await msg.react('👎');
     await msg.react('👍');
-    
+
     const filter = (r: MessageReaction, u: User) => {
       return (r.emoji.name === '👍' || r.emoji.name === '👎') && !u.bot;
     }
