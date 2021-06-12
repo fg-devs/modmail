@@ -39,6 +39,6 @@
   "scripts": {
     "start": "node ./build/app.js",
     "build": "tsc",
-    "test": "npm build && npm start"
+    "test": "npm run build && npm run start"
   }
 }

@@ -39,7 +39,6 @@ export default class ModmailBot extends CommandoClient {
           name: 'DM me for Help!',
         }
       }
-
     });
 
     // Controllers
