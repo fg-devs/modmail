@@ -31,10 +31,18 @@ export default class Forward extends Command {
       return null;
     }
 
+    const user = await thread.getAuthor()
     const category = await modmail.threads.getCategory(channel, true);
 
     if (category === null) {
       await msg.reply('Couldn\'t get that category.');
+      return null;
+    }
+
+    const muted = await category.isMuted(user.id)
+
+    if (muted) {
+      await msg.reply('The user is muted in that category.')
       return null;
     }
 
