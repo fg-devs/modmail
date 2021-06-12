@@ -48,12 +48,6 @@ export default class EventHandler {
   public async onReady(): Promise<void> {
     const log = EventHandler.getLogger();
     log.info('Bot is ready.');
-    this.modmail.user?.setPresence({
-      activity: {
-        type: 'PLAYING',
-        name: 'DM me for Help!',
-      },
-    });
   }
 
   /**

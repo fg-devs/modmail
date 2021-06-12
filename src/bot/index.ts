@@ -33,6 +33,13 @@ export default class ModmailBot extends CommandoClient {
     super({
       commandPrefix: CONFIG.bot.prefix,
       owner: CONFIG.bot.owners,
+      presence: {
+        activity: {
+          type: 'PLAYING',
+          name: 'DM me for Help!',
+        }
+      }
+
     });
 
     // Controllers
