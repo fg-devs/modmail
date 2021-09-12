@@ -1,9 +1,8 @@
-import path from 'path';
-import EventHandler from './events';
-import IssueHandler from './issues';
-import { CommandoClient, CommandoMessage } from 'discord.js-commando';
 import { Logger, getLogger } from 'log4js';
 import { parentPort } from 'worker_threads';
+import { SapphireClient } from '@sapphire/framework';
+import EventHandler from './events';
+import IssueHandler from './issues';
 import { DatabaseManager } from '../database';
 import { CONFIG } from '../globals';
 import {
@@ -14,7 +13,7 @@ import {
   WorkerHandler,
 } from '../controllers';
 
-export default class ModmailBot extends CommandoClient {
+export default class ModmailBot extends SapphireClient {
   public readonly attachments: Attachments;
 
   public readonly categories: Categories;
@@ -31,14 +30,14 @@ export default class ModmailBot extends CommandoClient {
 
   constructor() {
     super({
-      commandPrefix: CONFIG.bot.prefix,
-      owner: CONFIG.bot.owners,
+      defaultPrefix: CONFIG.bot.prefix,
       presence: {
-        activity: {
+        activities: [{
           type: 'PLAYING',
           name: 'DM me for Help!',
-        }
-      }
+        }],
+      },
+      intents: ['GUILD_MESSAGES', 'GUILD_MEMBERS', 'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS'],
     });
 
     // Controllers
@@ -54,26 +53,7 @@ export default class ModmailBot extends CommandoClient {
     // Event / command handlers
     this.events = new EventHandler(this);
     this.registerEvents();
-    this.dispatcher.addInhibitor(this.inhibiter.bind(this));
-    this.registry
-      .registerDefaultTypes()
-      .registerDefaultGroups()
-      .registerDefaultCommands({
-        unknownCommand: false,
-        commandState: false,
-        eval: false,
-        ping: false,
-        prefix: false,
-      })
-      .registerGroups([
-        ['threads'],
-        ['messages'],
-        ['category'],
-        ['muting'],
-        ['standard_replies'],
-        ['perms'],
-      ])
-      .registerCommandsIn(path.join(__dirname, '/commands'));
+    // this.dispatcher.addInhibitor(this.inhibiter.bind(this));
   }
 
   /**
@@ -132,10 +112,10 @@ export default class ModmailBot extends CommandoClient {
     }
   }
 
-  private inhibiter(msg: CommandoMessage): false | string {
-    const passes = msg.content.startsWith(this.commandPrefix)
-      && msg.guild !== null;
-
-    return passes ? false : '';
-  }
+  // private inhibiter(msg: Message): false | string {
+  //   const passes = msg.content.startsWith(this.commandPrefix)
+  //     && msg.guild !== null;
+  //
+  //   return passes ? false : '';
+  // }
 }

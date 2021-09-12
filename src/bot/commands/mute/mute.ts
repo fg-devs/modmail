@@ -1,8 +1,8 @@
-import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@newcircuit/modmail-types';
+import { Command, CommandOptions } from '@sapphire/framework';
+import { ApplyOptions } from '@sapphire/decorators';
 import { LogUtil, PermsUtil, TimeUtil } from '../../../util';
-import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 type Args = {
   userID: string,
@@ -16,6 +16,12 @@ type Args = {
  *  * Mod+
  *  * Must be used in a Discord guild that is being used as a Modmail category
  */
+@ApplyOptions<CommandOptions>({
+  name: 'mute',
+  aliases: [],
+  description: 'Mute a member',
+  runIn: 'GUILD_ANY',
+})
 export default class Mute extends Command {
   constructor(client: ModmailBot) {
     super(client, {

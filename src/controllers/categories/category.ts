@@ -92,7 +92,7 @@ export default class Category {
     const guildID = this.getGuildID();
 
     try {
-      return this.modmail.guilds.fetch(guildID, true);
+      return this.modmail.guilds.fetch(guildID);
     } catch (_) {
       return null;
     }
@@ -110,7 +110,6 @@ export default class Category {
     try {
       const channel = await this.modmail.channels.fetch(
         this.data.channelID,
-        true,
       );
 
       return channel as CategoryChannel;
