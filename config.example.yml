@@ -3,6 +3,7 @@ bot:
   token: 'TOKEN'
   prefix: '!'
   owners: ['Owner ID 1', 'Owner ID 2']
+  guildWhitelist: ['Guild ID 1', 'Guild ID 2']
 server:
   domain: ''
   appkey: 'put some random stuff here'
