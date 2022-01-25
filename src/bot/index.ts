@@ -123,6 +123,8 @@ export default class ModmailBot extends CommandoClient {
       .on('guildMemberRemove', this.events.onMemberLeave.bind(this.events))
       .on('guildMemberUpdate', this.events.onMemberUpdate.bind(this.events));
 
+    this.on('guildCreate', this.events.onGuildCreate.bind(this.events));
+
     this.once('ready', this.events.onReady.bind(this.events));
 
     if (parentPort) {
