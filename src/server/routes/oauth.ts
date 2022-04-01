@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import {
   Router,
   Response,
@@ -7,9 +8,9 @@ import {
   Guild,
   RequestWithRedirect,
   RequestWithUser,
-  User
+  User,
 } from '../types';
-import ModmailServer from '../';
+import ModmailServer from '..';
 import Route from '../route';
 
 export interface OAuthData {
@@ -94,8 +95,8 @@ export default class OAuthRoute extends Route {
         {
           headers: {
             Authorization: `Bearer ${user.accessToken}`,
-          }
-        }
+          },
+        },
       );
       const guildData: Guild[] = JSON.parse(guildRes.body);
       const userData: User = JSON.parse(userRes.body);
@@ -115,7 +116,8 @@ export default class OAuthRoute extends Route {
       res.redirect(redirection);
       delete req.session.redirect;
       req.session.save(console.error);
-    } catch (e) {
+    } catch (err) {
+      const e = err as Error;
       this.failError(res, e);
     } finally {
       res.end();

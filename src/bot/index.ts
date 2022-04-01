@@ -1,9 +1,9 @@
 import path from 'path';
-import EventHandler from './events';
-import IssueHandler from './issues';
 import { CommandoClient, CommandoMessage } from 'discord.js-commando';
 import { Logger, getLogger } from 'log4js';
 import { parentPort } from 'worker_threads';
+import IssueHandler from './issues';
+import EventHandler from './events';
 import { DatabaseManager } from '../database';
 import { CONFIG } from '../globals';
 import {
@@ -37,8 +37,8 @@ export default class ModmailBot extends CommandoClient {
         activity: {
           type: 'PLAYING',
           name: 'DM me for Help!',
-        }
-      }
+        },
+      },
     });
 
     // Controllers

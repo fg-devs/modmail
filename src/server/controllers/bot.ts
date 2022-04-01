@@ -15,9 +15,9 @@ import {
 import { Worker } from 'worker_threads';
 import { v1 as uuid } from 'uuid';
 import { Logger } from 'log4js';
-import { MAX_LISTENERS, MAX_RESPONSE_TIME } from '../../globals';
 import { Semaphore } from 'async-mutex';
-import ModmailServer from '../';
+import { MAX_LISTENERS, MAX_RESPONSE_TIME } from '../../globals';
+import ModmailServer from '..';
 
 /**
  * This class is responsible for managing the Discord bot that is running in
@@ -129,7 +129,8 @@ export default class BotController {
     try {
       const resp: GetStateRes<T> = await this.transaction(task);
       return resp.data;
-    } catch (e) {
+    } catch (err) {
+      const e = err as Error;
       if (!e.message.includes('not in cache')) {
         logger.error(`[${task.id}] An error has occurred\n`, e);
       } else {
@@ -140,7 +141,7 @@ export default class BotController {
   }
 
   private getLogger(): Logger {
-    return this.modmail.getLogger(`(controller) bot`);
+    return this.modmail.getLogger('(controller) bot');
   }
 
   private async transaction(req: ServerMessage): Promise<ServerResponse> {

@@ -1,9 +1,9 @@
 import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { MessageAttachment } from 'discord.js';
-import { PermsUtil } from '../../../util/';
+import { PermsUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 /**
  * List all the standard replies

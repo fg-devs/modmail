@@ -2,7 +2,7 @@ import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { LogUtil, PermsUtil, TimeUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 type Args = {
   userID: string,

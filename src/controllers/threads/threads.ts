@@ -7,7 +7,7 @@ import {
   User,
 } from 'discord.js';
 import { RoleLevel } from '@newcircuit/modmail-types';
-import { Category, } from '../';
+import { Category } from '..';
 import { Embeds } from '../../util';
 import { ADMIN_INDICATOR_PREFIX, PROMPT_TIME } from '../../globals';
 import Thread from './thread';
@@ -77,7 +77,7 @@ export default class ThreadController extends Controller {
       msg.author.id,
       channel.id,
       category.getID(),
-      false
+      false,
     );
     await msg.reply(
       'The thread is open, all messages now will be sent to the staff',
@@ -309,16 +309,14 @@ export default class ThreadController extends Controller {
   ): Promise<boolean> {
     const msg = await channel.send(
       forwarded
-      ? 'Should this be admin only?'
-      : 'Is this about a staff member?'
+        ? 'Should this be admin only?'
+        : 'Is this about a staff member?',
     );
 
     await msg.react('👎');
     await msg.react('👍');
 
-    const filter = (r: MessageReaction, u: User) => {
-      return (r.emoji.name === '👍' || r.emoji.name === '👎') && !u.bot;
-    }
+    const filter = (r: MessageReaction, u: User) => (r.emoji.name === '👍' || r.emoji.name === '👎') && !u.bot;
     const reactions = await msg.awaitReactions(
       filter,
       {

@@ -1,9 +1,9 @@
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
-import { CONFIG } from '../../../globals'; 
+import { CONFIG } from '../../../globals';
 import { LogUtil, PermsUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 type Args = {
   name: string,
@@ -51,13 +51,14 @@ export default class StandardReplyCreate extends Command {
         + `\n - Usage: \`${CONFIG.bot.prefix}sr ${args.name}\``,
       );
     } catch (err) {
+      const e = err as Error;
       let res;
-      if (err.message.includes('standard_replies_name_uindex')) {
+      if (e.message.includes('standard_replies_name_uindex')) {
         res = 'That standard reply name already is taken.';
       } else {
         res = 'An internal issue occurred.';
       }
-      LogUtil.cmdError(msg, err, res);
+      LogUtil.cmdError(msg, e, res);
       await msg.say(res);
     }
 

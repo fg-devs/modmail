@@ -2,7 +2,7 @@ import {
   Response,
   Router,
 } from 'express';
-import ModmailServer from '../';
+import ModmailServer from '..';
 import Route from '../route';
 import { RequestWithUser } from '../types';
 

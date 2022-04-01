@@ -1,13 +1,12 @@
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
-import { PermsUtil } from '../../../util/';
+import { PermsUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 type Args = {
   name: string,
 }
-
 
 /**
  * Remove a standard reply from Modmail
