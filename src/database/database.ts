@@ -54,10 +54,10 @@ export default class DatabaseManager {
       this.permissions = new PermissionsTable(pool);
     }
 
-    public async init(delay = 0, attempts = 0): Promise<void> {
+    public async init(delayMs = 1000, attempts = 0): Promise<void> {
       const log = ModmailBot.getLogger('database-init');
       const connect = () => new Promise<PoolClient>((res, rej) => {
-        setTimeout(() => this.pool.connect().then(res).catch(rej), delay);
+        setTimeout(() => this.pool.connect().then(res).catch(rej), delayMs);
       });
       let clientOpt: PoolClient | null = null;
 
