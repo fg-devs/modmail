@@ -9,5 +9,3 @@ docs
 config.example.yml
 CONTRIBUTING.md
 FUNDING.yml
-package-lock.json
-yarn.lock
