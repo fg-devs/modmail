@@ -1,0 +1,28 @@
+logLevel: 'INFO'
+bot:
+  token: 'TOKEN'
+  prefix: '!'
+  owners: ['Owner ID 1', 'Owner ID 2']
+server:
+  domain: ''
+  appkey: 'put some random stuff here'
+  # If the port is modified then the
+  # Dockerfile or compose should be updated.
+  port: 80
+  oauth:
+    accessTokenUri: 'https://discord.com/api/oauth2/token'
+    authorizationUri: 'https://discord.com/api/oauth2/authorize'
+    redirectUri: 'http://127.0.0.1/oauth/callback'
+    clientId: ''
+    clientSecret: ''
+    scopes: [identify, guilds]
+database:
+  # The database config should work out 
+  # of the box without modifying these values.
+  user: 'postgres'
+  password: 'postgres'
+  host: 'postgres'
+  port: 5432
+  database: 'postgres'
+  # Max connections
+  max: 20

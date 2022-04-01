@@ -1,0 +1,13 @@
+node_modules
+docs
+.dockerignore
+.env
+.github
+.gitignore
+.eslintrc.json
+.gitignore
+config.example.yml
+CONTRIBUTING.md
+FUNDING.yml
+package-lock.json
+yarn.lock
