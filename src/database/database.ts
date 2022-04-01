@@ -1,7 +1,9 @@
 import {
   Pool,
+  PoolClient,
   PoolConfig,
 } from 'pg';
+import ModmailBot from '../bot';
 import AttachmentsTable from './tables/attachments';
 import CategoriesTable from './tables/categories';
 import EditsManager from './tables/edits';
@@ -33,6 +35,10 @@ export default class DatabaseManager {
 
     public readonly permissions: PermissionsTable;
 
+    private static readonly ATTEMPTS = 5;
+
+    private static readonly RECON_DELAY_MS = 5000;
+
     constructor(config: PoolConfig) {
       const pool = new Pool(config);
 
@@ -48,9 +54,31 @@ export default class DatabaseManager {
       this.permissions = new PermissionsTable(pool);
     }
 
-    public async init(): Promise<void> {
-      const client = await this.pool.connect();
+    public async init(delayMs = 1000, attempts = 0): Promise<void> {
+      const log = ModmailBot.getLogger('database-init');
+      const connect = () => new Promise<PoolClient>((res, rej) => {
+        setTimeout(() => this.pool.connect().then(res).catch(rej), delayMs);
+      });
+      let clientOpt: PoolClient | null = null;
+
+      try {
+        log.debug('Attempting connection to postgres.');
+        clientOpt = await connect();
+      } catch (err) {
+        if (attempts >= DatabaseManager.ATTEMPTS) {
+          throw err;
+        }
+
+        log.warn(
+          'Failed to connect to postgres, trying again in'
+          + ` ${DatabaseManager.RECON_DELAY_MS / 1000} seconds.`,
+        );
+        await this.init(DatabaseManager.RECON_DELAY_MS, attempts + 1);
+        return;
+      }
+
       const tasks: Promise<void>[] = [];
+      const client = clientOpt;
 
       await client.query(
         'CREATE SCHEMA IF NOT EXISTS modmail',
