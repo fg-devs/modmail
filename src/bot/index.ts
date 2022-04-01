@@ -1,9 +1,9 @@
 import path from 'path';
-import EventHandler from './events';
-import IssueHandler from './issues';
 import { CommandoClient, CommandoMessage } from 'discord.js-commando';
 import { Logger, getLogger } from 'log4js';
 import { parentPort } from 'worker_threads';
+import IssueHandler from './issues';
+import EventHandler from './events';
 import { DatabaseManager } from '../database';
 import { CONFIG } from '../globals';
 import {
@@ -37,8 +37,8 @@ export default class ModmailBot extends CommandoClient {
         activity: {
           type: 'PLAYING',
           name: 'DM me for Help!',
-        }
-      }
+        },
+      },
     });
 
     // Controllers
@@ -122,6 +122,8 @@ export default class ModmailBot extends CommandoClient {
     this.on('guildMemberAdd', this.events.onMemberJoin.bind(this.events))
       .on('guildMemberRemove', this.events.onMemberLeave.bind(this.events))
       .on('guildMemberUpdate', this.events.onMemberUpdate.bind(this.events));
+
+    this.on('guildCreate', this.events.onGuildCreate.bind(this.events));
 
     this.once('ready', this.events.onReady.bind(this.events));
 

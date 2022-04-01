@@ -1,9 +1,9 @@
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { Threads } from '../../../controllers';
-import { Embeds, LogUtil, PermsUtil } from '../../../util/';
+import { Embeds, LogUtil, PermsUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 type Args = {
   userID: string;
@@ -96,7 +96,8 @@ export default class OpenThread extends Command {
       await pool.threads.open(user.id, channel.id, category.getID(), false);
 
       await msg.react('✅');
-    } catch (e) {
+    } catch (err) {
+      const e = err as Error;
       let res;
       if (e.message.includes('Cannot send messages to this user')) {
         res = 'This user has their DM\'s off';

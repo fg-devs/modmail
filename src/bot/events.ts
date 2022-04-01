@@ -1,6 +1,7 @@
 import { Mutex, MutexInterface } from 'async-mutex';
 import {
   DMChannel,
+  Guild,
   GuildMember,
   Message,
   PartialGuildMember,
@@ -9,7 +10,7 @@ import {
 import { Embeds } from '../util';
 import { CONFIG } from '../globals';
 import { Thread } from '../controllers';
-import ModmailBot from './';
+import ModmailBot from '.';
 
 export default class EventHandler {
   private readonly modmail: ModmailBot;
@@ -26,6 +27,13 @@ export default class EventHandler {
    * @param {Message} msg
    */
   public async onMessage(msg: Message): Promise<void> {
+    if (msg.channel.type === 'text') {
+      const { guildWhitelist } = CONFIG.bot;
+      if (guildWhitelist.length > 0 && !guildWhitelist.includes(msg.channel.guild.id)) {
+        await msg.channel.guild.leave();
+        return;
+      }
+    }
     const msgCtrl = this.modmail.messages;
     if (!msg.author.bot && !msg.content.startsWith(CONFIG.bot.prefix)) {
       if (msg.channel.type === 'dm') {
@@ -48,6 +56,18 @@ export default class EventHandler {
   public async onReady(): Promise<void> {
     const log = EventHandler.getLogger();
     log.info('Bot is ready.');
+    const { guildWhitelist } = CONFIG.bot;
+    if (guildWhitelist.length > 0) {
+      const leaveList = [];
+      // this returns an iterable. This is the intended syntax for it.
+      // eslint-disable-next-line no-restricted-syntax
+      for (const guild of this.modmail.guilds.cache.values()) {
+        if (!guildWhitelist.includes(guild.id)) {
+          leaveList.push(guild.leave());
+        }
+      }
+      await Promise.all(leaveList);
+    }
   }
 
   /**
@@ -224,5 +244,12 @@ export default class EventHandler {
 
   private static getLogger() {
     return ModmailBot.getLogger('events');
+  }
+
+  public async onGuildCreate(guild: Guild): Promise<void> {
+    const { guildWhitelist } = CONFIG.bot;
+    if (guildWhitelist.length > 0 && !guildWhitelist.includes(guild.id)) {
+      await guild.leave();
+    }
   }
 }

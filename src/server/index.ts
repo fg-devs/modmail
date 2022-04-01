@@ -4,15 +4,8 @@ import express, {
   NextFunction,
   Response,
 } from 'express';
-import OAuthRoute from './routes/oauth';
-import { CONFIG } from '../globals';
 import session from 'express-session';
-import SelfRoute from './routes/self';
-import CategoriesRoute from './routes/categories';
-import { DatabaseManager } from './../database';
-import { RequestWithUser } from './types';
 import { Worker } from 'worker_threads';
-import BotController from './controllers/bot';
 import { getLogger, Logger } from 'log4js';
 import {
   Message,
@@ -20,6 +13,13 @@ import {
   UserState,
   UserStateCache,
 } from '@newcircuit/modmail-types';
+import OAuthRoute from './routes/oauth';
+import { CONFIG } from '../globals';
+import SelfRoute from './routes/self';
+import CategoriesRoute from './routes/categories';
+import { DatabaseManager } from '../database';
+import { RequestWithUser } from './types';
+import BotController from './controllers/bot';
 import LogoutRoute from './routes/logout';
 
 export default class ModmailServer {
@@ -41,7 +41,7 @@ export default class ModmailServer {
   /**
    * This method must be called before all else can happen
    */
-  public async start() {
+  public async start(): Promise<void> {
     const oauth = new OAuthRoute(this);
     const categories = new CategoriesRoute(this);
     const self = new SelfRoute(this);
@@ -75,7 +75,7 @@ export default class ModmailServer {
     req: RequestWithUser,
     res: Response,
     next: NextFunction,
-  ) {
+  ): void {
     const { user } = req.session;
 
     if (user === undefined) {
@@ -115,9 +115,9 @@ export default class ModmailServer {
     }
 
     const users = await Promise.all(usrTasks);
-    let res: UserStateCache = {};
+    const res: UserStateCache = {};
 
-    for (let i = 0; i < users.length; i++) {
+    for (let i = 0; i < users.length; i += 1) {
       const user = users[i];
       if (user !== null) {
         res[user.id] = user;
@@ -131,7 +131,7 @@ export default class ModmailServer {
     const msgTasks: Promise<Message | null>[] = [];
     const pool = this.getDB();
 
-    for (let i = 0; i < threads.length; i++) {
+    for (let i = 0; i < threads.length; i += 1) {
       const thread = threads[i];
       const task = pool.messages.fetchLast(thread.id);
       msgTasks.push(task);
@@ -139,7 +139,7 @@ export default class ModmailServer {
 
     const msgs = await Promise.all(msgTasks);
 
-    for (let i = 0; i < threads.length; i++) {
+    for (let i = 0; i < threads.length; i += 1) {
       const msg = msgs[i];
       if (msg !== null) {
         threads[i].messages.push(msg);

@@ -8,11 +8,11 @@ import {
   Message as PartialMessage,
   Thread as PartialThread,
 } from '@newcircuit/modmail-types';
-import { Message as MMMessage, Threads } from '../';
+import getUrls from 'get-urls';
+import { Message as MMMessage, Threads } from '..';
 import { CLOSE_THREAD_DELAY } from '../../globals';
 import { Embeds, LogUtil } from '../../util';
 import Category from '../categories/category';
-import getUrls from 'get-urls';
 import ModmailBot from '../../bot';
 
 export default class Thread {
@@ -198,7 +198,8 @@ export default class Thread {
     try {
       await this.send(context, msg.member as GuildMember, anonymously);
       await msg.delete();
-    } catch (e) {
+    } catch (err) {
+      const e = err as Error;
       let res;
       if (e.message.includes('Cannot send messages to this user')) {
         res = 'This user closed their DM\'s.';
@@ -234,7 +235,8 @@ export default class Thread {
       await this.modmail.attachments.handle(mmMsg, attachments, anonymously);
 
       await msg.delete();
-    } catch (e) {
+    } catch (err) {
+      const e = err as Error;
       let res;
       if (e.message.includes('Cannot send messages to this user')) {
         res = 'This user closed their DM\'s.';
@@ -300,7 +302,7 @@ export default class Thread {
   /**
    * Forward this thread to another category
    * @param  {User} forwarder The user that forwarded it
-   * @param  {boolean} isAdminOnly Whether or not they want it to be admin 
+   * @param  {boolean} isAdminOnly Whether or not they want it to be admin
    * only
    * @param  {Category} category The category we're forwarding this to
    * @return {Promise<boolean>}

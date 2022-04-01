@@ -1,8 +1,8 @@
 import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@newcircuit/modmail-types';
-import { Embeds, LogUtil, PermsUtil } from '../../../util/';
+import { Embeds, LogUtil, PermsUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 /**
  * List all the Discord roles of a Modmail category

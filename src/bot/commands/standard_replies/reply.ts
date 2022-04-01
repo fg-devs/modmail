@@ -1,7 +1,7 @@
 import { CommandoMessage } from 'discord.js-commando';
-import { LogUtil } from '../../../util/';
+import { LogUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 type Args = {
   name: string

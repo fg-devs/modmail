@@ -1,7 +1,7 @@
 import { Attachment, FileType } from '@newcircuit/modmail-types';
 import { Message, MessageAttachment } from 'discord.js';
 import { IMAGE_REGEX } from '../globals';
-import { Message as MMMessage } from './';
+import { Message as MMMessage } from '.';
 import Controller from './controller';
 import ModmailBot from '../bot';
 import Embeds from '../util/Embeds';

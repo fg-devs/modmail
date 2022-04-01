@@ -1,11 +1,11 @@
-import ModmailServer from '../';
+import { Category, RoleLevel } from '@newcircuit/modmail-types';
+import { NextFunction, Response, Router } from 'express';
+import ModmailServer from '..';
 import MembersRoute from './categories/members';
 import UsersRoute from './categories/users';
 import ThreadsRoute from './categories/threads';
 import { RequestWithCategory, RequestWithUser } from '../types';
-import { Category, RoleLevel } from '@newcircuit/modmail-types';
 import Route from '../route';
-import { NextFunction, Response, Router, } from 'express';
 import RolesRoute from './categories/roles';
 import ChannelsRoute from './categories/channels';
 
@@ -87,7 +87,6 @@ export default class CategoriesRoute extends Route {
       return;
     }
 
-
     req.session.member = {
       ...user,
       role: member.role === 'mod' ? RoleLevel.Mod : RoleLevel.Admin,
@@ -116,7 +115,7 @@ export default class CategoriesRoute extends Route {
     const db = this.modmail.getDB();
     const fetchTasks: Promise<Category | null>[] = [];
 
-    for (let i = 0; i < guildIDs.length; i++) {
+    for (let i = 0; i < guildIDs.length; i += 1) {
       const guildID = guildIDs[i];
       const fetchTask = db.categories.fetchByGuild(guildID);
       fetchTasks.push(fetchTask);

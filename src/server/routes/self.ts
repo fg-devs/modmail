@@ -2,7 +2,7 @@ import {
   Response,
   Router,
 } from 'express';
-import ModmailServer from '../';
+import ModmailServer from '..';
 import Route from '../route';
 import { RequestWithUser } from '../types';
 
@@ -28,7 +28,7 @@ export default class SelfRoute extends Route {
    */
   private async root(req: RequestWithUser, res: Response) {
     const logger = this.getLogger();
-    let { user } = req.session;
+    const { user } = req.session;
 
     if (!user) {
       res.status(403);

@@ -1,8 +1,8 @@
 import { RoleLevel } from '@newcircuit/modmail-types';
-import { PermsUtil } from '../../../util';
 import { CommandoClient, CommandoMessage } from 'discord.js-commando';
+import { PermsUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 /**
  * Make a category private

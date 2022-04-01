@@ -3,9 +3,8 @@ import { CommandoMessage } from 'discord.js-commando';
 import { CONFIG } from '../globals';
 import ModmailBot from '../bot';
 
-
 /**
- * This is where the perm checking magic happens. It makes sure that user 
+ * This is where the perm checking magic happens. It makes sure that user
  * using a given command is a mod of the category where it's been executed.
  * @param {CommandoMessage} msg
  * @returns {Promise<RoleLevel | null>} Nullable if they're not even a mod

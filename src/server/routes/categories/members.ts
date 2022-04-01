@@ -2,7 +2,7 @@ import { Response, Router } from 'express';
 import {
   RequestWithCategory,
 } from '../../types';
-import ModmailServer from '../../';
+import ModmailServer from '../..';
 import Route from '../../route';
 
 export default class MembersRoute extends Route {
@@ -35,8 +35,9 @@ export default class MembersRoute extends Route {
 
       res.json(members);
       res.end();
-    } catch (e) {
-      this.failBadReq(res, e);
+    } catch (err) {
+      const e = err as Error;
+      this.failBadReq(res, e.message);
     }
   }
 }

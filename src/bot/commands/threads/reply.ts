@@ -1,6 +1,6 @@
 import { CommandoMessage } from 'discord.js-commando';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 /**
  * Send a message to the member of a thread
