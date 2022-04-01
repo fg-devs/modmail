@@ -55,19 +55,20 @@ export default class DatabaseManager {
     }
 
     public async init(delay = 0, attempts = 0): Promise<void> {
-      let clientOpt: PoolClient | null = null;
+      const log = ModmailBot.getLogger('database-init');
       const connect = () => new Promise<PoolClient>((res, rej) => {
         setTimeout(() => this.pool.connect().then(res).catch(rej), delay);
       });
+      let clientOpt: PoolClient | null = null;
 
       try {
+        log.debug('Attempting connection to postgres.');
         clientOpt = await connect();
       } catch (err) {
         if (attempts >= DatabaseManager.ATTEMPTS) {
           throw err;
         }
 
-        const log = ModmailBot.getLogger('database-init');
         log.warn(
           'Failed to connect to postgres, trying again in'
           + ` ${DatabaseManager.RECON_DELAY_MS / 1000} seconds.`,
