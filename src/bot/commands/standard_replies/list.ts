@@ -1,5 +1,4 @@
 import { CommandoMessage } from 'discord.js-commando';
-import { RoleLevel } from '@newcircuit/modmail-types';
 import { MessageAttachment } from 'discord.js';
 import { PermsUtil } from '../../../util';
 import Command from '../../command';
@@ -23,7 +22,7 @@ export default class StandardReplyList extends Command {
     });
   }
 
-  @PermsUtil.Requires(RoleLevel.Mod)
+  @PermsUtil.Requires('mod')
   public async run(msg: CommandoMessage): Promise<null> {
     const pool = ModmailBot.getDB();
     const srs = await pool.standardReplies.fetchAll();

@@ -1,5 +1,4 @@
 import { CommandoMessage } from 'discord.js-commando';
-import { RoleLevel } from '@newcircuit/modmail-types';
 import { TextChannel } from 'discord.js';
 import { LogUtil, PermsUtil } from '../../../util';
 import Command from '../../command';
@@ -25,7 +24,7 @@ export default class ActivateCategory extends Command {
     });
   }
 
-  @PermsUtil.Requires(RoleLevel.Admin)
+  @PermsUtil.Requires('admin')
   public async run(msg: CommandoMessage): Promise<null> {
     const modmail = ModmailBot.getModmail();
     const category = await modmail.categories.getByGuild(msg.guild?.id || '');

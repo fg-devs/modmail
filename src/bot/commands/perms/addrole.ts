@@ -1,6 +1,5 @@
 import { Guild, Message } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
-import { RoleLevel } from '@newcircuit/modmail-types';
 import { LogUtil, PermsUtil } from '../../../util';
 import Command from '../../command';
 import ModmailBot from '../..';
@@ -40,12 +39,11 @@ export default class AddRole extends Command {
     });
   }
 
-  @PermsUtil.Requires(RoleLevel.Admin)
+  @PermsUtil.Requires('admin')
   public async run(msg: CommandoMessage, args: Args): Promise<Message | Message[] | null> {
     const [roleID, levelStr] = AddRole.fuzzy(args);
     const modmail = ModmailBot.getModmail();
     const category = await modmail.categories.getByGuild(msg.guild?.id || '');
-    const level = AddRole.getLevel(levelStr.toLowerCase());
 
     if (category === null || !category.isActive()) {
       const res = 'This guild doesn\'t have an active category.';
@@ -54,7 +52,7 @@ export default class AddRole extends Command {
       return null;
     }
 
-    if (level === null) {
+    if (levelStr !== 'mod' && levelStr !== 'admin') {
       const res = `"${levelStr}" isn't a valid level, try again.`;
       LogUtil.cmdWarn(msg, res);
       await msg.say(res);
@@ -69,21 +67,13 @@ export default class AddRole extends Command {
 
     const pool = ModmailBot.getDB();
     await pool.permissions.add({
-      roleID,
-      level,
-      category: category.getID(),
+      roleId: roleID,
+      level: levelStr,
+      categoryId: category.getID(),
     });
 
     await msg.say(`Role added as ${levelStr}`);
     return null;
-  }
-
-  private static getLevel(level: string): RoleLevel | null {
-    try {
-      return PermsUtil.resolveStr(level);
-    } catch (_) {
-      return null;
-    }
   }
 
   private static async isReal(guild: Guild, roleID: string): Promise<boolean> {

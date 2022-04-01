@@ -1,4 +1,4 @@
-import { RoleLevel } from '@newcircuit/modmail-types';
+import { RoleLevel } from '@prisma/client';
 import { CommandoMessage } from 'discord.js-commando';
 import { CONFIG } from '../globals';
 import ModmailBot from '../bot';
@@ -20,11 +20,11 @@ async function checkRole(msg: CommandoMessage): Promise<RoleLevel | null> {
     return null;
   }
 
-  const guild = await msg.client.guilds.fetch(category.guildID);
+  const guild = await msg.client.guilds.fetch(category.guildId);
 
   if (!guild) {
     console.error(
-      `Failed to resolve guild for category "${category.guildID}"`,
+      `Failed to resolve guild for category "${category.guildId}"`,
     );
     return null;
   }
@@ -41,7 +41,7 @@ async function checkRole(msg: CommandoMessage): Promise<RoleLevel | null> {
   while (!role.done) {
     for (let i = 0; i < reference.length; i += 1) {
       const ref = reference[i];
-      if (ref.roleID === role.value.id) {
+      if (ref.roleId === role.value.id) {
         return ref.level;
       }
     }
@@ -50,42 +50,6 @@ async function checkRole(msg: CommandoMessage): Promise<RoleLevel | null> {
   }
 
   return null;
-}
-
-/**
- * Converts a human readable string to a RoleLevel enum
- * @param {string} level
- * @returns {RoleLevel}
- * @throws {Error} if an invalid level was provided
- */
-export function resolveStr(level: string): RoleLevel {
-  switch (level) {
-    case 'admin':
-      return RoleLevel.Admin;
-    case 'mod':
-      return RoleLevel.Mod;
-    default:
-      throw new Error(
-        `The role level "${level}" from the db isn't considered for.`,
-      );
-  }
-}
-
-/**
- * Converts RoleLevel enum to a human readable string
- * @param {RoleLevel} level
- * @returns {string}
- * @throws {Error} if an invalid level was provided
- */
-export function resolve(level: RoleLevel): string {
-  switch (level) {
-    case RoleLevel.Admin:
-      return 'admin';
-    case RoleLevel.Mod:
-      return 'mod';
-    default:
-      throw new Error('A role level provided was not considered for.');
-  }
 }
 
 /**
@@ -103,7 +67,7 @@ export function Requires(required: RoleLevel) {
     desc.value = (...args: any[]) => {
       const msg = args[0] as CommandoMessage;
       return checkRole(msg).then((hasRole) => {
-        const hasAccess = hasRole === RoleLevel.Admin
+        const hasAccess = hasRole === 'admin'
           || hasRole === required
           || CONFIG.bot.owners.includes(msg.author.id);
         if (hasAccess) {
@@ -111,7 +75,7 @@ export function Requires(required: RoleLevel) {
           // @ts-ignore
           return original.apply(this, args);
         }
-        if (required === RoleLevel.Admin) {
+        if (required === 'admin') {
           msg.say('You must be an admin to run this command.');
         } else {
           msg.say('You must be a mod to run this command.');

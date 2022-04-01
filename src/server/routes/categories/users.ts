@@ -1,12 +1,12 @@
 import { Response, Router } from 'express';
 import {
-  RoleLevel,
-  Thread,
-  UserState,
   Message,
+} from '@prisma/client';
+import {
+  UserState,
 } from '@newcircuit/modmail-types';
 import { RequestWithCategory } from '../../types';
-import ModmailServer from '../..';
+import ModmailServer, { ThreadWithMessages } from '../..';
 import Route from '../../route';
 
 export default class UsersRoute extends Route {
@@ -52,18 +52,20 @@ export default class UsersRoute extends Route {
       return;
     }
 
+    // TODO(dylhack): FIX
     const { categoryID, userID } = req.params;
     const pool = this.modmail.getDB();
     const userIDs = new Set<string>();
-    let threads = await pool.threads.history(userID, categoryID);
+    let threads = (await pool.threads.history(userID, categoryID))
+      .map<ThreadWithMessages>((th) => ({ ...th, messages: [] }));
 
-    threads = threads.filter((th: Thread) => {
-      const passes = (th.isAdminOnly && member.role === RoleLevel.Admin)
+    threads = threads.filter((th: ThreadWithMessages) => {
+      const passes = (th.isAdminOnly && member.role === 'admin')
         || (!th.isAdminOnly);
 
       if (passes) {
-        th.messages.forEach((msg: Message) => userIDs.add(msg.sender));
-        userIDs.add(th.author.id);
+        th.messages.forEach((msg: Message) => userIDs.add(msg.senderId));
+        userIDs.add(th.authorId);
       }
       return passes;
     });

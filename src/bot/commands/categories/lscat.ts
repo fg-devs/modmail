@@ -1,4 +1,3 @@
-import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { Embeds, PermsUtil } from '../../../util';
 import Command from '../../command';
@@ -22,7 +21,7 @@ export default class ListCategories extends Command {
     });
   }
 
-  @PermsUtil.Requires(RoleLevel.Mod)
+  @PermsUtil.Requires('mod')
   public async run(msg: CommandoMessage): Promise<null> {
     const modmail = ModmailBot.getModmail();
     const cats = await modmail.categories.getAll(false, true);

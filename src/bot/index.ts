@@ -48,7 +48,7 @@ export default class ModmailBot extends CommandoClient {
     this.threads = new Threads(this);
 
     // Globally accessible throughout the bot scope
-    ModmailBot.db = new DatabaseManager(CONFIG.database);
+    ModmailBot.db = new DatabaseManager();
     ModmailBot.modmail = this;
 
     // Event / command handlers
@@ -81,7 +81,6 @@ export default class ModmailBot extends CommandoClient {
    * @returns {Promise<void>}
    */
   public async start(): Promise<void> {
-    await ModmailBot.db.init();
     await this.login(CONFIG.bot.token);
   }
 

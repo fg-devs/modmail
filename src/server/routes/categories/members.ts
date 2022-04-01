@@ -31,7 +31,7 @@ export default class MembersRoute extends Route {
 
     try {
       const bot = this.modmail.getBot();
-      const members = await bot.getMembers(category.guildID);
+      const members = await bot.getMembers(category.guildId);
 
       res.json(members);
       res.end();

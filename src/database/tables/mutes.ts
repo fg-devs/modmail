@@ -1,11 +1,9 @@
-import { MuteStatus } from '@newcircuit/modmail-types';
-import { DBMuteStatus } from '../types';
-import { Pool } from 'pg';
+import { Mute, Prisma } from '@prisma/client';
 import Table from '../table';
 
 export default class MutesTable extends Table {
-  constructor(pool: Pool) {
-    super(pool, 'mutes');
+  constructor() {
+    super('mutes');
   }
 
   /**
@@ -13,94 +11,95 @@ export default class MutesTable extends Table {
    * @param {MuteStatus} mute
    * @returns {Promise<boolean>}
    */
-  public async add(mute: MuteStatus): Promise<boolean> {
-    const isMuted = await this.isMuted(mute.user, mute.category);
+  public async add(mute: Prisma.MuteUncheckedCreateInput): Promise<boolean> {
+    const isMuted = await this.isMuted(mute.userId, mute.categoryId);
 
     if (isMuted) {
       return false;
     }
 
-    const client = await this.getClient();
-    try { 
-      await client.query(
-        `INSERT INTO modmail.mutes (user_id, category_id, till, reason)
-         VALUES ($1, $2, $3, $4);`,
-        [mute.user, mute.category, mute.till, mute.reason],
-      );
-      
-      return true;
-    } finally {
-      client.release();
-    }
+    const client = this.getClient();
+    const newMute = await client.mute.create({
+      data: {
+        reason: mute.reason,
+        till: mute.till,
+        user: {
+          connectOrCreate: {
+            create: { id: mute.userId },
+            where: { id: mute.userId },
+          },
+        },
+        category: {
+          connect: {
+            id: mute.categoryId,
+          },
+        },
+      },
+    });
+
+    return newMute !== null;
   }
 
   /**
    * Unmute a user
-   * @param {string} user
-   * @param {string} category
+   * @param {string} userId
+   * @param {string} categoryId
    * @returns {Promise<boolean>}
    */
-  public async delete(user: string, category: string): Promise<boolean> {
-    const client = await this.getClient();
-
-    try {
-      const res = await client.query(
-        `DELETE
-         FROM modmail.mutes
-         WHERE user_id = $1
-           AND category_id = $2
-           AND till > $3;`,
-        [user, category, Date.now()],
-      );
-
-      return res.rowCount !== 0;
-    } finally {
-      client.release();
+  public async delete(userId: string, categoryId: string): Promise<boolean> {
+    const client = this.getClient();
+    const mute = await client.mute.findFirst({
+      where: {
+        categoryId,
+        userId,
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (mute === null) {
+      return false;
     }
+    await client.mute.delete({
+      where: {
+        id: mute.id,
+      },
+    });
+    return true;
   }
 
   /**
    * Get all the mutes for a user
-   * @param {string} user
+   * @param {string} userId
    * @returns {Promise<MuteStatus>}
    */
-  public async fetchAll(user: string): Promise<MuteStatus[]> {
-    const client = await this.getClient();
-
-    try {
-      const res = await client.query(
-        `SELECT *
-         FROM modmail.mutes
-         WHERE user_id = $1`,
-        [user],
-      );
-
-      return res.rows.map(MutesTable.parse);
-    } finally {
-      client.release();
-    }
+  public fetchAll(userId: string): Promise<Mute[]> {
+    const client = this.getClient();
+    return client.mute.findMany({
+      where: {
+        userId,
+      },
+    });
   }
 
   /**
    * Get a muted user for a given category
-   * @param {string} user
-   * @param {string} category
-   * @returns {Promise<MuteStatus | null>}
+   * @param {string} userId
+   * @param {string} categoryId
+   * @returns {Promise<Mute | null>}
    */
-  public async fetch(user: string, category: string): Promise<MuteStatus | null> {
-    const res = await this.fetchAll(user);
+  public fetch(userId: string, categoryId: string): Promise<Mute | null> {
+    const client = this.getClient();
     const now = Date.now();
-
-    for (let i = 0; i < res.length; i += 1) {
-      const mute = res[i];
-      const { till } = mute;
-
-      if (till > now && mute.category === category) {
-        return mute;
-      }
-    }
-
-    return null;
+    return client.mute.findFirst({
+      where: {
+        userId,
+        categoryId,
+        till: {
+          gt: now.toString(),
+        },
+      },
+    });
   }
 
   /**
@@ -117,61 +116,20 @@ export default class MutesTable extends Table {
 
   /**
    * Unmute a user from a category
-   * @param {string} user
-   * @param {string} category
+   * @param {string} userId
+   * @param {string} categoryId
    * @returns {Promise<boolean>}
    */
-  public async remove(user: string, category: string): Promise<boolean> {
-    const client = await this.getClient();
-
-    try {
-      const res = await client.query(
-        `DELETE
-         FROM modmail.mutes
-         WHERE user_id = $1
-           AND category_id = $2;`,
-        [user, category],
-      );
-
-      return res.rowCount !== 0;
-    } finally {
-      client.release();
+  public async remove(userId: string, categoryId: string): Promise<boolean> {
+    const client = this.getClient();
+    const current = await client.mute.findFirst({
+      where: { userId, categoryId },
+      select: { id: true },
+    });
+    if (current === null) {
+      return false;
     }
-  }
-
-  /**
-   * Initialize the mutes table
-   */
-  protected async init(): Promise<void> {
-    const client = await this.getClient();
-
-    try {
-      await client.query(
-        `CREATE TABLE IF NOT EXISTS modmail.mutes
-         (
-             user_id     BIGINT NOT NULL
-                 CONSTRAINT threads_users_id_fk
-                     REFERENCES modmail.users,
-             till        BIGINT NOT NULL,
-             category_id BIGINT NOT NULL,
-             reason      text   NOT NULL
-         )`,
-      );
-    } finally {
-      client.release();
-    }
-  }
-
-  /**
-   * @param {DBMuteStatus} data
-   * @returns {MuteStatus}
-   */
-  private static parse(data: DBMuteStatus): MuteStatus {
-    return {
-      user: data.user_id.toString(),
-      category: data.category_id.toString(),
-      till: data.till,
-      reason: data.reason,
-    };
+    await client.mute.delete({ where: { id: current.id } });
+    return true;
   }
 }

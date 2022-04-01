@@ -6,7 +6,6 @@ import {
   TextChannel,
   User,
 } from 'discord.js';
-import { RoleLevel } from '@newcircuit/modmail-types';
 import { Category } from '..';
 import { Embeds } from '../../util';
 import { ADMIN_INDICATOR_PREFIX, PROMPT_TIME } from '../../globals';
@@ -119,12 +118,12 @@ export default class ThreadController extends Controller {
 
   /**
    * Get a thread based on a thread ID provided
-   * @param {string} threadID
+   * @param {string} threadId
    * @returns {Promise<Thread | null>}
    */
-  public async getByID(threadID: string): Promise<Thread | null> {
+  public async getByID(threadId: string): Promise<Thread | null> {
     const pool = ModmailBot.getDB();
-    const data = await pool.threads.getByID(threadID);
+    const data = await pool.threads.getById(threadId);
 
     if (data !== null) {
       return new Thread(this.modmail, data);
@@ -353,10 +352,10 @@ export default class ThreadController extends Controller {
     for (let i = 0; i < roles.length; i += 1) {
       const role = roles[i];
 
-      if (role.level === RoleLevel.Admin) {
+      if (role.level === 'admin') {
         perms.push({
           allow: ['VIEW_CHANNEL'],
-          id: role.roleID,
+          id: role.roleId,
         });
       }
     }

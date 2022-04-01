@@ -1,4 +1,3 @@
-import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { Threads } from '../../../controllers';
 import { Embeds, LogUtil, PermsUtil } from '../../../util';
@@ -34,7 +33,7 @@ export default class OpenThread extends Command {
     });
   }
 
-  @PermsUtil.Requires(RoleLevel.Mod)
+  @PermsUtil.Requires('mod')
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const optUserID = (/[0-9]+/g).exec(args.userID);
 

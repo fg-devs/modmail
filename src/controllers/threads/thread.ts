@@ -5,9 +5,8 @@ import { CommandoMessage } from 'discord.js-commando';
 import {
   Attachment,
   Edit,
-  Message as PartialMessage,
   Thread as PartialThread,
-} from '@newcircuit/modmail-types';
+} from '@prisma/client';
 import getUrls from 'get-urls';
 import { Message as MMMessage, Threads } from '..';
 import { CLOSE_THREAD_DELAY } from '../../globals';
@@ -39,7 +38,7 @@ export default class Thread {
     try {
       await dmChannel.send(dmEmbed);
     } finally {
-      await pool.threads.close(this.ref.channel);
+      await pool.threads.close(this.ref.channelId);
       if (thChannel !== null) {
         await thChannel.send(threadEmbed);
         await new Promise((r) => setTimeout(r, CLOSE_THREAD_DELAY));
@@ -54,7 +53,7 @@ export default class Thread {
 
   public async getAuthor(): Promise<User> {
     return this.modmail.users.fetch(
-      this.ref.author.id,
+      this.ref.authorId,
       true,
     );
   }
@@ -72,20 +71,20 @@ export default class Thread {
         true,
       );
 
-      return guild.member(userID || this.ref.author.id);
+      return guild.member(userID || this.ref.authorId);
     } catch (_) {
       return null;
     }
   }
 
   public async getCategory(): Promise<Category | null> {
-    return this.modmail.categories.getByID(this.ref.category);
+    return this.modmail.categories.getByID(this.ref.categoryId);
   }
 
   public async getThreadChannel(): Promise<TextChannel | null> {
     try {
       const channel = await this.modmail.channels.fetch(
-        this.ref.channel,
+        this.ref.channelId,
         true,
       );
 
@@ -163,19 +162,15 @@ export default class Thread {
     }
 
     // Modmail message
-    const modmailMsg: PartialMessage = {
-      clientID: msg.id,
+    const modmailMsg = await pool.messages.add({
+      clientId: msg.id,
       content: msg.content,
-      edits: [],
-      files: [],
       isDeleted: false,
-      internal: false,
-      modmailID: thMessage.id,
-      sender: msg.author.id,
-      threadID: this.ref.id,
-    };
-
-    await pool.messages.add(modmailMsg);
+      isInternal: false,
+      modmailId: thMessage.id,
+      threadId: this.ref.id,
+      senderId: msg.author.id,
+    });
     await attCtrl.handleDM(
       new MMMessage(this.modmail, modmailMsg),
       msg.attachments.values(),
@@ -284,18 +279,15 @@ export default class Thread {
     const threadMessage = await thChannel.send(threadEmbed);
 
     await pool.users.create(sender.id);
-    const mmMsg = {
-      clientID: dmMessage.id,
+    const mmMsg = await pool.messages.add({
+      clientId: dmMessage.id,
       content,
-      edits: [],
-      files: [],
       isDeleted: false,
-      internal: false,
-      modmailID: threadMessage.id,
-      sender: sender.id,
-      threadID: this.ref.id,
-    };
-    await pool.messages.add(mmMsg);
+      isInternal: false,
+      modmailId: threadMessage.id,
+      senderId: sender.id,
+      threadId: this.ref.id,
+    });
     return new MMMessage(this.modmail, mmMsg);
   }
 
@@ -348,12 +340,12 @@ export default class Thread {
     (await Promise.all(usrTasks)).forEach((user) => users.set(user.id, user));
     (await Promise.all(edtTasks)).forEach((msgEdits) => {
       if (msgEdits.length > 0) {
-        edits.set(msgEdits[0].message, msgEdits);
+        edits.set(msgEdits[0].messageId, msgEdits);
       }
     });
     (await Promise.all(attTasks)).forEach((msgAtt) => {
       if (msgAtt.length > 0) {
-        attachments.set(msgAtt[0].messageID, msgAtt);
+        attachments.set(msgAtt[0].messageId, msgAtt);
       }
     });
 
@@ -369,19 +361,19 @@ export default class Thread {
       let attEmbed: MessageEmbed | null = null;
 
       if (msgEdits) {
-        embed = this.ref.author.id === msg.getSenderID()
+        embed = this.ref.authorId === msg.getSenderID()
           ? Embeds.editsRecv(user, msgEdits)
           : Embeds.editsSend(user, msgEdits);
       } else if (msg.isInternal()) {
         embed = Embeds.internalMessage(msg.getContent(), user);
       } else {
-        embed = this.ref.author.id === msg.getSenderID()
+        embed = this.ref.authorId === msg.getSenderID()
           ? Embeds.messageRecv(msg.getContent(), user, false)
           : Embeds.messageSend(msg.getContent(), user, false);
       }
       if (msgAtts) {
         msgAtts.forEach((att) => {
-          attEmbed = this.ref.author.id === msg.getSenderID()
+          attEmbed = this.ref.authorId === msg.getSenderID()
             ? Embeds.attachmentRecv(att, user, false)
             : Embeds.attachmentSend(att, user, false);
         });
@@ -400,6 +392,6 @@ export default class Thread {
   }
 
   public async getUser(): Promise<User> {
-    return this.modmail.users.fetch(this.ref.author.id);
+    return this.modmail.users.fetch(this.ref.authorId);
   }
 }

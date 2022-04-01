@@ -1,10 +1,8 @@
 import {
   Attachment,
   Edit,
-  FileType,
-  Role,
-  RoleLevel,
-} from '@newcircuit/modmail-types';
+  Permission,
+} from '@prisma/client';
 import {
   GuildMember,
   MessageEmbed,
@@ -419,7 +417,7 @@ export default class Embeds {
       anonymously,
     );
 
-    if (attachment.type === FileType.Image) {
+    if (attachment.type === 'image') {
       embed.image = {
         url: attachment.source,
       };
@@ -448,7 +446,7 @@ export default class Embeds {
    * @param {Role[]} roles
    * @returns {MessageEmbed}
    */
-  public static listRoles(cat: Category, roles: Role[]): MessageEmbed {
+  public static listRoles(cat: Category, roles: Permission[]): MessageEmbed {
     const res = Embeds.getGeneric({
       title: `Roles of ${cat.getName()} - ${cat.getEmoji()}`,
       description: '',
@@ -457,11 +455,11 @@ export default class Embeds {
 
     for (let i = 0; i < roles.length; i += 1) {
       const role = roles[i];
-      const level = role.level === RoleLevel.Admin
+      const level = role.level === 'admin'
         ? '**[admin]**'
         : '**[mod]**';
 
-      res.description += `${level} <@&${role.roleID}> (\`${role.roleID}\`)\n`;
+      res.description += `${level} <@&${role.roleId}> (\`${role.roleId}\`)\n`;
     }
 
     return res;

@@ -1,5 +1,4 @@
 import { CommandoMessage } from 'discord.js-commando';
-import { RoleLevel } from '@newcircuit/modmail-types';
 import { LogUtil, PermsUtil } from '../../../util';
 import Command from '../../command';
 import ModmailBot from '../..';
@@ -33,7 +32,7 @@ export default class RemoveRole extends Command {
     });
   }
 
-  @PermsUtil.Requires(RoleLevel.Admin)
+  @PermsUtil.Requires('admin')
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const { roleID } = args;
     const modmail = ModmailBot.getModmail();

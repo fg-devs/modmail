@@ -1,7 +1,7 @@
 import { Response, Router } from 'express';
-import { RoleLevel, Thread } from '@newcircuit/modmail-types';
+import { Thread } from '@prisma/client';
 import { RequestWithCategory } from '../../types';
-import ModmailServer from '../..';
+import ModmailServer, { ThreadWithMessages } from '../..';
 import Route from '../../route';
 
 export default class ThreadsRoute extends Route {
@@ -30,20 +30,23 @@ export default class ThreadsRoute extends Route {
     }
 
     const db = this.modmail.getDB();
-    const thread = await db.threads.getByID(threadID);
+    const partialThread = await db.threads.getById(threadID);
 
-    if (thread === null) {
+    if (partialThread === null) {
       res.status(404);
       res.end();
       return;
     }
 
-    if (thread.isAdminOnly && member.role !== RoleLevel.Admin) {
+    if (partialThread.isAdminOnly && member.role !== 'admin') {
       this.failBadReq(res, 'Not an admin');
       return;
     }
 
-    thread.messages = await db.messages.fetchAll(threadID);
+    const thread = {
+      ...partialThread,
+      messages: await db.messages.fetchAll(threadID),
+    };
 
     // get user cache
     const targets = new Set<string>();
@@ -51,7 +54,7 @@ export default class ThreadsRoute extends Route {
     for (let i = 0; i < thread.messages.length; i += 1) {
       const msg = thread.messages[i];
 
-      targets.add(msg.sender);
+      targets.add(msg.senderId);
     }
 
     const users = await this.modmail.getUserCache(targets.values());
@@ -83,21 +86,25 @@ export default class ThreadsRoute extends Route {
 
     const db = this.modmail.getDB();
 
-    let threads = await db.threads.getByCategory(category.id);
-    threads = threads.filter((thr: Thread) => (thr.isAdminOnly && member.role === RoleLevel.Admin)
+    let threadsOpt = await db.threads.getByCategory(category.id);
+    threadsOpt = threadsOpt.filter((thr: Thread) => (thr.isAdminOnly && member.role === 'admin')
         || (!thr.isAdminOnly));
+    let threads: ThreadWithMessages[] = threadsOpt.map<ThreadWithMessages>((th) => ({
+      ...th,
+      messages: [],
+    }));
     threads = await this.modmail.getLastMessages(threads);
     const targets = new Set<string>();
 
     // get user cache
     for (let i = 0; i < threads.length; i += 1) {
       const thread = threads[i];
-      targets.add(thread.author.id);
+      targets.add(thread.authorId);
 
       // get last message author
       if (thread.messages.length > 0) {
         const message = thread.messages[0];
-        targets.add(message.sender);
+        targets.add(message.senderId);
       }
     }
 

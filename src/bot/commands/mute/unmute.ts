@@ -1,4 +1,3 @@
-import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { PermsUtil, LogUtil } from '../../../util';
 import Command from '../../command';
@@ -33,7 +32,7 @@ export default class Unmute extends Command {
     });
   }
 
-  @PermsUtil.Requires(RoleLevel.Mod)
+  @PermsUtil.Requires('mod')
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const modmail = ModmailBot.getModmail();
     const category = await modmail.categories.getByGuild(msg.guild?.id || '');

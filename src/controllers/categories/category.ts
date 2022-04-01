@@ -1,9 +1,7 @@
 import {
   Category as PartialCategory,
-  MuteStatus,
-  Role,
-  RoleLevel,
-} from '@newcircuit/modmail-types';
+  Permission,
+} from '@prisma/client';
 import { CategoryChannel, Guild } from 'discord.js';
 import { MAX_THREADS } from '../../globals';
 import ModmailBot from '../../bot';
@@ -32,7 +30,7 @@ export default class Category {
   }
 
   public getEmoji(): string {
-    return this.data.emojiID;
+    return this.data.emoji;
   }
 
   public getID(): string {
@@ -44,7 +42,7 @@ export default class Category {
   }
 
   public getGuildID(): string {
-    return this.data.guildID;
+    return this.data.guildId;
   }
 
   public getDescription(): string {
@@ -55,12 +53,12 @@ export default class Category {
     return `${this.data.name} (${this.data.id})`;
   }
 
-  public async getRoles(adminOnly = false): Promise<Role[]> {
+  public async getRoles(adminOnly = false): Promise<Permission[]> {
     const pool = ModmailBot.getDB();
     const roles = await pool.permissions.fetchAll(this.data.id);
 
     if (adminOnly) {
-      return roles.filter((r: Role) => r.level === RoleLevel.Admin);
+      return roles.filter((r) => r.level === 'admin');
     }
     return roles;
   }
@@ -103,13 +101,13 @@ export default class Category {
    * @returns {Promise<CategoryChannel | null>}
    */
   public async getCategory(): Promise<CategoryChannel | null> {
-    if (this.data.channelID === null) {
+    if (this.data.channelId === null) {
       return null;
     }
 
     try {
       const channel = await this.modmail.channels.fetch(
-        this.data.channelID,
+        this.data.channelId,
         true,
       );
 
@@ -162,14 +160,13 @@ export default class Category {
     reason?: string,
   ): Promise<boolean> {
     const pool = ModmailBot.getDB();
-    const mute: MuteStatus = {
-      till,
-      category: this.getID(),
-      reason: reason || 'No Reason Provided',
-      user: userID,
-    };
 
-    return pool.mutes.add(mute);
+    return pool.mutes.add({
+      till: till.toString(),
+      categoryId: this.getID(),
+      reason: reason || 'No Reason Provided',
+      userId: userID,
+    });
   }
 
   /**

@@ -1,4 +1,4 @@
-import { Attachment, FileType } from '@newcircuit/modmail-types';
+import { Attachment } from '@prisma/client';
 import { Message, MessageAttachment } from 'discord.js';
 import { IMAGE_REGEX } from '../globals';
 import { Message as MMMessage } from '.';
@@ -28,9 +28,7 @@ export default class AttachmentController extends Controller {
       name: msgAtt.name || '',
       sender: msg.getSenderID(),
       source: msgAtt.url,
-      type: AttachmentController.isImage(msgAtt)
-        ? FileType.Image
-        : FileType.File,
+      type: AttachmentController.isImage(msgAtt) ? 'image' : 'file',
     });
   }
 

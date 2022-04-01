@@ -10,7 +10,7 @@ import {
   GetMemberStateReq,
   GetRolesReq, GetStateReq,
   MemberState,
-  RoleLevel, RoleState,
+  RoleState,
   ServerMessage,
   ServerResponse,
   UserState,
@@ -18,7 +18,6 @@ import {
 } from '@newcircuit/modmail-types';
 import { parentPort, MessagePort } from 'worker_threads';
 import ModmailBot from '../bot';
-import * as PermUtil from '../util/Perms';
 
 /**
  * This controller controls the Discord bot for the API in a worker thread
@@ -318,8 +317,8 @@ export default class WorkerHandler {
 
     for (let i = 0; i < roles.length; i += 1) {
       const role = roles[i];
-      roleState = PermUtil.resolve(role.level);
-      if (role.level === RoleLevel.Admin) {
+      roleState = role.level;
+      if (roleState === 'admin') {
         break;
       }
     }

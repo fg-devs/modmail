@@ -2,7 +2,7 @@ import {
   Attachment,
   Edit,
   Message as PartialMessage,
-} from '@newcircuit/modmail-types';
+} from '@prisma/client';
 import {
   GuildMember,
   Message as DMessage,
@@ -26,19 +26,19 @@ export default class Message {
   }
 
   public getID(): string {
-    return this.data.modmailID;
+    return this.data.modmailId;
   }
 
   public getClientID(): string | null {
-    return this.data.clientID;
+    return this.data.clientId;
   }
 
   public isInternal(): boolean {
-    return this.data.internal;
+    return this.data.isInternal;
   }
 
   public getSenderID(): string {
-    return this.data.sender;
+    return this.data.senderId;
   }
 
   public async getSender(): Promise<GuildMember | User> {
@@ -71,7 +71,7 @@ export default class Message {
 
     try {
       return await dm.messages.fetch(
-        this.data.clientID || '',
+        this.data.clientId || '',
         true,
       );
     } catch (_) {
@@ -94,7 +94,7 @@ export default class Message {
 
     try {
       return await channel.messages.fetch(
-        this.data.modmailID,
+        this.data.modmailId,
         true,
       );
     } catch (_) {
@@ -105,17 +105,17 @@ export default class Message {
   public async getAttachments(): Promise<Attachment[]> {
     const pool = ModmailBot.getDB();
 
-    return pool.attachments.fetch(this.data.modmailID);
+    return pool.attachments.fetch(this.data.modmailId);
   }
 
   public async getEdits(): Promise<Edit[]> {
     const pool = ModmailBot.getDB();
 
-    return pool.edits.fetch(this.data.modmailID);
+    return pool.edits.fetch(this.data.modmailId);
   }
 
   public async getUser(): Promise<User> {
-    return this.modmail.users.fetch(this.data.sender);
+    return this.modmail.users.fetch(this.data.senderId);
   }
 
   /**
@@ -144,7 +144,7 @@ export default class Message {
       return;
     }
 
-    const thMessage = await thChan.messages.fetch(dbMessage.modmailID);
+    const thMessage = await thChan.messages.fetch(dbMessage.modmailId);
 
     if (thMessage === undefined) { return; }
 
@@ -214,7 +214,7 @@ export default class Message {
       await ccMsg.delete();
     }
 
-    await pool.messages.setDeleted(this.data.modmailID);
+    await pool.messages.setDeleted(this.data.modmailId);
   }
 
   /**
@@ -226,7 +226,7 @@ export default class Message {
       return this.thread;
     }
 
-    const thread = await this.modmail.threads.getByID(this.data.threadID);
+    const thread = await this.modmail.threads.getByID(this.data.threadId);
 
     if (thread !== null) {
       this.thread = thread;

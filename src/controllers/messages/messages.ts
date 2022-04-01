@@ -1,4 +1,4 @@
-import { Thread, Message as PartialMessage } from '@newcircuit/modmail-types';
+import { Thread, Message as PartialMessage } from '@prisma/client';
 import { Message, TextChannel } from 'discord.js';
 import { Embeds } from '../../util';
 import MMMessage from './message';
@@ -64,15 +64,13 @@ export default class MessageController extends Controller {
     }
 
     await pool.messages.add({
-      clientID: null,
+      clientId: null,
       content: msg.content,
-      edits: [],
-      files: [],
-      internal: true,
+      isInternal: true,
       isDeleted: false,
-      modmailID: msg.id,
-      sender: msg.author.id,
-      threadID: thread.getID(),
+      modmailId: msg.id,
+      senderId: msg.author.id,
+      threadId: thread.getID(),
     });
   }
 
@@ -109,7 +107,7 @@ export default class MessageController extends Controller {
 
     // get the thread channel for this message
     const thChan = await this.modmail.channels.fetch(
-      thread.channel,
+      thread.channelId,
       true,
       true,
     );
@@ -126,7 +124,7 @@ export default class MessageController extends Controller {
     }
 
     const thMessage = await thChannel.messages.fetch(
-      dbMessage.modmailID,
+      dbMessage.modmailId,
       true,
       true,
     );
@@ -156,7 +154,7 @@ export default class MessageController extends Controller {
 
     try {
       // get thread channel
-      const thChan = await this.modmail.channels.fetch(thread.channel);
+      const thChan = await this.modmail.channels.fetch(thread.channelId);
 
       thChannel = thChan as TextChannel;
 
@@ -167,7 +165,7 @@ export default class MessageController extends Controller {
         return;
       }
 
-      thMessage = await thChannel.messages.fetch(dbMessage.modmailID);
+      thMessage = await thChannel.messages.fetch(dbMessage.modmailId);
     } catch (_) {
       return;
     }

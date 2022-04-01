@@ -1,4 +1,3 @@
-import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { PermsUtil } from '../../../util';
 import Command from '../../command';
@@ -33,7 +32,7 @@ export default class StandardReplyDelete extends Command {
     });
   }
 
-  @PermsUtil.Requires(RoleLevel.Mod)
+  @PermsUtil.Requires('mod')
   public async run(msg: CommandoMessage, args: Args): Promise<null> {
     const pool = ModmailBot.getDB();
     await pool.standardReplies.remove(args.name);

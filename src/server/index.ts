@@ -10,6 +10,8 @@ import { getLogger, Logger } from 'log4js';
 import {
   Message,
   Thread,
+} from '@prisma/client';
+import {
   UserState,
   UserStateCache,
 } from '@newcircuit/modmail-types';
@@ -21,6 +23,10 @@ import { DatabaseManager } from '../database';
 import { RequestWithUser } from './types';
 import BotController from './controllers/bot';
 import LogoutRoute from './routes/logout';
+
+export interface ThreadWithMessages extends Thread {
+  messages: Message[];
+}
 
 export default class ModmailServer {
   private readonly bot: BotController;
@@ -35,7 +41,7 @@ export default class ModmailServer {
     this.app = express();
     this.bot = new BotController(this, bot);
     this.oauth = new ClientOAuth2(CONFIG.server.oauth2);
-    ModmailServer.db = new DatabaseManager(CONFIG.database);
+    ModmailServer.db = new DatabaseManager();
   }
 
   /**
@@ -127,7 +133,7 @@ export default class ModmailServer {
     return res;
   }
 
-  public async getLastMessages(threads: Thread[]): Promise<Thread[]> {
+  public async getLastMessages(threads: ThreadWithMessages[]): Promise<ThreadWithMessages[]> {
     const msgTasks: Promise<Message | null>[] = [];
     const pool = this.getDB();
 

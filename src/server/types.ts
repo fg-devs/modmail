@@ -2,7 +2,7 @@
 import { Snowflake } from 'discord.js';
 import { Request } from 'express';
 import { Session } from 'express-session';
-import { Category, RoleLevel } from '@newcircuit/modmail-types';
+import { Category, RoleLevel } from '@prisma/client';
 
 export type User = {
   avatar: string;

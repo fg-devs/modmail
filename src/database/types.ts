@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-shadow */
-import { FileType } from '@newcircuit/modmail-types';
+import { FileType } from '@prisma/client';
 
 /**
  * CreateCategoryOpt is used by CategoryTable.create()

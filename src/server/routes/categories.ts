@@ -1,4 +1,4 @@
-import { Category, RoleLevel } from '@newcircuit/modmail-types';
+import { Category } from '@prisma/client';
 import { NextFunction, Response, Router } from 'express';
 import ModmailServer from '..';
 import MembersRoute from './categories/members';
@@ -77,7 +77,7 @@ export default class CategoriesRoute extends Route {
     }
 
     const member = await bot.getMember(
-      cat.guildID,
+      cat.guildId,
       req.session.user.id,
     );
 
@@ -89,7 +89,7 @@ export default class CategoriesRoute extends Route {
 
     req.session.member = {
       ...user,
-      role: member.role === 'mod' ? RoleLevel.Mod : RoleLevel.Admin,
+      role: member.role,
     };
     req.session.category = cat;
     next();
