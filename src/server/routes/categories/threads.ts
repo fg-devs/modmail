@@ -1,8 +1,8 @@
 import { Response, Router } from 'express';
-import { RequestWithCategory } from '../../types';
-import ModmailServer from '../../';
-import Route from '../../route';
 import { RoleLevel, Thread } from '@newcircuit/modmail-types';
+import { RequestWithCategory } from '../../types';
+import ModmailServer from '../..';
+import Route from '../../route';
 
 export default class ThreadsRoute extends Route {
   constructor(mm: ModmailServer) {
@@ -48,7 +48,7 @@ export default class ThreadsRoute extends Route {
     // get user cache
     const targets = new Set<string>();
 
-    for (let i = 0; i < thread.messages.length; ++i) {
+    for (let i = 0; i < thread.messages.length; i += 1) {
       const msg = thread.messages[i];
 
       targets.add(msg.sender);
@@ -84,15 +84,13 @@ export default class ThreadsRoute extends Route {
     const db = this.modmail.getDB();
 
     let threads = await db.threads.getByCategory(category.id);
-    threads = threads.filter((thr: Thread) => {
-      return (thr.isAdminOnly && member.role === RoleLevel.Admin)
-        || (!thr.isAdminOnly);
-    })
+    threads = threads.filter((thr: Thread) => (thr.isAdminOnly && member.role === RoleLevel.Admin)
+        || (!thr.isAdminOnly));
     threads = await this.modmail.getLastMessages(threads);
-    let targets = new Set<string>();
+    const targets = new Set<string>();
 
     // get user cache
-    for (let i = 0; i < threads.length; i++) {
+    for (let i = 0; i < threads.length; i += 1) {
       const thread = threads[i];
       targets.add(thread.author.id);
 
@@ -103,7 +101,7 @@ export default class ThreadsRoute extends Route {
       }
     }
 
-    let users = await this.modmail.getUserCache(targets.values());
+    const users = await this.modmail.getUserCache(targets.values());
 
     res.json({
       threads,

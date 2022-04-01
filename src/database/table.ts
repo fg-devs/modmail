@@ -1,4 +1,4 @@
-import { 
+import {
   Pool,
   PoolClient,
 } from 'pg';
@@ -47,6 +47,7 @@ export default class Table {
    * Alter existing tables if needed
    * @returns {Promise<void>}
    */
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected async migrate(): Promise<void> { }
 
   /**

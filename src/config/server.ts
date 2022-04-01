@@ -9,6 +9,7 @@ export default class ServerConfig extends Conf {
   public readonly appkey: string;
 
   public readonly oauth2: OAuth2Config;
+
   constructor() {
     super('server');
 

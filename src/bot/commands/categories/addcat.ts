@@ -2,7 +2,7 @@ import { TextChannel } from 'discord.js';
 import { CommandoMessage } from 'discord.js-commando';
 import { LogUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 type CatArgs = {
   name: string;
@@ -18,7 +18,6 @@ type CatArgs = {
  *  * Must be under a Discord category "parent" channel
  *    that isn't being used by another Modmail category
  *  * Name & Emoji must be unique
- *  
  */
 export default class AddCategory extends Command {
   constructor(client: ModmailBot) {
@@ -79,7 +78,8 @@ export default class AddCategory extends Command {
     try {
       await modmail.categories.create(parent, emoji, name, isPrivate, desc);
       await msg.say('Category added.');
-    } catch (e) {
+    } catch (err) {
+      const e = err as Error;
       let res;
       if (e.message.includes('channel_id')) {
         res = 'This category is already registered';

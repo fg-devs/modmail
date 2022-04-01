@@ -1,3 +1,7 @@
+import {
+  Pool,
+  PoolConfig,
+} from 'pg';
 import AttachmentsTable from './tables/attachments';
 import CategoriesTable from './tables/categories';
 import EditsManager from './tables/edits';
@@ -7,11 +11,6 @@ import PermissionsTable from './tables/permissions';
 import StandardRepliesTable from './tables/standardReplies';
 import ThreadsTable from './tables/threads';
 import UsersTable from './tables/users';
-import {
-  Pool,
-  PoolClient,
-  PoolConfig,
-} from 'pg';
 
 export default class DatabaseManager {
     public readonly pool: Pool;
@@ -53,18 +52,17 @@ export default class DatabaseManager {
       const client = await this.pool.connect();
       const tasks: Promise<void>[] = [];
 
-
       await client.query(
-        `CREATE SCHEMA IF NOT EXISTS modmail`,
+        'CREATE SCHEMA IF NOT EXISTS modmail',
       );
-      
-      try { 
+
+      try {
         await client.query(
-          `CREATE TYPE modmail.file_type AS ENUM ('image', 'file');`,
+          'CREATE TYPE modmail.file_type AS ENUM (\'image\', \'file\');',
         );
 
         await client.query(
-          `CREATE TYPE modmail.role_level AS ENUM ('admin', 'mod');`,
+          'CREATE TYPE modmail.role_level AS ENUM (\'admin\', \'mod\');',
         );
       } catch (_) {
         /* ignore these errors */

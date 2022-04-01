@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable no-shadow */
 import { FileType } from '@newcircuit/modmail-types';
 

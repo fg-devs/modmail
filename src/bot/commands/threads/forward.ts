@@ -1,9 +1,9 @@
 import { CommandoMessage } from 'discord.js-commando';
 import { TextChannel } from 'discord.js';
 import { Threads } from '../../../controllers';
-import { LogUtil } from '../../../util/';
+import { LogUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 /**
  * Forward a thread to another category
@@ -31,7 +31,7 @@ export default class Forward extends Command {
       return null;
     }
 
-    const user = await thread.getAuthor()
+    const user = await thread.getAuthor();
     const category = await modmail.threads.getCategory(channel, true);
 
     if (category === null) {
@@ -39,10 +39,10 @@ export default class Forward extends Command {
       return null;
     }
 
-    const muted = await category.isMuted(user.id)
+    const muted = await category.isMuted(user.id);
 
     if (muted) {
-      await msg.reply('The user is muted in that category.')
+      await msg.reply('The user is muted in that category.');
       return null;
     }
 
@@ -52,7 +52,8 @@ export default class Forward extends Command {
       await thread.forward(msg.author, isAdminOnly, category);
       await msg.reply('Forwarded.');
       await msg.channel.delete();
-    } catch (e) {
+    } catch (err) {
+      const e = err as Error;
       const res = 'Something internal went wrong.';
       LogUtil.cmdError(msg, e, res);
       await msg.reply(res);

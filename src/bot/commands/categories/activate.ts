@@ -1,9 +1,9 @@
-import { LogUtil, PermsUtil } from '../../../util/';
 import { CommandoMessage } from 'discord.js-commando';
 import { RoleLevel } from '@newcircuit/modmail-types';
 import { TextChannel } from 'discord.js';
+import { LogUtil, PermsUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 /**
  * This command is used for re-activating a category

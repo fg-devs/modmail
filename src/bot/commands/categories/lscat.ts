@@ -2,7 +2,7 @@ import { RoleLevel } from '@newcircuit/modmail-types';
 import { CommandoMessage } from 'discord.js-commando';
 import { Embeds, PermsUtil } from '../../../util';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 /**
  * List all the categories

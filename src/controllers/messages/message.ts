@@ -8,7 +8,7 @@ import {
   Message as DMessage,
   PartialMessage as PartialDMessage, User,
 } from 'discord.js';
-import { Thread } from '../';
+import { Thread } from '..';
 import { Embeds } from '../../util';
 import ModmailBot from '../../bot';
 
@@ -160,7 +160,7 @@ export default class Message {
   /**
    * Edit the Discord copies of this message and store this new edit in the
    * database
-   * @param  {string} content The new content that is replacing the current 
+   * @param  {string} content The new content that is replacing the current
    * message
    * @return {Promise<void>}
    */

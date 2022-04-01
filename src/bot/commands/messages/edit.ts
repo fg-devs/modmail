@@ -1,6 +1,6 @@
 import { CommandoMessage } from 'discord.js-commando';
 import Command from '../../command';
-import ModmailBot from '../../';
+import ModmailBot from '../..';
 
 type Args = {
   content: string;

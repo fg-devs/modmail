@@ -10,7 +10,7 @@ import {
 import { Embeds } from '../util';
 import { CONFIG } from '../globals';
 import { Thread } from '../controllers';
-import ModmailBot from './';
+import ModmailBot from '.';
 
 export default class EventHandler {
   private readonly modmail: ModmailBot;

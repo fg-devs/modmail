@@ -1,8 +1,8 @@
-import Route from '../../route';
-import ModmailServer from '../../';
 import { Response, Router } from 'express';
-import { RequestWithCategory } from '../../types';
 import { RoleState } from '@newcircuit/modmail-types';
+import Route from '../../route';
+import ModmailServer from '../..';
+import { RequestWithCategory } from '../../types';
 
 export default class RolesRoute extends Route {
   constructor(mm: ModmailServer) {

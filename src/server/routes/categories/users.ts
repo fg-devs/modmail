@@ -1,13 +1,13 @@
 import { Response, Router } from 'express';
-import { RequestWithCategory } from '../../types';
-import ModmailServer from '../../';
-import Route from '../../route';
 import {
   RoleLevel,
   Thread,
   UserState,
   Message,
 } from '@newcircuit/modmail-types';
+import { RequestWithCategory } from '../../types';
+import ModmailServer from '../..';
+import Route from '../../route';
 
 export default class UsersRoute extends Route {
   constructor(mm: ModmailServer) {
