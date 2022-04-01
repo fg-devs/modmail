@@ -54,42 +54,30 @@ export default class DatabaseManager {
       this.permissions = new PermissionsTable(pool);
     }
 
-    public async init(): Promise<void> {
-      const log = ModmailBot.getLogger('database-init');
-      let attempts = 0;
-      let client: PoolClient | null = null;
-      let finalError: Error | null = null;
-      const reconnect = () => new Promise<PoolClient>((res) => {
-        setTimeout(async () => {
-          res(await this.pool.connect());
-        }, DatabaseManager.RECON_DELAY_MS);
+    public async init(delay = 0, attempts = 0): Promise<void> {
+      let clientOpt: PoolClient | null = null;
+      const connect = () => new Promise<PoolClient>((res, rej) => {
+        setTimeout(() => this.pool.connect().then(res).catch(rej), delay);
       });
 
-      do {
-        try {
-          if (attempts === 0) {
-            // eslint-disable-next-line no-await-in-loop
-            client = await this.pool.connect();
-          } else {
-            log.warn(
-              'Failed to connect to postgres, trying again in'
-              + ` ${DatabaseManager.RECON_DELAY_MS / 1000} seconds.`,
-            );
-            // eslint-disable-next-line no-await-in-loop
-            client = await reconnect();
-          }
-        } catch (err) {
-          const e = err as Error;
-          finalError = e;
+      try {
+        clientOpt = await connect();
+      } catch (err) {
+        if (attempts >= DatabaseManager.ATTEMPTS) {
+          throw err;
         }
-        attempts += 1;
-      } while (attempts < DatabaseManager.ATTEMPTS && client === null);
 
-      if (client === null) {
-        throw finalError;
+        const log = ModmailBot.getLogger('database-init');
+        log.warn(
+          'Failed to connect to postgres, trying again in'
+          + ` ${DatabaseManager.RECON_DELAY_MS / 1000} seconds.`,
+        );
+        await this.init(DatabaseManager.RECON_DELAY_MS, attempts + 1);
+        return;
       }
 
       const tasks: Promise<void>[] = [];
+      const client = clientOpt;
 
       await client.query(
         'CREATE SCHEMA IF NOT EXISTS modmail',
