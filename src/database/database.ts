@@ -1,7 +1,9 @@
 import {
   Pool,
+  PoolClient,
   PoolConfig,
 } from 'pg';
+import ModmailBot from '../bot';
 import AttachmentsTable from './tables/attachments';
 import CategoriesTable from './tables/categories';
 import EditsManager from './tables/edits';
@@ -33,6 +35,10 @@ export default class DatabaseManager {
 
     public readonly permissions: PermissionsTable;
 
+    private static readonly ATTEMPTS = 5;
+
+    private static readonly RECON_DELAY_MS = 5000;
+
     constructor(config: PoolConfig) {
       const pool = new Pool(config);
 
@@ -49,7 +55,40 @@ export default class DatabaseManager {
     }
 
     public async init(): Promise<void> {
-      const client = await this.pool.connect();
+      const log = ModmailBot.getLogger('database-init');
+      let attempts = 0;
+      let client: PoolClient | null = null;
+      let finalError: Error | null = null;
+      const reconnect = () => new Promise<PoolClient>((res) => {
+        setTimeout(async () => {
+          res(await this.pool.connect());
+        }, DatabaseManager.RECON_DELAY_MS);
+      });
+
+      do {
+        try {
+          if (attempts === 0) {
+            // eslint-disable-next-line no-await-in-loop
+            client = await this.pool.connect();
+          } else {
+            log.warn(
+              'Failed to connect to postgres, trying again in'
+              + ` ${DatabaseManager.RECON_DELAY_MS / 1000} seconds.`,
+            );
+            // eslint-disable-next-line no-await-in-loop
+            client = await reconnect();
+          }
+        } catch (err) {
+          const e = err as Error;
+          finalError = e;
+        }
+        attempts += 1;
+      } while (attempts < DatabaseManager.ATTEMPTS && client === null);
+
+      if (client === null) {
+        throw finalError;
+      }
+
       const tasks: Promise<void>[] = [];
 
       await client.query(
