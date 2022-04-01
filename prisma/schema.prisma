@@ -1,0 +1,115 @@
+// docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum FileType {
+  image
+  file
+}
+
+enum RoleLevel {
+  mod
+  admin
+}
+
+model Category {
+  // Snowflake ID (originally BIGINT)
+  id          String       @id
+  // Snowflake ID (originally BIGINT)
+  channelId   String?      @unique
+  name        String       @unique
+  isActive    Boolean      @default(true)
+  isPrivate   Boolean      @default(false)
+  // Snowflake ID (originally BIGINT)
+  guildId     String       @unique
+  emoji       String       @unique
+  description String       @default("")
+  threads     Thread[]
+  permissions Permission[]
+  mutes       Mute[]
+}
+
+model User {
+  id          String       @id
+  threads     Thread[]
+  messages    Message[]
+  Mute        Mute[]
+  attachments Attachment[]
+}
+
+model Thread {
+  id          String    @id
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  channelId   String
+  isActive    Boolean   @default(true)
+  isAdminOnly Boolean   @default(false)
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  messages    Message[]
+}
+
+model Message {
+  senderId   String
+  sender     User         @relation(fields: [senderId], references: [id])
+  clientId   String?
+  modmailId  String
+  threadId   String
+  content    String
+  thread     Thread       @relation(fields: [threadId], references: [id])
+  isDeleted  Boolean      @default(false)
+  isInternal Boolean      @default(false)
+  edits      Edit[]
+  id         String       @id @default(uuid())
+  Attachment Attachment[]
+}
+
+model Attachment {
+  // Snowflake ID (originally BIGINT)
+  id        String   @id
+  name      String
+  source    String
+  // Snowflake ID (originally BIGINT)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  type      FileType
+  // Snowflake ID (originally BIGINT)
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id])
+}
+
+model Edit {
+  content   String
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id])
+  version   Int     @default(1)
+  id        String  @id @default(uuid())
+}
+
+model Permission {
+  categoryId String    @id
+  category   Category  @relation(fields: [categoryId], references: [id])
+  roleId     String    @unique
+  level      RoleLevel
+}
+
+model StandardReply {
+  name  String @id
+  reply String
+}
+
+model Mute {
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  till       String
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  reason     String
+  id         String   @id @default(uuid())
+}

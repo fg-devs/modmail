@@ -10,6 +10,8 @@ services:
   modmail:
     build: .
     restart: always
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres?schema=modmail
     ports:
       - "3001:80"
     links:
