@@ -1,12 +1,12 @@
 version: "3.9"
 services:
+  postgres:
+    image: postgres:14.2-alpine
+    environment:
+      - POSTGRES_PASSWORD=postgres
   server:
     build: .
     ports:
       - "3001:80"
     links:
       - postgres 
-  postgres:
-    image: postgres:14.2-alpine
-    environment:
-      - POSTGRES_PASSWORD=postgres
