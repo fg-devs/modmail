@@ -9,23 +9,19 @@ export default class AttachmentsTable extends Table {
   }
 
   public async create(opt: CreateAttachmentOpt): Promise<Attachment> {
-    const client = await this.getClient();
+    const client = this.getClient();
     const id = SnowflakeUtil.generate(Date.now());
     const attachment = await client.attachment.create({
       data: {
         sender: {
           connectOrCreate: {
-            create: {
-              id: opt.sender,
-            },
-            where: {
-              id: opt.sender,
-            },
+            create: { id: opt.sender },
+            where: { id: opt.sender },
           },
         },
         message: {
           connect: {
-            id: opt.messageID,
+            modmailId: opt.messageID,
           },
         },
         id,

@@ -278,7 +278,6 @@ export default class Thread {
     const dmMessage = await dmChannel.send(dmEmbed);
     const threadMessage = await thChannel.send(threadEmbed);
 
-    await pool.users.create(sender.id);
     const mmMsg = await pool.messages.add({
       clientId: dmMessage.id,
       content,

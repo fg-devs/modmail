@@ -91,7 +91,6 @@ export default class OpenThread extends Command {
       const notice = Embeds.threadNotice(category);
       const dms = await user.createDM();
       await dms.send(notice);
-      await pool.users.create(user.id);
       await pool.threads.open(user.id, channel.id, category.getID(), false);
 
       await msg.react('✅');

@@ -8,6 +8,7 @@ export default class EditsTable extends Table {
 
   public async add(content: string, msgId: string): Promise<Edit> {
     const client = this.getClient();
+
     const lastVerOpt = await client.edit.findFirst({
       where: {
         messageId: msgId,
@@ -26,7 +27,9 @@ export default class EditsTable extends Table {
     return client.edit.create({
       data: {
         content,
-        messageId: msgId,
+        message: {
+          connect: { modmailId: msgId },
+        },
         version: lastVersion,
       },
     });

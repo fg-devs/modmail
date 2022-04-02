@@ -144,7 +144,6 @@ export default class ThreadController extends Controller {
     category: Category,
     isAdminOnly: boolean,
   ): Promise<TextChannel | null> {
-    const pool = ModmailBot.getDB();
     const logger = this.getLogger();
 
     // setup channel and send details about the member and the thread
@@ -154,9 +153,6 @@ export default class ThreadController extends Controller {
         category,
         isAdminOnly,
       );
-
-      // create member if they don't exit
-      await pool.users.create(member.id);
 
       return channel;
     } catch (e) {

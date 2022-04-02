@@ -21,11 +21,11 @@ export default class ThreadsTable extends Table {
     catId: string | null = null,
   ): Promise<Thread[]> {
     const client = this.getClient();
-    const threadsRes = await client.message.findMany({
+    const messages = await client.message.findMany({
       where: { senderId: userId },
       distinct: ['threadId'],
     });
-    const threadIds = threadsRes.map((th) => th.id);
+    const threadIds = messages.map((msg) => msg.threadId);
     const where: Prisma.ThreadWhereInput = { id: { in: threadIds } };
     if (catId) {
       where.categoryId = catId;
@@ -69,10 +69,19 @@ export default class ThreadsTable extends Table {
     const thread = await client.thread.create({
       data: {
         id: threadId,
-        authorId: author,
         channelId,
-        categoryId,
         isAdminOnly,
+        category: {
+          connect: {
+            id: categoryId,
+          },
+        },
+        author: {
+          connectOrCreate: {
+            create: { id: author },
+            where: { id: author },
+          },
+        },
       },
     });
     return thread;

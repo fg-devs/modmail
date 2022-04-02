@@ -59,14 +59,13 @@ model Message {
   senderId   String
   sender     User         @relation(fields: [senderId], references: [id])
   clientId   String?
-  modmailId  String
+  modmailId  String       @id
   threadId   String
   content    String
   thread     Thread       @relation(fields: [threadId], references: [id])
   isDeleted  Boolean      @default(false)
   isInternal Boolean      @default(false)
   edits      Edit[]
-  id         String       @id @default(uuid())
   Attachment Attachment[]
 }
 
@@ -81,13 +80,13 @@ model Attachment {
   type      FileType
   // Snowflake ID (originally BIGINT)
   messageId String
-  message   Message  @relation(fields: [messageId], references: [id])
+  message   Message  @relation(fields: [messageId], references: [modmailId])
 }
 
 model Edit {
   content   String
   messageId String
-  message   Message @relation(fields: [messageId], references: [id])
+  message   Message @relation(fields: [messageId], references: [modmailId])
   version   Int     @default(1)
   id        String  @id @default(uuid())
 }
