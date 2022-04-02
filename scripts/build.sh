@@ -1,2 +1,4 @@
-npx prisma generate
-npx tsc
+#!/bin/bash
+npm exec prisma generate
+npm exec tsc
+
