@@ -9,7 +9,7 @@ server:
   # If the port is modified then the
   # Dockerfile or compose should be updated.
   port: 80
-  oauth:
+  oauth2:
     accessTokenUri: 'https://discord.com/api/oauth2/token'
     authorizationUri: 'https://discord.com/api/oauth2/authorize'
     redirectUri: 'http://127.0.0.1/oauth/callback'
@@ -26,3 +26,5 @@ database:
   database: 'postgres'
   # Max connections
   max: 20
+clients:
+  attachmentsUri: 'modmail-attachments:59001'

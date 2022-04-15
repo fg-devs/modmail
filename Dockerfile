@@ -22,6 +22,7 @@ COPY --from=build /opt/app/build /opt/app/build
 COPY --from=build /opt/app/node_modules /opt/app/node_modules
 COPY --from=build /opt/app/package.json /opt/app/package.json
 COPY --from=build /opt/app/config.yml /opt/app/config.yml
+COPY --from=build /opt/app/codegen /opt/app/codegen
 
 RUN chown node:node /opt/app
 

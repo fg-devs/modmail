@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3"
 services:
   postgres:
     image: postgres:14.2-alpine
@@ -16,3 +16,23 @@ services:
       - postgres 
     volumes:
       - /app
+    networks:
+      - attachments
+  modmail-attachments:
+    image: ghcr.io/fg-devs/attachment-service:latest
+    restart: always
+    environment:
+      - GRPC_PORT=59001
+      - HTTP_PORT=8420
+      - CDN_URI=https://cdn.modmail.pewdiemc.com/
+      - RUST_LOG=info,tower_http=debug%       
+    ports:
+      - 59001:59001
+      - 8420:8420
+    volumes:
+      - modmail-attachment-files:/app/files
+    networks:
+      - attachments
+
+networks:
+  attachments:

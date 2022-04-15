@@ -5,6 +5,7 @@ import Conf from './conf';
 import DBConfig from './database';
 import ServerConfig from './server';
 import OAuth2Config from './oauth2';
+import ClientsConfig from './clients';
 import validate from './validate';
 
 /**
@@ -19,6 +20,8 @@ export default class Config extends Conf {
 
     public readonly server: ServerConfig;
 
+    public readonly clients: ClientsConfig;
+
     private static location = process.env.CONFIG || './config.yml';
 
     constructor() {
@@ -27,6 +30,7 @@ export default class Config extends Conf {
       this.database = new DBConfig();
       this.bot = new BotConfig();
       this.server = new ServerConfig();
+      this.clients = new ClientsConfig();
     }
 
     /**
@@ -41,6 +45,7 @@ export default class Config extends Conf {
       validate<BotConfig>(new BotConfig(), casted.bot);
       validate<ServerConfig>(new ServerConfig(), casted.server);
       validate<OAuth2Config>(new OAuth2Config(), casted.server.oauth2);
+      validate<ClientsConfig>(new ClientsConfig(), casted.clients);
 
       return casted;
     }

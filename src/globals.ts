@@ -1,3 +1,4 @@
+import AttachmentClientLoader from './clients/attachmentsloader';
 import Config from './config/config';
 
 export const ADMIN_INDICATOR_PREFIX = '⭐┃';
@@ -23,3 +24,5 @@ export const MAX_LISTENERS = 1000;
 export const MAX_RESPONSE_TIME = 60000;
 
 export const MAX_THREADS = 30;
+
+export const ATTACHMENTS = AttachmentClientLoader.getAttachmentClient();

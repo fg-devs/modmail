@@ -8,7 +8,7 @@ server:
   domain: ''
   appkey: 'put some random stuff here'
   port: 80
-  oauth:
+  oauth2:
     accessTokenUri: 'https://discord.com/api/oauth2/token'
     authorizationUri: 'https://discord.com/api/oauth2/authorize'
     redirectUri: 'http://127.0.0.1/oauth/callback'
@@ -23,3 +23,5 @@ database:
   database: 'postgres'
   # Max connections
   max: 20
+clients:
+  attachmentsUri: 'localhost:59001'
