@@ -1,10 +1,11 @@
 import { Attachment, FileType } from '@newcircuit/modmail-types';
 import { Message, MessageAttachment } from 'discord.js';
-import { IMAGE_REGEX } from '../globals';
+import { ATTACHMENTS, IMAGE_REGEX } from '../globals';
 import { Message as MMMessage } from '.';
 import Controller from './controller';
 import ModmailBot from '../bot';
 import Embeds from '../util/Embeds';
+import { NewAttachmentRequest } from '../../codegen/attachments/attachments_pb.js';
 
 export default class AttachmentController extends Controller {
   constructor(modmail: ModmailBot) {
@@ -20,14 +21,18 @@ export default class AttachmentController extends Controller {
   public async create(
     msg: MMMessage,
     msgAtt: MessageAttachment,
-  ): Promise<Attachment> {
+  ): Promise<Attachment | null> {
     const pool = ModmailBot.getDB();
+
+    const source = await AttachmentController.createAttachment(msgAtt.url);
+
+    if (source == null) return source;
 
     return pool.attachments.create({
       messageID: msg.getID(),
       name: msgAtt.name || '',
       sender: msg.getSenderID(),
-      source: msgAtt.url,
+      source,
       type: AttachmentController.isImage(msgAtt)
         ? FileType.Image
         : FileType.File,
@@ -54,7 +59,7 @@ export default class AttachmentController extends Controller {
       throw new Error('The thread doesn\'t exist anymore.');
     }
 
-    const attTasks: Promise<Attachment>[] = [];
+    const attTasks: Promise<Attachment | null>[] = [];
     const sendTasks: Promise<Message>[] = [];
     const recvTasks: Promise<Message>[] = [];
     const sender = await msg.getSender();
@@ -77,6 +82,13 @@ export default class AttachmentController extends Controller {
     // Send all the attachments to the member's DMs and thread
     for (let i = 0; i < attachments.length; i += 1) {
       const attachment = attachments[i];
+
+      if (attachment == null) {
+        const threadEmbed = Embeds.warning("Unable to process attachment, please try again");
+        sendTasks.push(thChannel.send(threadEmbed));
+        continue;
+      }
+
       const threadEmbed = Embeds.attachmentSend(
         attachment,
         sender,
@@ -114,12 +126,14 @@ export default class AttachmentController extends Controller {
     }
 
     const thChannel = await thread.getThreadChannel();
+    const dmChannel = await thread.getDMChannel();
+
 
     if (thChannel === null) {
       throw new Error('The thread channel doesn\'t exist anymore.');
     }
 
-    const attTasks: Promise<Attachment>[] = [];
+    const attTasks: Promise<Attachment | null>[] = [];
     const recvTasks: Promise<Message>[] = [];
     const user = await msg.getUser();
 
@@ -134,6 +148,13 @@ export default class AttachmentController extends Controller {
     const attachments = await Promise.all(attTasks);
     for (let i = 0; i < attachments.length; i += 1) {
       const attachment = attachments[i];
+
+      if (attachment == null) {
+        const dmEmbed = Embeds.warning("Unable to process attachment, please try again");
+        recvTasks.push(dmChannel.send(dmEmbed));
+        continue;
+      }
+
       const threadEmbed = Embeds.attachmentRecv(
         attachment,
         user,
@@ -167,5 +188,18 @@ export default class AttachmentController extends Controller {
    */
   public static getExtension(name: string): string {
     return name.substr(name.lastIndexOf('.') + 1);
+  }
+
+  // https://github.com/grpc/grpc-node/issues/54
+  private static async createAttachment(url: string): Promise<string | null> {
+    const request = new NewAttachmentRequest();
+    request.setUrl(url);
+
+    return new Promise((resolve, reject) => ATTACHMENTS.createAttachment(request, function(err, response) {
+      if(err) {
+        return reject(err)
+      }
+      resolve(response.getUrl())        
+    }))
   }
 }

@@ -314,14 +314,15 @@ export default class ThreadsTable extends Table {
       await client.query(
         `CREATE TABLE IF NOT EXISTS modmail.threads
          (
-             id        BIGINT               NOT NULL
+             id            BIGINT                 NOT NULL
                  CONSTRAINT threads_pk PRIMARY KEY,
-             author    BIGINT               NOT NULL
+             author        BIGINT                 NOT NULL
                  CONSTRAINT threads_users_id_fk
                      REFERENCES modmail.users,
-             channel   BIGINT               NOT NULL,
-             is_active BOOLEAN DEFAULT true NOT NULL,
-             category  BIGINT               NOT NULL
+             channel        BIGINT                NOT NULL,
+             is_active      BOOLEAN DEFAULT true  NOT NULL,
+             is_admin_only  BOOLEAN DEFAULT false NOT NULL,
+             category       BIGINT                NOT NULL
                  CONSTRAINT threads_categories_id_fk
                      REFERENCES modmail.categories
          );`,
